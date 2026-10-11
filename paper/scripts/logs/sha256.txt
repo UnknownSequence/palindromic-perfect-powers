@@ -1,0 +1,3 @@
+sha256 of the window_constants.py that produced table_run_A/B.txt:
+d6370e3cf6c8d031a9b0c4e48dc7e824383692bc2ab52596b75c602798c04524  window_constants.py
+d6370e3cf6c8d031a9b0c4e48dc7e824383692bc2ab52596b75c602798c04524  window_constants.py

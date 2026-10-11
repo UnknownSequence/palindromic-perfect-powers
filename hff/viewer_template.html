@@ -1,0 +1,1095 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Primes 3 mod 4 Proof Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: a full-window survey map of the proof (layers run like lines of latitude, the theorem at the top) with a docked reading panel on the right; on phones the panel becomes a bottom sheet. */
+:root{
+  --ground:#E6ECEF;
+  --grid:#D5DDE3;
+  --band:#B9C6CF;
+  --ink:#15202A;
+  --muted:#56646F;
+  --card:#FFFFFF;
+  --card-def:#EDF2F8;
+  --edge:#6A7782;
+  --accent:#2246A3;
+  --accent-soft:rgba(34,70,163,.13);
+  --fog:#6E7C87;
+  --fog-opacity:1;
+  --fog-light-opacity:.42;
+  --fog-ink:#EEF2F5;
+  --panel:#F7F9FA;
+  --border:#C6CFD6;
+  --shadow:0 1px 2px rgba(21,32,42,.08),0 6px 18px rgba(21,32,42,.07);
+  --font-display:"IBM Plex Serif",Georgia,"Times New Roman",serif;
+  --font-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E151B; --grid:#17212A; --band:#2B3844; --ink:#E2E9EF; --muted:#95A3AE;
+    --card:#16202A; --card-def:#1A2633; --edge:#7F8D98; --accent:#8AA6F3; --accent-soft:rgba(138,166,243,.17);
+    --fog:#030507; --fog-opacity:1; --fog-light-opacity:.55; --fog-ink:#8E9CA7;
+    --panel:#121B23; --border:#283540; --shadow:0 1px 2px rgba(0,0,0,.45),0 6px 18px rgba(0,0,0,.3);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E151B; --grid:#17212A; --band:#2B3844; --ink:#E2E9EF; --muted:#95A3AE;
+  --card:#16202A; --card-def:#1A2633; --edge:#7F8D98; --accent:#8AA6F3; --accent-soft:rgba(138,166,243,.17);
+  --fog:#030507; --fog-opacity:1; --fog-light-opacity:.55; --fog-ink:#8E9CA7;
+  --panel:#121B23; --border:#283540; --shadow:0 1px 2px rgba(0,0,0,.45),0 6px 18px rgba(0,0,0,.3);
+  color-scheme:dark;
+}
+
+html,body{height:100%}
+[hidden]{display:none !important}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--font-body);font-size:14px;overflow:hidden}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.app{display:grid;grid-template-rows:auto minmax(0,1fr);height:100%}
+
+/* ---------- top bar ---------- */
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--border);position:relative;z-index:8}
+.brand{display:flex;flex-direction:column;gap:3px;min-width:0;margin-right:auto}
+.eyebrow{font:500 10.5px/1.2 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.brand h1{margin:0;font:600 17px/1.25 var(--font-display);text-wrap:balance}
+.tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.btn{font:500 13px/1 var(--font-body);color:var(--ink);background:var(--card);border:1px solid var(--border);border-radius:6px;padding:7px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{border-color:var(--edge)}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+kbd{font:500 10.5px/1 var(--font-mono);color:var(--muted);border:1px solid var(--border);border-bottom-width:2px;border-radius:3px;padding:2px 4px;background:var(--panel)}
+.search{position:relative}
+.search input{font:400 13px/1 var(--font-body);color:var(--ink);background:var(--card);border:1px solid var(--border);border-radius:6px;padding:8px 10px;width:14rem;max-width:56vw}
+.search input::placeholder{color:var(--muted)}
+.results{position:absolute;top:calc(100% + 4px);left:0;min-width:100%;width:max-content;max-width:min(22rem,80vw);background:var(--panel);border:1px solid var(--border);border-radius:6px;box-shadow:var(--shadow);padding:4px;display:flex;flex-direction:column;gap:2px;z-index:30}
+.results button{display:flex;gap:8px;align-items:baseline;text-align:left;border:0;background:none;padding:7px 8px;border-radius:4px;cursor:pointer}
+.results button:hover,.results button:focus-visible{background:var(--accent-soft)}
+.results .k{font:500 11px/1 var(--font-mono);color:var(--muted);white-space:nowrap}
+.progress{display:flex;align-items:center;gap:8px;font:500 12px/1 var(--font-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.cells{display:flex;gap:3px}
+.cell{width:14px;height:10px;border-radius:2px;background:var(--band)}
+.cell.verified{background:var(--accent)}
+.cell.conditional{background:var(--accent);opacity:.4}
+#panelToggle{display:none}
+
+/* ---------- map ---------- */
+.main{display:grid;grid-template-columns:minmax(0,1fr) 400px;min-height:0;position:relative}
+.mapwrap{position:relative;min-width:0;min-height:0;overflow:hidden}
+#viewport{position:absolute;inset:0;overflow:hidden;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+#viewport.dragging{cursor:grabbing}
+#world{position:absolute;left:0;top:0;transform-origin:0 0}
+#world > svg{position:absolute;left:0;top:0;overflow:visible}
+#nodes{position:absolute;left:0;top:0}
+#fog{pointer-events:none}
+.gridline{fill:none;stroke:var(--grid);stroke-width:1}
+.gridline2{fill:none;stroke:var(--grid);stroke-width:2.5}
+.band{stroke:var(--band);stroke-width:1.5;stroke-dasharray:3 9}
+.bandlabel{fill:var(--muted);font:500 14px var(--font-mono);letter-spacing:.16em}
+.fogcloud{fill:var(--fog)}
+#fog .clouds{opacity:var(--fog-opacity)}
+#fog .clouds-light{opacity:var(--fog-light-opacity)}
+#overlay{position:absolute;left:0;top:0;pointer-events:none}
+.foglabel{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;box-sizing:border-box;color:var(--fog-ink);text-align:center}
+.foglabel .fl-k{font:500 14px/1 var(--font-mono);letter-spacing:.16em;text-transform:uppercase}
+.foglabel .fl-s{font:500 11px/1 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;opacity:.72}
+.foglabel .fl-big{display:none;font:600 60px/1 var(--font-display)}
+#world.z-far .foglabel .fl-big{display:block}
+#world.z-far .foglabel .fl-k,#world.z-far .foglabel .fl-s{display:none}
+.selring{position:absolute;box-sizing:border-box;border:4px solid var(--accent);border-radius:18px}
+
+.edge{fill:none;stroke:var(--edge);stroke-width:2;transition:opacity .2s}
+.edge.hl{stroke:var(--accent);stroke-width:3.4}
+.edge.uses{stroke:var(--ink);stroke-width:2;stroke-dasharray:7 6}
+.edge.dim{opacity:.22}
+.ah{fill:var(--edge)} .ah-hl{fill:var(--accent)} .ah-uses{fill:var(--ink)}
+
+.node{position:absolute;box-sizing:border-box;padding:12px 14px;background:var(--card);border:1.5px solid var(--edge);border-radius:12px;box-shadow:var(--shadow);cursor:pointer;overflow:hidden;display:flex;flex-direction:column;gap:7px;transition:opacity .2s,border-color .2s}
+.node.definition{border-radius:2px;background:var(--card-def)}
+.node.imported{border-style:dashed}
+.node.theorem{border-color:var(--ink);border-radius:14px;box-shadow:0 0 0 3px var(--card),0 0 0 4.5px var(--ink),var(--shadow)}
+.node[data-status="verified"]{border-color:var(--accent)}
+.node.theorem[data-status="verified"]{box-shadow:0 0 0 3px var(--card),0 0 0 4.5px var(--accent),var(--shadow)}
+.node.dim{opacity:.55}
+.node:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+.node .kind{display:flex;justify-content:space-between;align-items:center;font:500 10.5px/1 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.pip{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--muted);box-sizing:border-box}
+.node[data-status="verified"] .pip{background:var(--accent);border-color:var(--accent)}
+.node .hdr{font:600 16.5px/1.28 var(--font-display);color:var(--ink);text-wrap:balance}
+.node .stmt{font:400 12.5px/1.45 var(--font-display);color:var(--muted)}
+.node .big{display:none;font:600 60px/1 var(--font-display);text-align:center;margin:auto;color:var(--ink)}
+#world.z-far .node .big{display:block}
+#world.z-far .node .kind,#world.z-far .node .hdr,#world.z-far .node .stmt{display:none}
+#world.z-mid .node{justify-content:center}
+#world.z-mid .node .stmt{display:none}
+#world.z-mid .node .hdr{font-size:19px}
+
+/* overlays */
+.overlay{position:absolute;z-index:4}
+.hint{top:12px;left:16px;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font:400 12px/1.3 var(--font-body);color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 10px;max-width:calc(100% - 32px);box-sizing:border-box}
+.hint span{display:inline-flex;gap:5px;align-items:center;white-space:nowrap}
+.dock{left:16px;bottom:16px;display:flex;flex-direction:column;gap:6px}
+#mini{width:184px;height:138px;display:block;border:1px solid var(--border);border-radius:6px;background:var(--ground);box-shadow:var(--shadow);cursor:crosshair;touch-action:none}
+.zoomrow{display:flex;gap:6px;align-items:center}
+.zoomrow .btn{padding:6px 9px}
+#zoomReadout{font:500 12px/1 var(--font-mono);color:var(--muted);min-width:3.2em;text-align:center;font-variant-numeric:tabular-nums}
+
+/* ---------- panel ---------- */
+.panel{min-width:0;overflow:auto;background:var(--panel);border-left:1px solid var(--border);padding:20px 22px 32px;box-sizing:border-box}
+.panel h2{font:600 23px/1.22 var(--font-display);margin:6px 0 4px;text-wrap:balance}
+.panel section{display:flex;flex-direction:column;gap:8px;padding-block:14px;border-top:1px solid var(--border)}
+.panel section:first-of-type{margin-top:12px}
+.panel h3{margin:0;display:flex;justify-content:space-between;align-items:baseline;gap:8px;font:500 10.5px/1.2 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.rich{font:400 15.5px/1.62 var(--font-display);color:var(--ink);max-width:62ch}
+.rich em{font-style:italic}
+.m{font-style:normal;white-space:nowrap}
+.m i{font-style:italic}
+.disp{display:block;text-align:center;margin:8px 0;overflow-x:auto;white-space:nowrap}
+cite{font-style:normal;color:var(--accent)}
+.xref{appearance:none;border:0;background:none;padding:0;color:var(--accent);cursor:pointer;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;font:inherit}
+.cost{font:500 11px/1 var(--font-mono);letter-spacing:.04em;text-transform:none;color:var(--muted);font-variant-numeric:tabular-nums}
+.meter{height:4px;border-radius:2px;background:var(--border);overflow:hidden;max-width:220px}
+.meter span{display:block;height:100%;background:var(--accent)}
+.status{display:grid;grid-template-columns:repeat(2,1fr);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-top:12px}
+.status button{border:0;border-right:1px solid var(--border);background:var(--card);padding:9px 6px;font:500 13px/1 var(--font-body);cursor:pointer;display:inline-flex;justify-content:center;align-items:center;gap:6px}
+.status button:last-child{border-right:0}
+.status button .dot{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--muted);box-sizing:border-box}
+.status button[data-s="verified"] .dot{border-color:var(--accent)}
+.status button[aria-checked="true"]{background:var(--accent-soft)}
+.status button[data-s="unverified"][aria-checked="true"] .dot{background:var(--muted)}
+.status button[data-s="verified"][aria-checked="true"] .dot{background:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;border:1px solid var(--border);background:var(--card);border-radius:6px;padding:7px 9px;cursor:pointer;max-width:100%}
+.chip:hover{border-color:var(--accent)}
+.chip .k{font:500 10px/1 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.chip .h{font:500 13.5px/1.3 var(--font-display)}
+.none{font:400 13.5px/1.5 var(--font-body);color:var(--muted);margin:0}
+.back{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:4px 0;color:var(--accent);cursor:pointer;font:500 13px/1 var(--font-body)}
+.keys,.legend{list-style:none;margin:0;padding:0;display:grid;gap:7px;font:400 13.5px/1.4 var(--font-body)}
+.keys li{display:grid;grid-template-columns:7.2rem 1fr;gap:10px;align-items:baseline}
+.keys li span:first-child{display:flex;gap:4px;flex-wrap:wrap}
+.legend li{display:flex;align-items:center;gap:10px}
+.sw{width:30px;height:18px;box-sizing:border-box;border:1.5px solid var(--edge);background:var(--card);border-radius:5px;flex:none}
+.sw.def{border-radius:1px;background:var(--card-def)}
+.sw.thm{border-color:var(--ink);box-shadow:0 0 0 2px var(--card),0 0 0 3px var(--ink)}
+.sw.ver{border-color:var(--accent)}
+.sw.fog{border:0;background:var(--fog)}
+.sw.fogl{border-color:var(--accent);position:relative;overflow:hidden}
+.sw.fogl::after{content:"";position:absolute;inset:0;background:var(--fog);opacity:var(--fog-light-opacity)}
+.depnote{display:flex;flex-direction:column;gap:8px;margin-top:10px;padding:10px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card)}
+.refs{margin:0;padding:0;list-style:none;display:grid;gap:8px;font:400 13.5px/1.5 var(--font-display)}
+.refs li{display:grid;grid-template-columns:3.2rem 1fr;gap:8px}
+.refs .key{font:500 12px/1.5 var(--font-mono);color:var(--accent)}
+.about{font:400 12.5px/1.5 var(--font-body);color:var(--muted);margin:16px 0 0;max-width:60ch}
+.done{right:16px;bottom:16px;max-width:min(24rem,calc(100% - 240px));box-sizing:border-box;background:var(--panel);border:1.5px solid var(--accent);border-radius:8px;padding:10px 12px;font:400 13.5px/1.45 var(--font-body);color:var(--ink);box-shadow:var(--shadow)}
+.done strong{color:var(--accent);font-weight:600}
+
+mjx-container[jax="SVG"][display="true"]{margin:.5em 0 !important;overflow-x:auto;overflow-y:hidden}
+
+@media (max-width:760px){
+  .main{grid-template-columns:minmax(0,1fr)}
+  .panel{position:absolute;left:0;right:0;bottom:0;max-height:48%;border-left:0;border-top:1px solid var(--border);border-radius:12px 12px 0 0;box-shadow:var(--shadow);z-index:6;padding:14px 16px calc(24px + env(safe-area-inset-bottom, 0px))}
+  .panel.collapsed{display:none}
+  #panelToggle{display:inline-flex}
+  .hint{display:none}
+  .dock{top:12px;bottom:auto;left:auto;right:16px}
+  #mini{width:132px;height:100px}
+  .brand h1{font-size:15px}
+  .search input{width:9.5rem}
+  .progress .label{display:none}
+  .done{top:12px;bottom:auto;left:16px;right:164px;max-width:none}
+}
+@media (prefers-reduced-motion: reduce){
+  .edge,.node{transition:none}
+}
+</style>
+
+<div class="app">
+  <header class="bar">
+    <div class="brand">
+      <span class="eyebrow">HFF map · worked example</span>
+      <h1 id="docTitle">Infinitely many primes ≡ 3 (mod 4)</h1>
+    </div>
+    <div class="tools">
+      <button class="btn" id="btnTheorem" type="button" title="Travel to the main theorem">Theorem <kbd>T</kbd></button>
+      <button class="btn" id="btnFit" type="button" title="Show the whole map">Whole map <kbd>F</kbd></button>
+      <div class="search">
+        <input id="search" type="search" placeholder="Go to block…" aria-label="Go to a block by number or header" autocomplete="off">
+        <div class="results" id="results" hidden></div>
+      </div>
+      <div class="progress" aria-live="polite">
+        <div class="cells" id="cells" aria-hidden="true"></div>
+        <span id="progressText">Verified 0/5</span>
+      </div>
+      <button class="btn" id="panelToggle" type="button" aria-expanded="true" aria-controls="panel">Panel</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="mapwrap">
+      <div id="viewport" aria-label="Map of the dependency graph. Drag to pan, scroll or pinch to zoom.">
+        <div id="world">
+          <svg id="terrain" aria-hidden="true"></svg>
+          <svg id="edges" aria-hidden="true"></svg>
+          <div id="nodes"></div>
+          <svg id="fog" aria-hidden="true"></svg>
+          <div id="overlay" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="overlay done" id="done" role="status" hidden></div>
+      <div class="overlay hint" aria-hidden="true">
+        <span>Drag to pan</span><span>Scroll or pinch to zoom</span>
+        <span><kbd>T</kbd> theorem</span><span><kbd>F</kbd> whole map</span><span><kbd>/</kbd> search</span><span><kbd>Esc</kbd> overview</span>
+      </div>
+      <div class="overlay dock">
+        <canvas id="mini" aria-label="Minimap. Click to move the view." role="img"></canvas>
+        <div class="zoomrow">
+          <button class="btn" id="zoomOut" type="button" aria-label="Zoom out">−</button>
+          <span id="zoomReadout">100%</span>
+          <button class="btn" id="zoomIn" type="button" aria-label="Zoom in">+</button>
+        </div>
+      </div>
+    </div>
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+</div>
+
+<!-- Map data: everything below is generated from the HFF document; the viewer computes depth, layout and paths. -->
+<script type="application/json" id="hff-data">
+{
+  "slug": "primes-3-mod-4",
+  "title": "Infinitely many primes $\\equiv 3 \\pmod{4}$",
+  "theorem": "T6",
+  "budget": 300,
+  "overview": {
+    "theorem": "There are infinitely many prime numbers that leave remainder $3$ on division by $4$.",
+    "method": "The proof is a variant of Euclid's argument for the infinitude of primes [Euc]. Suppose there were only finitely many such primes. Multiply them all together, multiply by $4$, and subtract $1$. The resulting number $N$ leaves remainder $3$ on division by $4$. The key observation (Lemma 5) is that any number of this kind has a prime factor which also leaves remainder $3$, because numbers leaving remainder $1$ are closed under multiplication (Lemma 3). But no prime on our list divides $N$, since each divides $N+1$, and this is a contradiction.",
+    "structure": "Lemmas 2 and 3 are routine, Lemma 5 is the delicate step, and Theorem 6 is Euclid's trick. Prerequisites: divisibility and congruences."
+  },
+  "blocks": [
+    {"id": "D1", "kind": "definition", "number": 1, "header": "Prime",
+     "statement": "An integer $p > 1$ is \\emph{prime} if its only positive divisors are $1$ and $p$.",
+     "cites": []},
+    {"id": "L2", "kind": "lemma", "number": 2, "header": "Factorisations exist",
+     "statement": "Every integer $n > 1$ is a product of primes.",
+     "proof": "We use strong induction on $n$. If $n$ is prime, we are done. Otherwise, by Definition 1, $n = ab$ for some integers $1 < a, b < n$. By the induction hypothesis $a$ and $b$ are products of primes, and hence so is $n$.",
+     "length": 159, "cites": ["D1"]},
+    {"id": "L3", "kind": "lemma", "number": 3, "header": "$1 \\bmod 4$ closed under products",
+     "statement": "If $a \\equiv b \\equiv 1 \\pmod{4}$, then $ab \\equiv 1 \\pmod{4}$.",
+     "proof": "Write $a = 4s + 1$ and $b = 4t + 1$ with $s, t$ integers. Then $$ab = 16st + 4s + 4t + 1 = 4(4st + s + t) + 1.$$",
+     "length": 69, "cites": []},
+    {"id": "L5", "kind": "lemma", "number": 5, "header": "Prime factor $\\equiv 3 \\bmod 4$",
+     "statement": "If $n > 1$ and $n \\equiv 3 \\pmod{4}$, then some prime $p \\equiv 3 \\pmod{4}$ divides $n$.",
+     "proof": "By Lemma 2, $n = p_1 \\cdots p_r$ with each $p_i$ prime. Since $n$ is odd, each $p_i$ is odd, so $p_i \\equiv 1$ or $3 \\pmod{4}$. If every $p_i \\equiv 1 \\pmod{4}$, then $n \\equiv 1 \\pmod{4}$ by Lemma 3 applied $r - 1$ times, which is a contradiction.",
+     "length": 151, "cites": ["D1", "L2", "L3"]},
+    {"id": "T6", "kind": "theorem", "number": 6, "header": "Infinitely many primes $\\equiv 3 \\bmod 4$",
+     "statement": "There are infinitely many primes $p \\equiv 3 \\pmod{4}$.",
+     "proof": "The prime $3$ is one. Suppose $p_1, \\dots, p_k$ are all of them, and let $N = 4p_1 \\cdots p_k - 1$. Then $N > 1$ and $N \\equiv 3 \\pmod{4}$, so by Lemma 5 some prime $p \\equiv 3 \\pmod{4}$ divides $N$. Then $p = p_i$ for some $i$, so $p$ divides $4p_1 \\cdots p_k - N = 1$, which is absurd.",
+     "length": 174, "cites": ["D1", "L5"]}
+  ],
+  "references": [
+    {"key": "Dir", "text": "P. G. L. Dirichlet, \\emph{Beweis des Satzes, dass jede unbegrenzte arithmetische Progression, deren erstes Glied und Differenz ganze Zahlen ohne gemeinschaftlichen Factor sind, unendlich viele Primzahlen enthält}, Abh. Königl. Preuss. Akad. Wiss. Berlin (1837), 45–81."},
+    {"key": "Euc", "text": "Euclid, \\emph{Elements}, Book IX, Proposition 20."}
+  ]
+}
+</script>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$']], displayMath: [['$$', '$$']] },
+  svg: { fontCache: 'local' },
+  startup: { typeset: false }
+};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.js"></script>
+
+<script>
+(function () {
+  'use strict';
+  var DATA = JSON.parse(document.getElementById('hff-data').textContent);
+  var $ = function (s) { return document.querySelector(s); };
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var sheetQuery = window.matchMedia('(max-width: 760px)');
+
+  /* ---------------- graph ---------------- */
+  var blocks = DATA.blocks;
+  var byId = {}, byNumber = {};
+  blocks.forEach(function (b) { byId[b.id] = b; byNumber[b.number] = b; b.usedBy = []; });
+  blocks.forEach(function (b) { b.cites.forEach(function (c) { if (byId[c]) byId[c].usedBy.push(b.id); }); });
+  var KIND = { definition: 'Definition', lemma: 'Lemma', theorem: 'Theorem', imported: 'Imported lemma' };
+  var SHORT = { definition: 'D', lemma: 'L', theorem: 'T', imported: 'I' };
+  function label(b) { return KIND[b.kind] + ' ' + b.number; }
+
+  var depth = {};
+  function getDepth(id) {
+    if (id in depth) return depth[id];
+    depth[id] = 0; // guard against cycles
+    var b = byId[id];
+    var d = b.usedBy.length ? 1 + Math.max.apply(null, b.usedBy.map(getDepth)) : 0;
+    depth[id] = d;
+    return d;
+  }
+  blocks.forEach(function (b) { getDepth(b.id); });
+  var ancestors = {};
+  function getAncestors(id) {
+    if (ancestors[id]) return ancestors[id];
+    var set = new Set();
+    ancestors[id] = set; // guard against cycles
+    byId[id].cites.forEach(function (u) {
+      if (!byId[u]) return;
+      set.add(u);
+      getAncestors(u).forEach(function (w) { set.add(w); });
+    });
+    return set;
+  }
+  blocks.forEach(function (b) { getAncestors(b.id); });
+
+  /* ---------------- layout (M1) ---------------- */
+  var SIZE = { theorem: { w: 304, h: 132 }, lemma: { w: 264, h: 128 }, definition: { w: 264, h: 128 }, imported: { w: 264, h: 128 } };
+  var LAYER_GAP = 260, MIN_GAP = 150, PAD = 1100;
+  var maxDepth = Math.max.apply(null, blocks.map(function (b) { return depth[b.id]; }));
+  var layers = [];
+  for (var i = 0; i <= maxDepth; i++) layers.push(blocks.filter(function (b) { return depth[b.id] === i; }));
+  function avg(a) { return a.reduce(function (s, x) { return s + x; }, 0) / a.length; }
+  var pos = {};
+  layers.forEach(function (L, li) {
+    var items = L.map(function (b, k) {
+      return { b: b, k: k, bx: b.usedBy.length ? avg(b.usedBy.map(function (u) { return pos[u].x; })) : 0 };
+    });
+    items.sort(function (p, q) { return (p.bx - q.bx) || (p.k - q.k); });
+    items.forEach(function (it, j) {
+      it.x = it.bx;
+      if (j) {
+        var pr = items[j - 1];
+        var m = pr.x + SIZE[pr.b.kind].w / 2 + MIN_GAP + SIZE[it.b.kind].w / 2;
+        if (it.x < m) it.x = m;
+      }
+    });
+    var shift = avg(items.map(function (it) { return it.bx; })) - avg(items.map(function (it) { return it.x; }));
+    items.forEach(function (it) { pos[it.b.id] = { x: it.x + shift, y: li * LAYER_GAP }; });
+  });
+  var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  blocks.forEach(function (b) {
+    var s = SIZE[b.kind], p = pos[b.id];
+    minX = Math.min(minX, p.x - s.w / 2); maxX = Math.max(maxX, p.x + s.w / 2);
+    minY = Math.min(minY, p.y - s.h / 2); maxY = Math.max(maxY, p.y + s.h / 2);
+  });
+  var OX = minX - PAD, OY = minY - PAD, W = maxX - minX + 2 * PAD, H = maxY - minY + 2 * PAD;
+  var rect = {};
+  blocks.forEach(function (b) {
+    var s = SIZE[b.kind], p = pos[b.id];
+    rect[b.id] = { x: p.x - s.w / 2 - OX, y: p.y - s.h / 2 - OY, w: s.w, h: s.h, cx: p.x - OX, cy: p.y - OY };
+  });
+  var graphBox = { x: minX - OX, y: minY - OY, w: maxX - minX, h: maxY - minY };
+
+  var edges = [];
+  blocks.forEach(function (v) { v.cites.forEach(function (u) { if (byId[u]) edges.push({ u: u, v: v.id }); }); });
+
+  function edgePath(u, v) {
+    var A = rect[u], B = rect[v];
+    var s = { x: A.cx, y: A.y }, t = { x: B.cx, y: B.y + B.h };
+    var mids = [];
+    for (var k = depth[v] + 1; k < depth[u]; k++) mids = mids.concat(layers[k]);
+    var blocked = mids.some(function (n) {
+      var R = rect[n.id], f = (s.y - R.cy) / (s.y - t.y), xk = s.x + (t.x - s.x) * f;
+      return xk > R.x - 24 && xk < R.x + R.w + 24;
+    });
+    if (!blocked) {
+      var dy = s.y - t.y;
+      return 'M' + s.x + ',' + s.y + ' C' + s.x + ',' + (s.y - dy * 0.42) + ' ' + t.x + ',' + (t.y + dy * 0.42) + ' ' + t.x + ',' + t.y;
+    }
+    var left = Math.min.apply(null, mids.map(function (n) { return rect[n.id].x; })) - 80;
+    var right = Math.max.apply(null, mids.map(function (n) { return rect[n.id].x + rect[n.id].w; })) + 80;
+    var goLeft = Math.abs(s.x - left) + Math.abs(t.x - left) <= Math.abs(s.x - right) + Math.abs(t.x - right);
+    var s2 = { x: goLeft ? A.x : A.x + A.w, y: A.cy }, t2 = { x: goLeft ? B.x : B.x + B.w, y: B.cy };
+    var r = goLeft ? Math.min(left, s2.x - 80, t2.x - 80) : Math.max(right, s2.x + 80, t2.x + 80);
+    var c1 = s2.x + (r - s2.x) * 1.35, c2 = t2.x + (r - t2.x) * 1.35;
+    return 'M' + s2.x + ',' + s2.y + ' C' + c1 + ',' + s2.y + ' ' + c2 + ',' + t2.y + ' ' + t2.x + ',' + t2.y;
+  }
+
+  /* ---------------- rich text (TeX via MathJax, with a plain fallback) ---------------- */
+  var mathMode = 'text';
+  var richEls = new Set();
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function texToHTML(m) {
+    var s = esc(m)
+      .replace(/\\pmod\{([^}]*)\}/g, ' (\u0001 $1)')
+      .replace(/\\bmod/g, ' \u0001 ')
+      .replace(/\\equiv/g, ' ≡ ')
+      .replace(/\\cdots/g, '⋯').replace(/\\dots/g, '…').replace(/\\cdot/g, ' · ')
+      .replace(/\\leq?(?![a-z])/g, ' ≤ ').replace(/\\geq?(?![a-z])/g, ' ≥ ')
+      .replace(/\\qquad|\\quad|\\,/g, ' ');
+    s = s.replace(/&[a-z]+;|([A-Za-z])/g, function (m0, l) { return l ? '<i>' + l + '</i>' : m0; });
+    s = s.replace(/\u0001/g, 'mod');
+    s = s.replace(/_\{([^}]*)\}|_(<i>[A-Za-z]<\/i>|\w)/g, function (_, a, b) { return '<sub>' + (a !== undefined ? a : b) + '</sub>'; });
+    s = s.replace(/\^\{([^}]*)\}|\^(<i>[A-Za-z]<\/i>|\w)/g, function (_, a, b) { return '<sup>' + (a !== undefined ? a : b) + '</sup>'; });
+    s = s.replace(/(\d|\)|<\/i>|\s)-(?=\s|\d|<i>)/g, '$1 − ').replace(/^-/, '−').replace(/\s+/g, ' ');
+    return s.trim();
+  }
+  function refLink(n, text) {
+    var b = byNumber[n];
+    return b ? '<button type="button" class="xref" data-goto="' + b.id + '">' + text + '</button>' : text;
+  }
+  function textHTML(t, links) {
+    var s = esc(t).replace(/\\emph\{([^}]*)\}/g, '<em>$1</em>');
+    s = s.replace(/\[(\w+)\]/g, function (m0, k) {
+      return DATA.references.some(function (r) { return r.key === k; }) ? '<cite>[' + k + ']</cite>' : m0;
+    });
+    if (links) {
+      s = s.replace(/\b(Definition|Lemma|Theorem)s (\d+) and (\d+)/g, function (m0, kind, a, c) {
+        return kind + 's ' + refLink(a, a) + ' and ' + refLink(c, c);
+      });
+      s = s.replace(/\b(Definition|Lemma|Theorem) (\d+)/g, function (m0, kind, a) { return refLink(a, m0); });
+    }
+    return s;
+  }
+  function richHTML(src, links, mode) {
+    mode = mode || mathMode;
+    return String(src).split(/(\$\$[\s\S]+?\$\$|\$[^$]+\$)/g).map(function (p) {
+      if (p.slice(0, 2) === '$$' && p.length > 4) {
+        return mode === 'tex' ? '<span class="mjx-ph" data-d="1">' + esc(p.slice(2, -2)) + '</span>' : '<span class="disp m">' + texToHTML(p.slice(2, -2)) + '</span>';
+      }
+      if (p.charAt(0) === '$' && p.length > 2) {
+        return mode === 'tex' ? '<span class="mjx-ph" data-d="0">' + esc(p.slice(1, -1)) + '</span>' : '<span class="m">' + texToHTML(p.slice(1, -1)) + '</span>';
+      }
+      return textHTML(p, links);
+    }).join('');
+  }
+  function plain(src) {
+    var d = document.createElement('div');
+    d.innerHTML = richHTML(src, false, 'text');
+    return d.textContent.replace(/\s+/g, ' ').trim();
+  }
+  // Each formula is converted on its own with fixed font metrics. Nothing is measured on the page,
+  // so formulas render correctly even in elements that are not attached yet or are hidden.
+  function upgradeMath(el) {
+    var phs = el.querySelectorAll('.mjx-ph');
+    for (var i = 0; i < phs.length; i++) {
+      var ph = phs[i], tex = ph.textContent, display = ph.getAttribute('data-d') === '1', node = null;
+      try { node = window.MathJax.tex2svg(tex, { display: display, em: 16, ex: 8, containerWidth: 640 }); } catch (e) { node = null; }
+      if (node) ph.parentNode.replaceChild(node, ph);
+      else { ph.className = display ? 'disp m' : 'm'; ph.innerHTML = texToHTML(tex); }
+    }
+  }
+  function rich(el, src, links) {
+    el._src = src; el._links = !!links;
+    el.innerHTML = richHTML(src, links);
+    if (mathMode === 'tex') upgradeMath(el);
+    else richEls.add(el);
+    return el;
+  }
+  if (window.MathJax && window.MathJax.startup && window.MathJax.startup.promise) {
+    window.MathJax.startup.promise.then(function () {
+      if (typeof window.MathJax.tex2svg !== 'function') return;
+      try { document.head.appendChild(window.MathJax.svgStylesheet()); } catch (e) {}
+      mathMode = 'tex';
+      richEls.forEach(function (el) { if (el.isConnected) rich(el, el._src, el._links); });
+      richEls.clear();
+      rich(document.getElementById('docTitle'), DATA.title, false);
+    }).catch(function () {});
+  }
+
+  /* ---------------- build the world ---------------- */
+  var world = $('#world'), viewport = $('#viewport'), nodesLayer = $('#nodes');
+  world.style.width = W + 'px'; world.style.height = H + 'px';
+  function svgEl(tag, attrs, parent) {
+    var e = document.createElementNS(SVGNS, tag);
+    for (var a in attrs) e.setAttribute(a, attrs[a]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+
+  // terrain: survey grid and depth bands
+  var terrain = $('#terrain');
+  terrain.setAttribute('width', W); terrain.setAttribute('height', H); terrain.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  var tdefs = svgEl('defs', {}, terrain);
+  var p1 = svgEl('pattern', { id: 'g1', width: 48, height: 48, patternUnits: 'userSpaceOnUse' }, tdefs);
+  svgEl('path', { d: 'M48 0H0V48', 'class': 'gridline' }, p1);
+  var p2 = svgEl('pattern', { id: 'g2', width: 240, height: 240, patternUnits: 'userSpaceOnUse' }, tdefs);
+  svgEl('path', { d: 'M240 0H0V240', 'class': 'gridline2' }, p2);
+  svgEl('rect', { width: W, height: H, fill: 'url(#g1)' }, terrain);
+  svgEl('rect', { width: W, height: H, fill: 'url(#g2)' }, terrain);
+  layers.forEach(function (L, li) {
+    var y = li * LAYER_GAP - OY;
+    svgEl('line', { x1: 0, x2: W, y1: y, y2: y, 'class': 'band' }, terrain);
+  });
+
+  // edges
+  var edgeSvg = $('#edges');
+  edgeSvg.setAttribute('width', W); edgeSvg.setAttribute('height', H); edgeSvg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  var edefs = svgEl('defs', {}, edgeSvg);
+  [['ah', 'ah'], ['ah-hl', 'ah-hl'], ['ah-uses', 'ah-uses']].forEach(function (m) {
+    var mk = svgEl('marker', { id: m[0], viewBox: '0 0 10 10', refX: 9.5, refY: 5, markerWidth: 5.5, markerHeight: 5.5, orient: 'auto' }, edefs);
+    svgEl('path', { d: 'M0,0 L10,5 L0,10 z', 'class': m[1] }, mk);
+  });
+  var edgeGroup = svgEl('g', {}, edgeSvg);
+  var edgeEls = edges.map(function (e) {
+    var el = svgEl('path', { d: edgePath(e.u, e.v), 'class': 'edge', 'marker-end': 'url(#ah)' }, edgeGroup);
+    return { u: e.u, v: e.v, el: el };
+  });
+  // include routed edges in the region that "whole map" frames
+  try {
+    var eb = edgeGroup.getBBox();
+    if (eb.width) {
+      var gx2 = Math.max(graphBox.x + graphBox.w, eb.x + eb.width), gy2 = Math.max(graphBox.y + graphBox.h, eb.y + eb.height);
+      graphBox.x = Math.min(graphBox.x, eb.x); graphBox.y = Math.min(graphBox.y, eb.y);
+      graphBox.w = gx2 - graphBox.x; graphBox.h = gy2 - graphBox.y;
+    }
+  } catch (err) {}
+  // depth labels, like lines of latitude, just left of the graph
+  layers.forEach(function (L, li) {
+    var t = svgEl('text', { x: graphBox.x - 250, y: li * LAYER_GAP - OY - 12, 'class': 'bandlabel' }, terrain);
+    t.textContent = li === 0 ? 'DEPTH 0 · THEOREM' : 'DEPTH ' + li;
+  });
+
+  // nodes
+  var nodeEl = {};
+  blocks.forEach(function (b) {
+    var r = rect[b.id];
+    var el = document.createElement('div');
+    el.className = 'node ' + b.kind;
+    el.tabIndex = 0;
+    el.setAttribute('role', 'button');
+    el.setAttribute('aria-label', label(b) + ': ' + plain(b.header));
+    el.dataset.id = b.id;
+    el.style.left = r.x + 'px'; el.style.top = r.y + 'px'; el.style.width = r.w + 'px'; el.style.height = r.h + 'px';
+    el.innerHTML = '<div class="kind"><span>' + label(b) + '</span><span class="pip" aria-hidden="true"></span></div>' +
+      '<div class="big" aria-hidden="true">' + SHORT[b.kind] + b.number + '</div><div class="hdr"></div><div class="stmt"></div>';
+    nodesLayer.appendChild(el);
+    rich(el.querySelector('.hdr'), b.header, false);
+    rich(el.querySelector('.stmt'), b.statement, false);
+    nodeEl[b.id] = el;
+  });
+
+  // fog (M5): one dense cloud over each unverified block and none anywhere else,
+  // so the map is free of fog exactly when every block has been verified.
+  var fogSvg = $('#fog');
+  fogSvg.setAttribute('width', W); fogSvg.setAttribute('height', H); fogSvg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  var fdefs = svgEl('defs', {}, fogSvg);
+  var cloudFilter = svgEl('filter', { id: 'fogcloud', x: '-25%', y: '-25%', width: '150%', height: '150%' }, fdefs);
+  svgEl('feTurbulence', { type: 'fractalNoise', baseFrequency: '0.018', numOctaves: '2', seed: '7', result: 'noise' }, cloudFilter);
+  svgEl('feDisplacementMap', { 'in': 'SourceGraphic', in2: 'noise', scale: '40', xChannelSelector: 'R', yChannelSelector: 'G', result: 'ragged' }, cloudFilter);
+  svgEl('feGaussianBlur', { 'in': 'ragged', stdDeviation: '9' }, cloudFilter);
+  var cloudsLight = svgEl('g', { 'class': 'clouds-light', filter: 'url(#fogcloud)' }, fogSvg);
+  var clouds = svgEl('g', { 'class': 'clouds', filter: 'url(#fogcloud)' }, fogSvg);
+  var FOG_MARGIN = 42;
+  var cloudEl = {}, lightEl = {}, labelEl = {};
+  var overlayLayer = $('#overlay');
+  blocks.forEach(function (b) {
+    var r = rect[b.id];
+    var cloudBox = { x: r.x - FOG_MARGIN, y: r.y - FOG_MARGIN, width: r.w + 2 * FOG_MARGIN, height: r.h + 2 * FOG_MARGIN, rx: 42, 'class': 'fogcloud' };
+    cloudEl[b.id] = svgEl('rect', cloudBox, clouds);
+    lightEl[b.id] = svgEl('rect', cloudBox, cloudsLight);
+    var l = document.createElement('div');
+    l.className = 'foglabel';
+    l.style.left = r.x + 'px'; l.style.top = r.y + 'px'; l.style.width = r.w + 'px'; l.style.height = r.h + 'px';
+    l.innerHTML = '<span class="fl-k">' + label(b) + '</span><span class="fl-s">unverified</span><span class="fl-big">' + SHORT[b.kind] + b.number + '</span>';
+    overlayLayer.appendChild(l);
+    labelEl[b.id] = l;
+  });
+  var selRing = document.createElement('div');
+  selRing.className = 'selring'; selRing.hidden = true;
+  overlayLayer.appendChild(selRing);
+
+  /* ---------------- reading status ---------------- */
+  var STORE_KEY = 'hff-map:' + DATA.slug + ':status';
+  var status = {};
+  try { status = JSON.parse(localStorage.getItem(STORE_KEY) || '{}') || {}; } catch (e) { status = {}; }
+  Object.keys(status).forEach(function (k) {
+    // marks saved by an earlier version ("digested") count as verified
+    if (byId[k] && (status[k] === 'verified' || status[k] === 'digested')) status[k] = 'verified'; else delete status[k];
+  });
+  function saveStatus() { try { localStorage.setItem(STORE_KEY, JSON.stringify(status)); } catch (e) {} }
+  var cellsEl = $('#cells');
+  blocks.forEach(function () { var c = document.createElement('span'); c.className = 'cell'; cellsEl.appendChild(c); });
+  function isVerified(id) { return status[id] === 'verified'; }
+  // unverified: dense fog; verified but resting on an unverified block (directly or indirectly): light fog;
+  // verified together with everything it depends on: no fog, and the statement is proved.
+  function pendingDeps(id) { return blocks.filter(function (b) { return ancestors[id].has(b.id) && !isVerified(b.id); }); }
+  function stateOf(id) {
+    if (!isVerified(id)) return 'unverified';
+    return pendingDeps(id).length ? 'conditional' : 'established';
+  }
+  function paintStatus() {
+    var v = 0;
+    blocks.forEach(function (b, i) {
+      var ok = isVerified(b.id), st = stateOf(b.id);
+      if (ok) v++;
+      nodeEl[b.id].dataset.status = ok ? 'verified' : 'unverified';
+      nodeEl[b.id].dataset.state = st;
+      cellsEl.children[i].className = 'cell' + (st === 'established' ? ' verified' : st === 'conditional' ? ' conditional' : '');
+      cloudEl[b.id].style.display = st === 'unverified' ? '' : 'none';
+      lightEl[b.id].style.display = st === 'conditional' ? '' : 'none';
+      labelEl[b.id].hidden = st !== 'unverified';
+    });
+    if (selected) renderDepNote(selected);
+    $('#progressText').innerHTML = '<span class="label">Verified </span>' + v + '/' + blocks.length;
+    document.querySelectorAll('.status button').forEach(function (btn) {
+      btn.setAttribute('aria-checked', String((isVerified(btn.dataset.id) ? 'verified' : 'unverified') === btn.dataset.s));
+    });
+    var done = $('#done'), all = v === blocks.length;
+    done.hidden = !all;
+    if (all) {
+      var imported = blocks.some(function (b) { return b.kind === 'imported'; });
+      done.innerHTML = '<strong>No fog left.</strong> Every block is verified, so ' + label(byId[DATA.theorem]) + ' is proved' + (imported ? ', relative to its imported lemmas' : '') + '.';
+    }
+    drawMini();
+  }
+  function setStatus(id, s) {
+    if (s === 'verified') status[id] = 'verified'; else delete status[id];
+    saveStatus(); paintStatus();
+  }
+
+  /* ---------------- camera (M2) ---------------- */
+  var MIN_S = 0.2, MAX_S = 2.6;
+  var cam = { s: 1, tx: 0, ty: 0 };
+  var anim = null;
+  var panel = $('#panel');
+  function clampS(s) { var f = fullSize(); return Math.min(MAX_S, Math.max(MIN_S, f.w / W, f.h / H, s)); }
+  function fullSize() { var r = viewport.getBoundingClientRect(); return { w: r.width, h: r.height }; }
+  function effSize() {
+    var f = fullSize();
+    var h = f.h;
+    if (sheetQuery.matches && !panel.classList.contains('collapsed')) h -= panel.offsetHeight;
+    return { w: f.w, h: Math.max(140, h) };
+  }
+  function clampCam(c) {
+    var f = fullSize(), ww = W * c.s, wh = H * c.s;
+    c.tx = ww > f.w ? Math.min(0, Math.max(f.w - ww, c.tx)) : (f.w - ww) / 2;
+    c.ty = wh > f.h ? Math.min(0, Math.max(f.h - wh, c.ty)) : (f.h - wh) / 2;
+    return c;
+  }
+  function camFor(cx, cy, s) { var e = effSize(); return { s: s, tx: e.w / 2 - cx * s, ty: e.h / 2 - cy * s }; }
+  var zoomReadout = $('#zoomReadout');
+  function apply() {
+    world.style.transform = 'translate(' + cam.tx + 'px,' + cam.ty + 'px) scale(' + cam.s + ')';
+    var z = cam.s < 0.55 ? 'z-far' : cam.s < 1.1 ? 'z-mid' : 'z-near';
+    if (world.dataset.zoom !== z) {
+      world.classList.remove('z-far', 'z-mid', 'z-near');
+      world.classList.add(z);
+      world.dataset.zoom = z;
+    }
+    zoomReadout.textContent = Math.round(cam.s * 100) + '%';
+    drawMini();
+  }
+  function flyTo(target, dur) {
+    target = clampCam(target);
+    if (anim) { cancelAnimationFrame(anim); anim = null; }
+    if (dur === 0 || reduceMotion.matches) { cam = target; apply(); return; }
+    dur = dur || 520;
+    var e = effSize();
+    var a = { s: cam.s, cx: (e.w / 2 - cam.tx) / cam.s, cy: (e.h / 2 - cam.ty) / cam.s };
+    var b = { s: target.s, cx: (e.w / 2 - target.tx) / target.s, cy: (e.h / 2 - target.ty) / target.s };
+    var t0 = performance.now();
+    function ease(x) { return x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2; }
+    function step(now) {
+      var k = Math.min(1, (now - t0) / dur), q = ease(k);
+      var s = a.s * Math.pow(b.s / a.s, q), cx = a.cx + (b.cx - a.cx) * q, cy = a.cy + (b.cy - a.cy) * q;
+      cam = clampCam({ s: s, tx: e.w / 2 - cx * s, ty: e.h / 2 - cy * s });
+      apply();
+      anim = k < 1 ? requestAnimationFrame(step) : null;
+    }
+    anim = requestAnimationFrame(step);
+  }
+  function zoomAt(px, py, f) {
+    var s2 = clampS(cam.s * f), wx = (px - cam.tx) / cam.s, wy = (py - cam.ty) / cam.s;
+    cam = clampCam({ s: s2, tx: px - wx * s2, ty: py - wy * s2 });
+    apply();
+  }
+  function zoomCenter(f) { var e = effSize(); zoomAt(e.w / 2, e.h / 2, f); }
+  function fitAll(dur) {
+    var e = effSize(), m = 70;
+    var s = clampS(Math.min((e.w - 2 * m) / graphBox.w, (e.h - 2 * m) / graphBox.h, 1.05));
+    flyTo(camFor(graphBox.x + graphBox.w / 2, graphBox.y + graphBox.h / 2, s), dur);
+  }
+  function goTo(id, s, select) {
+    var r = rect[id];
+    if (!r) return;
+    flyTo(camFor(r.cx, r.cy, clampS(s || Math.max(cam.s, 1.2))));
+    if (select !== false) selectNode(id);
+  }
+
+  /* ---------------- pointer input ---------------- */
+  var pointers = new Map(), drag = null, pinch = null;
+  viewport.addEventListener('pointerdown', function (e) {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    viewport.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (anim) { cancelAnimationFrame(anim); anim = null; }
+    if (pointers.size === 1) {
+      drag = { x: e.clientX, y: e.clientY, tx: cam.tx, ty: cam.ty, moved: false, target: e.target };
+    } else if (pointers.size === 2) {
+      var pts = Array.from(pointers.values());
+      pinch = { d: Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y), s: cam.s, mx: (pts[0].x + pts[1].x) / 2, my: (pts[0].y + pts[1].y) / 2, tx: cam.tx, ty: cam.ty };
+      if (drag) drag.moved = true;
+    }
+  });
+  viewport.addEventListener('pointermove', function (e) {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    var r = viewport.getBoundingClientRect();
+    if (pinch && pointers.size >= 2) {
+      var pts = Array.from(pointers.values());
+      var d = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      var mx = (pts[0].x + pts[1].x) / 2 - r.left, my = (pts[0].y + pts[1].y) / 2 - r.top;
+      var s2 = clampS(pinch.s * d / Math.max(1, pinch.d));
+      var wx = (pinch.mx - r.left - pinch.tx) / pinch.s, wy = (pinch.my - r.top - pinch.ty) / pinch.s;
+      cam = clampCam({ s: s2, tx: mx - wx * s2, ty: my - wy * s2 });
+      apply();
+      return;
+    }
+    if (drag) {
+      var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+      if (!drag.moved && Math.hypot(dx, dy) > 4) { drag.moved = true; viewport.classList.add('dragging'); }
+      if (drag.moved) { cam = clampCam({ s: cam.s, tx: drag.tx + dx, ty: drag.ty + dy }); apply(); }
+    }
+  });
+  function endPointer(e) {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.delete(e.pointerId);
+    if (pointers.size < 2) pinch = null;
+    if (pointers.size === 0 && drag) {
+      viewport.classList.remove('dragging');
+      if (!drag.moved && e.type === 'pointerup' && drag.target) {
+        var n = drag.target.closest ? drag.target.closest('.node') : null;
+        if (n) goTo(n.dataset.id, Math.max(cam.s, 0.9));
+        else if (selected) selectNode(null);
+      }
+      drag = null;
+    } else if (pointers.size === 1) {
+      var p = Array.from(pointers.values())[0];
+      drag = { x: p.x, y: p.y, tx: cam.tx, ty: cam.ty, moved: true, target: null };
+    }
+  }
+  viewport.addEventListener('pointerup', endPointer);
+  viewport.addEventListener('pointercancel', endPointer);
+  viewport.addEventListener('dblclick', function (e) {
+    var n = e.target.closest ? e.target.closest('.node') : null;
+    if (n) goTo(n.dataset.id, 1.6);
+    else { var r = viewport.getBoundingClientRect(); zoomAt(e.clientX - r.left, e.clientY - r.top, 1.6); }
+  });
+  viewport.addEventListener('wheel', function (e) {
+    e.preventDefault();
+    var r = viewport.getBoundingClientRect();
+    var dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1);
+    zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.0016)));
+  }, { passive: false });
+
+  /* ---------------- minimap ---------------- */
+  var mini = $('#mini'), mctx = mini.getContext('2d'), miniT = null;
+  function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function drawMini() {
+    var cw = mini.clientWidth, ch = mini.clientHeight;
+    if (!cw || !ch) return;
+    var dpr = window.devicePixelRatio || 1;
+    if (mini.width !== Math.round(cw * dpr) || mini.height !== Math.round(ch * dpr)) { mini.width = Math.round(cw * dpr); mini.height = Math.round(ch * dpr); }
+    mctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    mctx.clearRect(0, 0, cw, ch);
+    mctx.fillStyle = cssVar('--ground'); mctx.fillRect(0, 0, cw, ch);
+    var k = Math.min(cw / W, ch / H), ox = (cw - W * k) / 2, oy = (ch - H * k) / 2;
+    miniT = { k: k, ox: ox, oy: oy };
+    mctx.strokeStyle = cssVar('--band'); mctx.lineWidth = 1;
+    layers.forEach(function (L, li) { var y = oy + (li * LAYER_GAP - OY) * k; mctx.beginPath(); mctx.moveTo(ox, y); mctx.lineTo(ox + W * k, y); mctx.stroke(); });
+    mctx.strokeStyle = cssVar('--edge'); mctx.globalAlpha = 0.7;
+    edges.forEach(function (e) {
+      var a = rect[e.u], b = rect[e.v];
+      mctx.beginPath(); mctx.moveTo(ox + a.cx * k, oy + a.y * k); mctx.lineTo(ox + b.cx * k, oy + (b.y + b.h) * k); mctx.stroke();
+    });
+    mctx.globalAlpha = 1;
+    blocks.forEach(function (b) {
+      var r = rect[b.id], st = status[b.id], state = stateOf(b.id);
+      mctx.fillStyle = st === 'verified' ? cssVar('--accent') : cssVar('--fog');
+      mctx.globalAlpha = state === 'conditional' ? 0.4 : 1;
+      mctx.fillRect(ox + r.x * k, oy + r.y * k, Math.max(2, r.w * k), Math.max(2, r.h * k));
+      if (!st) { mctx.strokeStyle = cssVar('--edge'); mctx.lineWidth = 1; mctx.strokeRect(ox + r.x * k, oy + r.y * k, Math.max(2, r.w * k), Math.max(2, r.h * k)); }
+      mctx.globalAlpha = 1;
+      if (b.id === selected) { mctx.strokeStyle = cssVar('--ink'); mctx.lineWidth = 1.5; mctx.strokeRect(ox + r.x * k - 2, oy + r.y * k - 2, r.w * k + 4, r.h * k + 4); }
+    });
+    var f = fullSize();
+    mctx.strokeStyle = cssVar('--accent'); mctx.lineWidth = 1.5;
+    mctx.strokeRect(ox + (-cam.tx / cam.s) * k, oy + (-cam.ty / cam.s) * k, (f.w / cam.s) * k, (f.h / cam.s) * k);
+  }
+  var miniDrag = false;
+  function miniMove(e) {
+    if (!miniT) return;
+    var r = mini.getBoundingClientRect();
+    var wx = (e.clientX - r.left - miniT.ox) / miniT.k, wy = (e.clientY - r.top - miniT.oy) / miniT.k;
+    if (anim) { cancelAnimationFrame(anim); anim = null; }
+    cam = clampCam(camFor(wx, wy, cam.s));
+    apply();
+  }
+  mini.addEventListener('pointerdown', function (e) { miniDrag = true; mini.setPointerCapture(e.pointerId); miniMove(e); });
+  mini.addEventListener('pointermove', function (e) { if (miniDrag) miniMove(e); });
+  mini.addEventListener('pointerup', function () { miniDrag = false; });
+  mini.addEventListener('pointercancel', function () { miniDrag = false; });
+
+  /* ---------------- selection and panel (M4) ---------------- */
+  var selected = null;
+  function selectNode(id) {
+    selected = id;
+    if (id) {
+      var sr = rect[id];
+      selRing.style.left = (sr.x - 10) + 'px'; selRing.style.top = (sr.y - 10) + 'px';
+      selRing.style.width = (sr.w + 20) + 'px'; selRing.style.height = (sr.h + 20) + 'px';
+    }
+    selRing.hidden = !id;
+    blocks.forEach(function (b) { nodeEl[b.id].classList.remove('sel', 'dim'); });
+    edgeEls.forEach(function (e) { e.el.setAttribute('class', 'edge'); e.el.setAttribute('marker-end', 'url(#ah)'); });
+    if (!id) { renderOverview(); drawMini(); return; }
+    var down = new Set([id]), stack = [id];
+    while (stack.length) {
+      var x = stack.pop();
+      byId[x].usedBy.forEach(function (y) { if (!down.has(y)) { down.add(y); stack.push(y); } });
+    }
+    var parents = new Set(byId[id].cites);
+    blocks.forEach(function (b) {
+      if (b.id === id) nodeEl[b.id].classList.add('sel');
+      else if (!down.has(b.id) && !parents.has(b.id)) nodeEl[b.id].classList.add('dim');
+    });
+    edgeEls.forEach(function (e) {
+      if (down.has(e.u) && down.has(e.v)) { e.el.setAttribute('class', 'edge hl'); e.el.setAttribute('marker-end', 'url(#ah-hl)'); edgeGroup.appendChild(e.el); }
+      else if (e.v === id) { e.el.setAttribute('class', 'edge uses'); e.el.setAttribute('marker-end', 'url(#ah-uses)'); }
+      else e.el.setAttribute('class', 'edge dim');
+    });
+    renderBlock(id);
+    if (sheetQuery.matches) setPanelOpen(true);
+    drawMini();
+  }
+
+  function section(title, extra) {
+    var s = document.createElement('section');
+    var h = document.createElement('h3');
+    h.innerHTML = '<span>' + title + '</span>' + (extra || '');
+    s.appendChild(h);
+    return s;
+  }
+  function richDiv(src, cls) { var d = document.createElement('div'); d.className = 'rich' + (cls ? ' ' + cls : ''); rich(d, src, true); return d; }
+  function chip(id) {
+    var b = byId[id];
+    var c = document.createElement('button');
+    c.type = 'button'; c.className = 'chip'; c.dataset.goto = id;
+    c.innerHTML = '<span class="k">' + label(b) + '</span><span class="h"></span>';
+    rich(c.querySelector('.h'), b.header, false);
+    return c;
+  }
+  function none(text) { var p = document.createElement('p'); p.className = 'none'; p.textContent = text; return p; }
+
+  function renderDepNote(id) {
+    var el = document.getElementById('depnote');
+    if (!el) return;
+    el.innerHTML = '';
+    var st = stateOf(id);
+    el.hidden = st === 'unverified';
+    if (st === 'established') {
+      el.appendChild(none(ancestors[id].size ? 'No fog: this block and everything it depends on are verified, so its statement is proved.' : 'No fog: this block depends on nothing else, so its statement is proved.'));
+    } else if (st === 'conditional') {
+      el.appendChild(none('Light fog: this block is verified, but it depends, directly or indirectly, on blocks that are still unverified. The fog lifts once these are verified:'));
+      var c = document.createElement('div'); c.className = 'chips';
+      pendingDeps(id).forEach(function (b) { c.appendChild(chip(b.id)); });
+      el.appendChild(c);
+    }
+  }
+
+  function renderBlock(id) {
+    var b = byId[id];
+    panel.innerHTML = '';
+    var back = document.createElement('button');
+    back.type = 'button'; back.className = 'back'; back.id = 'backBtn'; back.innerHTML = '← Overview';
+    panel.appendChild(back);
+    var eb = document.createElement('div');
+    eb.className = 'eyebrow';
+    eb.textContent = label(b) + ' · depth ' + depth[id] + (b.kind === 'theorem' ? ' · main theorem' : '');
+    panel.appendChild(eb);
+    var h = document.createElement('h2'); rich(h, b.header, false); panel.appendChild(h);
+
+    var st = document.createElement('div');
+    st.className = 'status'; st.setAttribute('role', 'radiogroup'); st.setAttribute('aria-label', 'Verification status');
+    [['unverified', 'Unverified'], ['verified', 'Verified']].forEach(function (o) {
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.setAttribute('role', 'radio'); btn.id = 'status-' + o[0];
+      btn.dataset.s = o[0]; btn.dataset.id = id;
+      btn.setAttribute('aria-checked', String((isVerified(id) ? 'verified' : 'unverified') === o[0]));
+      btn.innerHTML = '<span class="dot" aria-hidden="true"></span>' + o[1];
+      st.appendChild(btn);
+    });
+    panel.appendChild(st);
+    var how = none(b.kind === 'definition' ? 'Mark this definition verified once you have checked that it is well formed.'
+      : b.kind === 'imported' ? 'Mark this lemma verified once you have compared it with its source.'
+      : 'Mark this block verified once you have checked its proof, taking the statements it uses as given.');
+    how.style.marginTop = '8px';
+    panel.appendChild(how);
+    var dep = document.createElement('div');
+    dep.id = 'depnote'; dep.className = 'depnote';
+    panel.appendChild(dep);
+    renderDepNote(id);
+
+    var s1 = section(b.kind === 'definition' ? 'Definition' : 'Statement');
+    s1.appendChild(richDiv(b.statement)); panel.appendChild(s1);
+
+    if (b.proof) {
+      var budget = DATA.budget || 300;
+      var lenTxt = 'length ' + b.length + ' / ' + budget;
+      var s2 = section('Proof', '<span class="cost" title="Visible characters in the compiled proof, spaces not counted">' + lenTxt + '</span>');
+      var meter = document.createElement('div'); meter.className = 'meter';
+      meter.innerHTML = '<span style="width:' + Math.min(100, 100 * b.length / budget) + '%"></span>';
+      s2.appendChild(meter);
+      s2.appendChild(richDiv(b.proof)); panel.appendChild(s2);
+    }
+
+    var s3 = section('Uses');
+    if (b.cites.length) { var c3 = document.createElement('div'); c3.className = 'chips'; b.cites.forEach(function (u) { c3.appendChild(chip(u)); }); s3.appendChild(c3); }
+    else s3.appendChild(none('Nothing. This block is a leaf of the map.'));
+    panel.appendChild(s3);
+
+    var s4 = section('Used by');
+    if (b.usedBy.length) {
+      var c4 = document.createElement('div'); c4.className = 'chips'; b.usedBy.forEach(function (u) { c4.appendChild(chip(u)); }); s4.appendChild(c4);
+      if (id !== DATA.theorem) s4.appendChild(none('Every path from here up to the theorem is highlighted on the map.'));
+    } else s4.appendChild(none(id === DATA.theorem ? 'Nothing. This is the main theorem, the top of the map.' : 'Nothing.'));
+    panel.appendChild(s4);
+
+    panel.scrollTop = 0;
+  }
+
+  function renderOverview() {
+    panel.innerHTML = '';
+    var eb = document.createElement('div'); eb.className = 'eyebrow'; eb.textContent = 'Part I · Overview'; panel.appendChild(eb);
+    var h = document.createElement('h2'); rich(h, DATA.title, false); panel.appendChild(h);
+    var o = DATA.overview;
+    [['Theorem', o.theorem], ['Method', o.method], ['Structure', o.structure]].forEach(function (x) {
+      var s = section(x[0]); s.appendChild(richDiv(x[1])); panel.appendChild(s);
+    });
+    var sk = section('Reading the map');
+    sk.insertAdjacentHTML('beforeend',
+      '<ul class="keys">' +
+      '<li><span>Drag</span><span>Pan around the map.</span></li>' +
+      '<li><span>Scroll, pinch</span><span>Zoom. Far out shows numbers, middle range headers, close in full statements.</span></li>' +
+      '<li><span>Click a block</span><span>Open it here, with its proof and its paths to the theorem.</span></li>' +
+      '<li><span><kbd>T</kbd></span><span>Travel to the theorem.</span></li>' +
+      '<li><span><kbd>F</kbd></span><span>Show the whole map.</span></li>' +
+      '<li><span><kbd>/</kbd></span><span>Search by number or header.</span></li>' +
+      '<li><span><kbd>V</kbd></span><span>Mark the open block verified, or unverified again.</span></li>' +
+      '<li><span>Minimap</span><span>Click or drag to move the view.</span></li>' +
+      '</ul>' +
+      '<p class="none">Every unverified block lies under dense fog. Mark a block verified once you have checked it, and the dense fog lifts. If something it depends on, directly or indirectly, is still unverified, a light fog stays over it until those blocks are verified too. A block with no fog over it is proved. When no fog is left anywhere on the map, every block is verified and the theorem is proved. Your marks are kept in this browser.</p>');
+    panel.appendChild(sk);
+    var sl = section('Legend');
+    sl.insertAdjacentHTML('beforeend',
+      '<ul class="legend">' +
+      '<li><span class="sw def"></span>Definition</li>' +
+      '<li><span class="sw"></span>Lemma</li>' +
+      '<li><span class="sw thm"></span>Main theorem</li>' +
+      '<li><span class="sw ver"></span>No fog: verified, with everything it depends on</li>' +
+      '<li><span class="sw fogl"></span>Light fog: verified, but depends on unverified blocks</li>' +
+      '<li><span class="sw fog"></span>Dense fog: unverified block</li>' +
+      '</ul>');
+    panel.appendChild(sl);
+    var sr = section('References');
+    var ol = document.createElement('ol'); ol.className = 'refs';
+    DATA.references.forEach(function (r) {
+      var li = document.createElement('li');
+      li.innerHTML = '<span class="key">[' + esc(r.key) + ']</span><span></span>';
+      rich(li.lastChild, r.text, false);
+      ol.appendChild(li);
+    });
+    sr.appendChild(ol); panel.appendChild(sr);
+    var ab = document.createElement('p'); ab.className = 'about';
+    ab.innerHTML = 'This map accompanies the note <em>Checking AI-Generated Proofs: The Human Friendly Form</em> by Siddharth Iyer. It renders the worked example of Section 7 from the block data embedded in this file.';
+    panel.appendChild(ab);
+    panel.scrollTop = 0;
+  }
+
+  panel.addEventListener('click', function (e) {
+    var t = e.target;
+    var g = t.closest('[data-goto]');
+    if (g) { goTo(g.dataset.goto); return; }
+    var sb = t.closest('.status button');
+    if (sb) { setStatus(sb.dataset.id, sb.dataset.s); return; }
+    if (t.closest('#backBtn')) selectNode(null);
+  });
+
+  /* ---------------- toolbar ---------------- */
+  $('#btnTheorem').addEventListener('click', function () { goTo(DATA.theorem, Math.max(cam.s, 1.1)); });
+  $('#btnFit').addEventListener('click', function () { fitAll(); });
+  $('#zoomIn').addEventListener('click', function () { zoomCenter(1.3); });
+  $('#zoomOut').addEventListener('click', function () { zoomCenter(1 / 1.3); });
+  function setPanelOpen(open) {
+    panel.classList.toggle('collapsed', !open);
+    $('#panelToggle').setAttribute('aria-expanded', String(open));
+  }
+  $('#panelToggle').addEventListener('click', function () { setPanelOpen(panel.classList.contains('collapsed')); });
+
+  // search
+  var search = $('#search'), results = $('#results'), matches = [];
+  function findMatches(q) {
+    q = q.trim().toLowerCase();
+    if (!q) return [];
+    var num = q.replace(/^(definition|def|lemma|lem|theorem|thm)\s*/, '');
+    return blocks.filter(function (b) {
+      return String(b.number) === num || (label(b) + ' ' + plain(b.header) + ' ' + plain(b.statement)).toLowerCase().indexOf(q) >= 0;
+    }).slice(0, 6);
+  }
+  search.addEventListener('input', function () {
+    matches = findMatches(search.value);
+    results.innerHTML = '';
+    if (!matches.length) { results.hidden = !search.value.trim(); if (search.value.trim()) results.innerHTML = '<span class="none" style="padding:7px 8px">No block matches.</span>'; return; }
+    matches.forEach(function (b) {
+      var btn = document.createElement('button');
+      btn.type = 'button'; btn.dataset.goto = b.id;
+      btn.innerHTML = '<span class="k">' + label(b) + '</span><span></span>';
+      rich(btn.lastChild, b.header, false);
+      results.appendChild(btn);
+    });
+    results.hidden = false;
+  });
+  search.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && matches.length) { goTo(matches[0].id); results.hidden = true; search.blur(); }
+    if (e.key === 'Escape') { results.hidden = true; search.blur(); }
+  });
+  results.addEventListener('click', function (e) {
+    var g = e.target.closest('[data-goto]');
+    if (g) { goTo(g.dataset.goto); results.hidden = true; }
+  });
+  document.addEventListener('pointerdown', function (e) { if (!e.target.closest('.search')) results.hidden = true; });
+
+  // keyboard
+  document.addEventListener('keydown', function (e) {
+    if (e.target.matches && e.target.matches('input, textarea')) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key, e2 = effSize();
+    if (k === 't' || k === 'T' || k === 'Home') { goTo(DATA.theorem, Math.max(cam.s, 1.1)); e.preventDefault(); }
+    else if (k === 'f' || k === 'F') { fitAll(); e.preventDefault(); }
+    else if (k === '+' || k === '=') { zoomCenter(1.25); e.preventDefault(); }
+    else if (k === '-' || k === '_') { zoomCenter(0.8); e.preventDefault(); }
+    else if (k === '/') { search.focus(); e.preventDefault(); }
+    else if (k === 'Escape') { if (selected) selectNode(null); }
+    else if ((k === 'v' || k === 'V') && selected) { setStatus(selected, isVerified(selected) ? 'unverified' : 'verified'); e.preventDefault(); }
+    else if ((k === 'Enter' || k === ' ') && e.target.classList && e.target.classList.contains('node')) { goTo(e.target.dataset.id, Math.max(cam.s, 0.9)); e.preventDefault(); }
+    else if (k.indexOf('Arrow') === 0 && !(e.target.closest && e.target.closest('.panel'))) {
+      var step = 90;
+      cam = clampCam({ s: cam.s, tx: cam.tx + (k === 'ArrowLeft' ? step : k === 'ArrowRight' ? -step : 0), ty: cam.ty + (k === 'ArrowUp' ? step : k === 'ArrowDown' ? -step : 0) });
+      apply(); e.preventDefault();
+    }
+  });
+
+  window.addEventListener('resize', function () { cam = clampCam(cam); apply(); });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', drawMini);
+  new MutationObserver(drawMini).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  /* ---------------- start ---------------- */
+  renderOverview();
+  paintStatus();
+  fitAll(0);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawMini);
+})();
+</script>
+
+</html>

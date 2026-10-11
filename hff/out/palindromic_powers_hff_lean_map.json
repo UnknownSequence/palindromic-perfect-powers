@@ -1,0 +1,1986 @@
+{
+ "slug": "palindromic-perfect-powers-lean",
+ "title": "Palindromic perfect powers (Lean-friendly)",
+ "theorem": "T101",
+ "budget": 300,
+ "overview": {
+  "theorem": "Fix a base $g\\ge2$ and an exponent $k\\ge2$, and consider the palindromes with $L$ digits in base $g$; there are about $g^{L/2}$ of them. Cilleruelo, Luca and Shparlinski [CLS] proved that at most a constant times $(\\#\\cP_L)^{1/k}$ of them are perfect $k$-th powers. We prove (Theorem 101) that the exponent $1/k$ can be replaced by $\\gamma/k$ for some $\\gamma=\\gamma(g,k)<1$, for every base and every exponent. This is a weak form of the main result of the accompanying paper [Pal], which gives explicit values such as $\\gamma=0.9674$ for $g=2$; those values need a certified computer calculation, while the argument here needs none.",
+  "method": "If $x^k$ is a palindrome with $L$ digits, its first $t$ digits are the reversal of its last $t$ digits. We sort the candidates $x$ by their residue class $b$ modulo $g^t$, that is, by the last $t$ digits of $x$ (a \\emph{node}). The last $t$ digits of $x^k$ depend only on $b$, hence so do the first $t$ digits of $x^k$, and these confine $x$ to a short interval. So the possible $x$ in a node form an arithmetic progression of length about $Z=g^{L/k}g^{-2t}$ (Lemmas 33 and 35), and counting all of them gives the bound of [CLS]. We also use the next $s$ digits from both ends. Inside a node write $x=x_b+g^tz$. The digits of $x^k$ in positions $t,\\dots,t+s-1$ form an affine function of $z$ modulo $g^s$ (Lemma 41), and the digits in positions $L-t-s,\\dots,L-t-1$ form the integer part of a function of $z$ that lies within $1/g$ of an affine function over the reals (Lemmas 42 and 44). The palindrome condition says that the second block is the reversal of the first (Lemma 45). We detect this with a Fejér-kernel majorant (Lemmas 50 and 51) and expand the reversal map in additive characters modulo $g^s$ (Lemma 12). The coefficients of this expansion are the values of the \\emph{reversal transform} $\\Psi_\\ell(a)$, a discrete Fourier transform of digit reversal. Summing the resulting geometric series in $z$ splits the count into a main term, smaller than the bound of [CLS] by the factor $g^s$, and an error term (Lemma 55). Two ingredients control the error term. First, a power saving for the sum over $\\ell$ of $\\max_a|\\Psi_\\ell(a)|$ (Lemma 26). The modulus of $\\Psi_\\ell(a)$ is a product of digit factors (Lemma 11), and consecutive factors satisfy an identity in which $a$ cancels (Lemma 16). So whenever two neighbouring digits of $(g^2-1)\\ell\\bmod g^s$ are not both $0$ or both $g-1$, one of two consecutive factors is bounded away from $1$, whatever $a$ is (Lemma 22), and a count of digit strings (Lemma 24) gives the saving. Arguments of this kind go back to Col [Col] and appear in [TP], [DMRSS] and [BhS]. Second, after replacing $|\\Psi_\\ell(a)|$ by its maximum over $a$, the sums over $a$ are taken node by node (Lemma 59), and the averaging over the nodes comes from the archimedean phases alone: they are close to the values of a smooth monotone function of the first $t$ digits, these values are well spaced (Lemmas 78 and 81), and few nodes share the same first digits (Lemma 68). The last point rests on an elementary count of $k$-th roots modulo prime powers (Lemmas 63–66) and on the $g$-part of a node, its largest divisor composed of primes dividing $g$ (Lemma 67). Integers $x$ that share a large factor with a power of $g$ are counted separately by a direct argument (Lemma 89); this matters only when $g$ is not a prime power. Finally we choose $t$ with $g^{(4-c)t}$ about $g^{L/k}$, $s=t-2$, and a threshold $D=g^{\\eta L/k}$ for the $g$-part (Definition 90), and the bookkeeping (blocks 90–100) gives the theorem (Theorem 101).",
+  "structure": "Routine: digits, reversal and harmonic sums (blocks 1–8); the elementary properties of the reversal transform (blocks 9–15); the tree of nodes (blocks 28–36); the linearisation (blocks 37–45); the Fejér majorant (blocks 46–55); the sums over residues (blocks 56–59); the count of roots (blocks 60–66); the reduction to the quantities $\\Phi_b$ (blocks 70–73); and the final bookkeeping with the deduction of the theorem (blocks 90–101). Delicate: the power saving (blocks 16–26); the rigidity of $g$-parts and the fibre bound (Lemmas 67 and 68); the replacement of the phases $\\delta_b$ by values of a smooth function, and the spacing argument (blocks 74–86); and the large $g$-part (blocks 87–89). The key lemmas are Lemmas 26, 55, 68, 86, 89 and 100. Prerequisites: Division with remainder, congruences, greatest common divisors, $p$-adic valuations and the Chinese remainder theorem; the binomial theorem; the mean value theorem, Taylor's theorem with the Lagrange remainder, the fact that a continuous function on a compact interval attains its maximum, and $\\int_1^x\\frac{dy}y=\\log x$; the identity $|e(y)-1|=2|\\sin\\pi y|$ and the inequalities $|\\sin\\pi y|\\ge2\\|y\\|$, $|\\sin y|\\le|y|$ and $\\sin y\\ge2y/\\pi$ for $0\\le y\\le\\pi/2$; and the properties $\\|x-y\\|\\le\\|x\\|+\\|y\\|$ and $\\|nx\\|\\le|n|\\,\\|x\\|$ ($n\\in\\Z$) of the distance to the nearest integer. No result from the literature is imported, and no computer calculation is used. In the Lean formalization the algebraic prerequisites are taken from Lean and Mathlib, and the analytic ones are the fields of the structure KnownResults in PalindromicPowers/Assumptions.lean, documented in palindromic_powers_lean/assumptions.md and proved from Mathlib in PalindromicPowers/Discharge.lean; no published result is assumed."
+ },
+ "blocks": [
+  {
+   "id": "D1",
+   "kind": "definition",
+   "number": 1,
+   "header": "Conventions",
+   "statement": "Throughout, $g\\ge2$ and $k\\ge2$ are fixed integers. We write $e(x)=e^{2\\pi ix}$, $\\|x\\|$ for the distance from $x\\in\\R$ to the nearest integer, $\\log$ for the natural logarithm, and $n\\bmod q\\in\\{0,\\dots,q-1\\}$ for the remainder of $n\\in\\Z$ on division by an integer $q\\ge1$. For real $A$, $H$, $y$, $\\min(A,H/y)$ has its usual meaning if $y\\ne0$, and $\\min(A,H/0):=A$ (the convention $H/0=\\infty$). “For $L$ large” means for all $L\\ge L_0$, where $L_0$ depends only on $g$ and $k$; and “$A\\ll B$ for $L$ large” means: there are $C_1$ and $L_0$, depending only on $g$ and $k$, with $|A|\\le C_1B$ for all $L\\ge L_0$.",
+   "lean": [
+    "e",
+    "distZ",
+    "minDiv"
+   ],
+   "lean_status": "definition",
+   "cites": []
+  },
+  {
+   "id": "L2",
+   "kind": "lemma",
+   "number": 2,
+   "header": "Digits",
+   "statement": "For $j\\ge0$, the map $(n_0,\\dots,n_{j-1})\\mapsto\\sum_{i<j}n_ig^i$ is a bijection from $\\{0,\\dots,g-1\\}^j$ onto $\\{0,\\dots,g^j-1\\}$ (Definition 1).",
+   "lean": [
+    "digits_bijection"
+   ],
+   "lean_status": "proved",
+   "proof": "The image lies in $[0,(g-1)\\sum_{i<j}g^i]=[0,g^j-1]$, and both sets have $g^j$ elements, so it suffices to show injectivity. If $\\sum_in_ig^i=\\sum_in'_ig^i$, reducing modulo $g$ gives $n_0=n'_0$; subtract, divide by $g$, and use induction on $j$.",
+   "length": 174,
+   "cites": [
+    "D1"
+   ]
+  },
+  {
+   "id": "D3",
+   "kind": "definition",
+   "number": 3,
+   "header": "Digits and reversal",
+   "statement": "For integers $n,i\\ge0$, the $i$-th \\emph{digit} of $n$ is $n_i:=\\lfloor n/g^i\\rfloor\\bmod g\\in\\{0,\\dots,g-1\\}$. For $j\\ge0$ put $\\rev_j(n):=\\sum_{i<j}n_ig^{j-1-i}$ (Definition 1).",
+   "lean": [
+    "digit",
+    "rev"
+   ],
+   "lean_status": "definition",
+   "cites": [
+    "D1"
+   ]
+  },
+  {
+   "id": "L4",
+   "kind": "lemma",
+   "number": 4,
+   "header": "Blocks of digits",
+   "statement": "Let $n\\ge0$ have digits $n_r$, and let $0\\le i\\le i'$ (Definition 3). Then $n\\bmod g^i=\\sum_{r<i}n_rg^r$ and $\\lfloor n/g^i\\rfloor\\bmod g^{i'-i}=\\sum_{i\\le r<i'}n_rg^{r-i}$ (Definition 1). Moreover, if $j\\ge0$ and $d_r\\in\\{0,\\dots,g-1\\}$ for $r<j$, then the digits of $\\sum_{r<j}d_rg^r$ are $d_0,\\dots,d_{j-1}$ (in positions $0,\\dots,j-1$).",
+   "lean": [
+    "digit_window"
+   ],
+   "lean_status": "proved",
+   "proof": "The first claim follows by induction on $i$ from $n\\bmod g^{i+1}=n\\bmod g^i+g^in_i$. The second is the first for $\\lfloor n/g^i\\rfloor$, whose $r$-th digit is $n_{i+r}$, as $\\lfloor\\lfloor n/g^i\\rfloor/g^r\\rfloor= \\lfloor n/g^{i+r}\\rfloor$. For the third, $m:=\\sum_{r<j}d_rg^r<g^j$ (Lemma 2), so $m=m\\bmod g^j=\\sum_{r<j}m_rg^r$; now use the uniqueness in Lemma 2.",
+   "length": 213,
+   "cites": [
+    "D3",
+    "D1",
+    "L2"
+   ]
+  },
+  {
+   "id": "L5",
+   "kind": "lemma",
+   "number": 5,
+   "header": "Reversal is an involution",
+   "statement": "Let $j\\ge0$. For every $n\\ge0$, $\\rev_j(n)<g^j$ and the digits of $\\rev_j(n)$ in positions $i<j$ are $n_{j-1-i}$; and $\\rev_j(\\rev_j(n))=n$ if $n<g^j$ (Definitions 1 and 3).",
+   "lean": [
+    "rev_involution"
+   ],
+   "lean_status": "proved",
+   "proof": "As $\\rev_j(n)=\\sum_{i<j}n_{j-1-i}g^i$ with all $n_{j-1-i}\\le g-1$, $\\rev_j(n)<g^j$ by Lemma 2, and its digits are the $n_{j-1-i}$ by Lemma 4. So $\\rev_j(\\rev_j(n))=\\sum_{i<j}n_ig^i=n\\bmod g^j$ (Lemma 4), which is $n$ if $n<g^j$.",
+   "length": 145,
+   "cites": [
+    "D1",
+    "D3",
+    "L2",
+    "L4"
+   ]
+  },
+  {
+   "id": "L6",
+   "kind": "lemma",
+   "number": 6,
+   "header": "Geometric sums",
+   "statement": "For $\\theta\\in\\R$ and an integer $n\\ge1$, $\\bigl|\\sum_{z=0}^{n-1}e(z\\theta)\\bigr|\\le\\min\\bigl(n,\\frac1{2\\|\\theta\\|}\\bigr)$ (Definition 1).",
+   "lean": [
+    "geom_sum_le"
+   ],
+   "lean_status": "proved",
+   "proof": "Each term has modulus $1$. If $\\theta\\notin\\Z$, the sum is $(e(n\\theta)-1)/(e(\\theta)-1)$, of modulus at most $2/|e(\\theta)-1|=1/|\\sin\\pi\\theta|\\le1/(2\\|\\theta\\|)$, since $|\\sin\\pi\\theta|\\ge2\\|\\theta\\|$.",
+   "length": 117,
+   "cites": [
+    "D1"
+   ]
+  },
+  {
+   "id": "L7",
+   "kind": "lemma",
+   "number": 7,
+   "header": "Harmonic numbers",
+   "statement": "For every integer $n\\ge1$, $\\sum_{j=1}^n\\frac1j\\le1+\\log n$ (Definition 1).",
+   "lean": [
+    "harmonic_le"
+   ],
+   "lean_status": "proved",
+   "proof": "For $j\\ge2$, $\\frac1j\\le\\int_{j-1}^j\\frac{dx}x$, as $\\frac1x\\ge\\frac1j$ on $[j-1,j]$. Summing over $2\\le j\\le n$ gives $\\sum_{j=1}^n\\frac1j\\le1+\\int_1^n\\frac{dx}x=1+\\log n$.",
+   "length": 78,
+   "cites": [
+    "D1"
+   ]
+  },
+  {
+   "id": "L8",
+   "kind": "lemma",
+   "number": 8,
+   "header": "An odd harmonic sum",
+   "statement": "For every integer $R\\ge1$, $\\sum_{0<|j|\\le R/2}\\frac1{2|j|-1}\\le2+\\log R$ (Definition 1).",
+   "lean": [
+    "odd_harmonic_le"
+   ],
+   "lean_status": "proved",
+   "proof": "For $R=1$ the sum is empty. For $R\\ge2$ it is $2\\sum_{1\\le j\\le R/2}\\frac1{2j-1}\\le 2+2\\int_1^{R/2}\\frac{dx}{2x-1}=2+\\log(R-1)$, since $\\frac1{2j-1}\\le\\int_{j-1}^{j}\\frac{dx}{2x-1}$ for $j\\ge2$.",
+   "length": 97,
+   "cites": [
+    "D1"
+   ]
+  },
+  {
+   "id": "D9",
+   "kind": "definition",
+   "number": 9,
+   "header": "Reversal transform",
+   "statement": "Let $s\\ge1$ and $Q:=g^s$. For $\\ell,a\\in\\Z$ put $\\Psi_\\ell(a):=\\sum_{m=0}^{Q-1}e\\bigl(-(\\ell\\rev_s(m)+am)/Q\\bigr)$, $M(\\ell):=\\max_{0\\le a<Q}|\\Psi_\\ell(a)|$ and $S(s):=\\sum_{0<|\\ell|<Q}M(\\ell)$. For $\\theta\\in\\R$ let $f(\\theta):=\\frac1g\\bigl|\\sum_{d=0}^{g-1}e(d\\theta)\\bigr|$, and for $0\\le i<s$ let $\\theta_i=\\theta_i(\\ell,a):=(\\ell g^{s-1-i}+ag^i)/Q$ (Definitions 1 and 3).",
+   "lean": [
+    "Psi",
+    "Mmax",
+    "Ssum",
+    "fdig",
+    "theta"
+   ],
+   "lean_status": "definition",
+   "cites": [
+    "D1",
+    "D3"
+   ]
+  },
+  {
+   "id": "L10",
+   "kind": "lemma",
+   "number": 10,
+   "header": "Periodicity",
+   "statement": "$\\Psi_\\ell(a)$ depends only on $\\ell\\bmod Q$ and $a\\bmod Q$ (Definitions 1, 3 and 9).",
+   "lean": [
+    "Psi_periodic"
+   ],
+   "lean_status": "proved",
+   "proof": "Changing $\\ell$ or $a$ by a multiple of $Q$ changes each argument $-(\\ell\\rev_s(m)+am)/Q$ by an integer, as $\\rev_s(m)$ and $m$ are integers, and $e$ has period $1$.",
+   "length": 113,
+   "cites": [
+    "D1",
+    "D3",
+    "D9"
+   ]
+  },
+  {
+   "id": "L11",
+   "kind": "lemma",
+   "number": 11,
+   "header": "Product formula",
+   "statement": "For all $\\ell,a\\in\\Z$: $|\\Psi_\\ell(a)|=Q\\prod_{i=0}^{s-1}f(\\theta_i(\\ell,a))$ (Definitions 1 and 9).",
+   "lean": [
+    "norm_Psi_eq"
+   ],
+   "lean_status": "proved",
+   "proof": "For $0\\le m<Q$, $m=\\sum_{i<s}m_ig^i$ (Definition 3 and Lemma 4), so $\\ell\\rev_s(m)+am=\\sum_im_i(\\ell g^{s-1-i}+ag^i)=Q\\sum_im_i\\theta_i$; and $(m_i)_{i<s}$ runs over $\\{0,\\dots,g-1\\}^s$ as $m$ does (Lemmas 2 and 4). So $\\Psi_\\ell(a)=\\prod_{i<s}\\sum_{d<g}e(-d\\theta_i)$; each factor is the conjugate of $\\sum_{d<g}e(d\\theta_i)$, of modulus $gf(\\theta_i)$.",
+   "length": 204,
+   "cites": [
+    "D1",
+    "D9",
+    "D3",
+    "L4",
+    "L2"
+   ]
+  },
+  {
+   "id": "L12",
+   "kind": "lemma",
+   "number": 12,
+   "header": "Fourier inversion",
+   "statement": "For $\\ell\\in\\Z$ and $0\\le n<Q$ (Definitions 1, 3 and 9): $$e(-\\ell\\rev_s(n)/Q)=Q^{-1}\\sum_{a=0}^{Q-1}\\Psi_\\ell(a)e(an/Q).$$",
+   "lean": [
+    "fourier_inversion"
+   ],
+   "lean_status": "proved",
+   "proof": "By Definition 9 the right side is $Q^{-1}\\sum_{m<Q}e(-\\ell\\rev_s(m)/Q)\\sum_{a<Q}e(a(n-m)/Q)$. The inner sum is $Q$ if $m=n$, and $0$ otherwise, since it sums the powers of the $Q$-th root of unity $e((n-m)/Q)\\ne1$.",
+   "length": 150,
+   "cites": [
+    "D1",
+    "D3",
+    "D9"
+   ]
+  },
+  {
+   "id": "L13",
+   "kind": "lemma",
+   "number": 13,
+   "header": "Zero frequency",
+   "statement": "If $Q\\nmid\\ell$, then $\\Psi_\\ell(0)=0$ (Definitions 1, 3 and 9).",
+   "lean": [
+    "Psi_zero"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 5, $n=\\rev_s(m)$ runs over $\\{0,\\dots,Q-1\\}$ as $m$ does. So $\\Psi_\\ell(0)=\\sum_{n<Q}\\omega^n$ with $\\omega:=e(-\\ell/Q)$, and $\\omega\\ne1=\\omega^Q$; the sum is $(\\omega^Q-1)/(\\omega-1)=0$.",
+   "length": 107,
+   "cites": [
+    "D1",
+    "D3",
+    "D9",
+    "L5"
+   ]
+  },
+  {
+   "id": "L14",
+   "kind": "lemma",
+   "number": 14,
+   "header": "Shape of $f$",
+   "statement": "$f$ is continuous and $1$-periodic, $0\\le f\\le1$, and $f(\\theta)<1$ for $\\theta\\notin\\Z$ (Definitions 1 and 9).",
+   "lean": [
+    "fdig_shape"
+   ],
+   "lean_status": "proved",
+   "proof": "Continuity and periodicity are clear, and $f\\le1$ by the triangle inequality. If $f(\\theta)=1$, equality holds there, so the unit vectors $e(d\\theta)$, $d<g$, coincide; as $g\\ge2$, $e(\\theta)=e(0)=1$, i.e. $\\theta\\in\\Z$.",
+   "length": 152,
+   "cites": [
+    "D1",
+    "D9"
+   ]
+  },
+  {
+   "id": "L15",
+   "kind": "lemma",
+   "number": 15,
+   "header": "Uniform gap",
+   "statement": "Let $\\varepsilon_*:=1/(g^2(g+1))$ and $u_*:=\\bigl(\\sup_{\\varepsilon_*\\le\\theta\\le1-\\varepsilon_*}f(\\theta)\\bigr)^{1/2}$. Then $0\\le u_*<1$, and $f(\\theta)\\le u_*^2$ whenever $\\|\\theta\\|\\ge\\varepsilon_*$ (Definitions 1 and 9).",
+   "lean": [
+    "epsStar",
+    "uStar",
+    "uStar_spec"
+   ],
+   "lean_status": "proved",
+   "proof": "As $g\\ge2$, $0<\\varepsilon_*<1/2$. By Lemma 14, $f$ is continuous, $\\ge0$, and $<1$ on the compact set $[\\varepsilon_*,1-\\varepsilon_*]$, which contains no integer; so the supremum is a maximum, and $0\\le u_*^2<1$. If $\\|\\theta\\|\\ge\\varepsilon_*$ then $\\theta-\\lfloor\\theta\\rfloor\\in[\\varepsilon_*,1-\\varepsilon_*]$, and $f$ has period $1$.",
+   "length": 173,
+   "cites": [
+    "D1",
+    "D9",
+    "L14"
+   ]
+  },
+  {
+   "id": "L16",
+   "kind": "lemma",
+   "number": 16,
+   "header": "Consecutive arguments",
+   "statement": "For $\\ell,a\\in\\Z$ and $0\\le i\\le s-2$: $g\\theta_i-\\theta_{i+1}=(g^2-1)\\ell/g^{i+2}$, where $\\theta_i=\\theta_i(\\ell,a)$ (Definition 9).",
+   "lean": [
+    "theta_consecutive"
+   ],
+   "lean_status": "proved",
+   "proof": "By Definition 9, $g\\theta_i=\\ell/g^{i}+a/g^{s-1-i}$ and $\\theta_{i+1}=\\ell/g^{i+2}+a/g^{s-1-i}$. Subtracting gives $\\ell/g^i-\\ell/g^{i+2}=(g^2-1)\\ell/g^{i+2}$.",
+   "length": 96,
+   "cites": [
+    "D9"
+   ]
+  },
+  {
+   "id": "L17",
+   "kind": "lemma",
+   "number": 17,
+   "header": "One of two is far",
+   "statement": "For $0\\le i\\le s-2$: $\\max(\\|\\theta_i\\|,\\|\\theta_{i+1}\\|)\\ge\\|(g^2-1)\\ell/g^{i+2}\\|/(g+1)$ (Definitions 1 and 9).",
+   "lean": [
+    "one_of_two_far"
+   ],
+   "lean_status": "proved",
+   "proof": "For $x,y\\in\\R$ and integers $n\\ge1$, $\\|x-y\\|\\le\\|x\\|+\\|y\\|$ and $\\|nx\\|\\le n\\|x\\|$. By Lemma 16, $\\|(g^2-1)\\ell/g^{i+2}\\|=\\|g\\theta_i-\\theta_{i+1}\\|\\le g\\|\\theta_i\\|+\\|\\theta_{i+1}\\|$, which is at most $(g+1)\\max(\\|\\theta_i\\|,\\|\\theta_{i+1}\\|)$.",
+   "length": 133,
+   "cites": [
+    "D1",
+    "D9",
+    "L16"
+   ]
+  },
+  {
+   "id": "D18",
+   "kind": "definition",
+   "number": 18,
+   "header": "Bad indices",
+   "statement": "For $\\ell\\in\\Z$ let $\\ell':=(g^2-1)\\ell\\bmod Q$. For integers $n\\ge1$ and $r\\ge0$ with digits $r_i$, an index $0\\le i\\le n-2$ is \\emph{bad} for $r$ if $(r_{i+1},r_i)$ is neither $(0,0)$ nor $(g-1,g-1)$; let $\\beta_n(r)$ be the number of these bad indices, and $b(\\ell):=\\beta_s(\\ell')$ (Definitions 1, 3 and 9).",
+   "lean": [
+    "twist",
+    "IsBad",
+    "badCount",
+    "bBad"
+   ],
+   "lean_status": "definition",
+   "cites": [
+    "D1",
+    "D3",
+    "D9"
+   ]
+  },
+  {
+   "id": "L19",
+   "kind": "lemma",
+   "number": 19,
+   "header": "Twisting is bijective",
+   "statement": "The map $\\ell\\mapsto\\ell'$ is a bijection of $\\{0,\\dots,Q-1\\}$, and $\\ell'$ (hence $b(\\ell)$) depends only on $\\ell\\bmod Q$ (Definitions 1, 9 and 18).",
+   "lean": [
+    "twist_bijective"
+   ],
+   "lean_status": "proved",
+   "proof": "A prime factor of $Q=g^s$ divides $g^2$, hence not $g^2-1$; so $\\gcd(g^2-1,Q)=1$, and multiplication by $g^2-1$ is invertible modulo $Q$. Also $\\ell'$, and hence $b(\\ell)$, depends only on $\\ell\\bmod Q$.",
+   "length": 139,
+   "cites": [
+    "D1",
+    "D9",
+    "D18"
+   ]
+  },
+  {
+   "id": "L20",
+   "kind": "lemma",
+   "number": 20,
+   "header": "Fractional parts",
+   "statement": "For $0\\le i\\le s-2$: $(g^2-1)\\ell/g^{i+2}\\equiv v_i+w_i\\pmod1$, where $v_i:=\\ell'_{i+1}/g+\\ell'_i/g^2$ and $0\\le w_i<1/g^2$ (Definitions 1, 3, 9 and 18).",
+   "lean": [
+    "frac_parts"
+   ],
+   "lean_status": "proved",
+   "proof": "As $i+2\\le s$ and $(g^2-1)\\ell\\equiv\\ell'\\pmod{g^s}$, the number $((g^2-1)\\ell-\\ell')/g^{i+2}$ is an integer, and $\\ell'/g^{i+2}\\equiv(\\ell'\\bmod g^{i+2})/g^{i+2}=\\sum_{j\\le i+1}\\ell'_jg^{j-i-2}\\pmod1$ (Lemma 4). This is $v_i+w_i$ with $w_i:=\\sum_{j<i}\\ell'_jg^{j-i-2}<g^{-2}$.",
+   "length": 159,
+   "cites": [
+    "D1",
+    "D3",
+    "D9",
+    "D18",
+    "L4"
+   ]
+  },
+  {
+   "id": "L21",
+   "kind": "lemma",
+   "number": 21,
+   "header": "Bad indices are far",
+   "statement": "If $0\\le i\\le s-2$ is bad for $\\ell'$, then $\\|(g^2-1)\\ell/g^{i+2}\\|\\ge1/g^2$ (Definitions 1 and 18).",
+   "lean": [
+    "bad_far"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 20 it suffices that $1/g^2\\le v_i+w_i\\le1-1/g^2$. Now $v_i$ is a multiple of $1/g^2$ in $[0,1-1/g^2]$; it is $0$ only if $\\ell'_{i+1}=\\ell'_i=0$, and $1-1/g^2$ only if both are $g-1$. So $1/g^2\\le v_i\\le1-2/g^2$, while $0\\le w_i<1/g^2$.",
+   "length": 157,
+   "cites": [
+    "D1",
+    "D18",
+    "L20"
+   ]
+  },
+  {
+   "id": "L22",
+   "kind": "lemma",
+   "number": 22,
+   "header": "Bad pair product",
+   "statement": "If $0\\le i\\le s-2$ is bad for $\\ell'$ (Definition 18), then $f(\\theta_i)f(\\theta_{i+1})\\le u_*^2$ for every $a\\in\\Z$ (Definition 9 and Lemma 15).",
+   "lean": [
+    "bad_pair_prod"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemmas 17 and 21, $\\max(\\|\\theta_i\\|,\\|\\theta_{i+1}\\|)\\ge1/(g^2(g+1))=\\varepsilon_*$ (Definition 1). By Lemma 15 that factor is at most $u_*^2$, and the other is at most $1$ by Lemma 14.",
+   "length": 122,
+   "cites": [
+    "D18",
+    "D9",
+    "L15",
+    "L17",
+    "L21",
+    "D1",
+    "L14"
+   ]
+  },
+  {
+   "id": "L23",
+   "kind": "lemma",
+   "number": 23,
+   "header": "Sup bound",
+   "statement": "For every $\\ell\\in\\Z$: $M(\\ell)\\le Q\\,u_*^{b(\\ell)}$ (Definition 9, Definition 18 and Lemma 15).",
+   "lean": [
+    "Mmax_le"
+   ],
+   "lean_status": "proved",
+   "proof": "Fix $a$ and let $\\varphi_i:=f(\\theta_i)\\in[0,1]$ (Lemma 14). As $\\varphi\\le\\varphi^{1/2}$ on $[0,1]$, $\\prod_{i<s}\\varphi_i\\le\\prod_{i\\le s-2}(\\varphi_i\\varphi_{i+1})^{1/2}$, the right side being $(\\varphi_0\\varphi_{s-1})^{1/2}\\prod_{0<i<s-1}\\varphi_i$ if $s\\ge2$. Use Lemma 22 for bad $i$, then Lemma 11.",
+   "length": 147,
+   "cites": [
+    "D9",
+    "D18",
+    "L15",
+    "L14",
+    "L22",
+    "L11"
+   ]
+  },
+  {
+   "id": "L24",
+   "kind": "lemma",
+   "number": 24,
+   "header": "Weighted digit strings",
+   "statement": "Let $0\\le u\\le1$ and $n\\ge1$. Then $\\sum_{0\\le r<g^n}u^{\\beta_n(r)}\\le g(1+(g-1)u)^{n-1}$ (Definitions 3 and 18).",
+   "lean": [
+    "weighted_strings"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemmas 2 and 4, $r\\mapsto(r_i)_{i<n}$ maps $[0,g^n)$ bijectively onto $\\{0,\\dots,g-1\\}^n$, and $\\beta_n(r)=:\\beta(d)$ depends only on $d=(r_i)_{i<n}$. Induct on $n$; for $n=1$ the sum is $g$. Appending $d_n$ to $d$ raises $\\beta$ by $1$ unless $d_n=d_{n-1}\\in\\{0,g-1\\}$, so $\\sum_{d_n}u^{\\beta(d,d_n)}\\le u^{\\beta(d)}(1+(g-1)u)$, as $gu\\le1+(g-1)u$.",
+   "length": 213,
+   "cites": [
+    "D3",
+    "D18",
+    "L2",
+    "L4"
+   ]
+  },
+  {
+   "id": "L25",
+   "kind": "lemma",
+   "number": 25,
+   "header": "Sum over frequencies",
+   "statement": "Let $\\rho:=1+(g-1)u_*$. Then $\\rho<g$, and $S(s)\\le2gQ\\rho^{s-1}$ (Definition 9 and Lemma 15).",
+   "lean": [
+    "rho",
+    "Ssum_le"
+   ],
+   "lean_status": "proved",
+   "proof": "$\\rho<g$ as $u_*<1$. By Lemma 10, each residue mod $Q$ is $\\ell\\bmod Q$ for at most two $\\ell$ with $0<|\\ell|<Q$, so $S(s)\\le2\\sum_{0\\le\\ell<Q}M(\\ell)$ (Definition 1). By Lemma 23, Lemma 19 and Definition 18 this is at most $2Q\\sum_{0\\le r<Q}u_*^{\\beta_s(r)}$, and Lemma 24 ($u=u_*$, $n=s$) applies.",
+   "length": 185,
+   "cites": [
+    "D9",
+    "L15",
+    "L10",
+    "D1",
+    "L23",
+    "L19",
+    "D18",
+    "L24"
+   ]
+  },
+  {
+   "id": "L26",
+   "kind": "lemma",
+   "number": 26,
+   "header": "Power saving",
+   "statement": "Let $\\rho$ be as in Lemma 25, $c:=\\min\\bigl(1-\\log_g\\rho,\\frac{\\log2}{2\\log g}\\bigr)$ and $C:=2g$. Then $0<c\\le\\frac{\\log2}{2\\log g}$, $C\\ge1$, and $S(s)\\le Cg^{(2-c)s}$ for all $s\\ge1$ (Definitions 1 and 9).",
+   "lean": [
+    "cSave",
+    "CSave",
+    "power_saving"
+   ],
+   "lean_status": "proved",
+   "proof": "As $\\rho<g$ (Lemma 25), $c>0$. Also $1\\le\\rho\\le g^{1-c}$, as $u_*\\ge0$ (Lemma 15), so Lemma 25 gives $S(s)\\le2gQ\\rho^{s-1}\\le2g\\cdot g^s\\cdot g^{(1-c)s}=Cg^{(2-c)s}$; and $C=2g\\ge1$.",
+   "length": 108,
+   "cites": [
+    "L25",
+    "D1",
+    "D9",
+    "L15"
+   ]
+  },
+  {
+   "id": "D28",
+   "kind": "definition",
+   "number": 28,
+   "header": "Palindromes",
+   "statement": "For $L\\ge1$ let $\\cP_L$ be the set of integers $g^{L-1}\\le n<g^L$ whose digits $n_i$ ($i<L$) satisfy $n_i=n_{L-1-i}$ for all $i<L$. Let $\\cQ_L:=\\{x\\in\\N:x^k\\in\\cP_L\\}$ and $X:=g^{L/k}$ (Definitions 1 and 3).",
+   "lean": [
+    "palSet",
+    "powSet",
+    "Xr"
+   ],
+   "lean_status": "definition",
+   "cites": [
+    "D1",
+    "D3"
+   ]
+  },
+  {
+   "id": "L29",
+   "kind": "lemma",
+   "number": 29,
+   "header": "Many palindromes",
+   "statement": "For $L\\ge1$: $\\#\\cP_L\\ge g^{L/2-1}$, and hence $X\\le(g\\#\\cP_L)^{2/k}$ (Definitions 1 and 28).",
+   "lean": [
+    "many_palindromes"
+   ],
+   "lean_status": "proved",
+   "proof": "Choose digits $n_i$ for $(L-1)/2\\le i<L$ with $n_{L-1}\\ne0$, and put $n_i:=n_{L-1-i}$ for smaller $i$. Then $n:=\\sum_in_ig^i\\in[g^{L-1},g^L)$ has these digits (Lemma 4), so it lies in $\\cP_L$, and distinct choices give distinct $n$ (Lemma 2). So $\\#\\cP_L\\ge(g-1)g^{\\lceil L/2\\rceil-1}\\ge g^{L/2-1}$, and $X=(g^{L/2})^{2/k}$.",
+   "length": 208,
+   "cites": [
+    "D1",
+    "D28",
+    "L4",
+    "L2"
+   ]
+  },
+  {
+   "id": "L30",
+   "kind": "lemma",
+   "number": 30,
+   "header": "First digits of palindromes",
+   "statement": "Let $n\\in\\cP_L$ and $1\\le t\\le L$. Then $g\\nmid n$ and $\\lfloor n/g^{L-t}\\rfloor=\\rev_t(n\\bmod g^t)$ (Definitions 1, 3 and 28).",
+   "lean": [
+    "first_digits"
+   ],
+   "lean_status": "proved",
+   "proof": "Let $n_r$ be the digits of $n$. By Lemma 4, $n\\bmod g^t=\\sum_{r<t}n_rg^r$ has digits $n_r$, $r<t$, and $\\lfloor n/g^{L-t}\\rfloor=\\sum_{r<t}n_{L-t+r}g^r$ as $n<g^L$. As $n_{L-t+r}=n_{t-1-r}$, the latter is $\\rev_t(n\\bmod g^t)$. For $t=1$: $n\\bmod g=\\lfloor n/g^{L-1}\\rfloor\\ge1$, as $n\\ge g^{L-1}$.",
+   "length": 162,
+   "cites": [
+    "D1",
+    "D3",
+    "D28",
+    "L4"
+   ]
+  },
+  {
+   "id": "D31",
+   "kind": "definition",
+   "number": 31,
+   "header": "Nodes",
+   "statement": "Let $1\\le t\\le L$. A \\emph{node} (of level $t$) is an integer $0\\le b<g^t$ with $g\\nmid b^k$. For a node $b$ put $T_b:=\\rev_t(b^k\\bmod g^t)$, $y_0:=T_bg^{L-t}$, $y_1:=y_0+g^{L-t}$, $I_b:=[y_0^{1/k},y_1^{1/k})$ (so an integer $x\\ge0$ lies in $I_b$ iff $y_0\\le x^k<y_1$) and $|I_b|:=y_1^{1/k}-y_0^{1/k}$; let $Z_b$ be the number of integers $x\\in I_b$ with $x\\equiv b\\pmod{g^t}$, and if $Z_b\\ge1$ let $x_b$ be the least of them. Let $Z(t):=Xg^{-2t}$ (Definitions 1, 3 and 28).",
+   "lean": [
+    "IsNode",
+    "Tb",
+    "y0",
+    "y1",
+    "InI",
+    "Ilen",
+    "nodeElems",
+    "Zb",
+    "xb",
+    "Zt"
+   ],
+   "lean_status": "definition",
+   "cites": [
+    "D1",
+    "D3",
+    "D28"
+   ]
+  },
+  {
+   "id": "L32",
+   "kind": "lemma",
+   "number": 32,
+   "header": "Leading digit",
+   "statement": "For a node $b$: $g^{t-1}\\le T_b<g^t$ (Definition 31).",
+   "lean": [
+    "leading_digit"
+   ],
+   "lean_status": "proved",
+   "proof": "Let $n:=b^k\\bmod g^t$, with digits $n_i$ (Definition 3). By Lemma 4, $n_0=n\\bmod g=b^k\\bmod g\\ne0$, as $g\\nmid b^k$ (Definition 1). So $T_b=\\rev_t(n)\\ge n_0g^{t-1}\\ge g^{t-1}$, and $T_b<g^t$ by Lemma 5.",
+   "length": 130,
+   "cites": [
+    "D31",
+    "D3",
+    "L4",
+    "D1",
+    "L5"
+   ]
+  },
+  {
+   "id": "L33",
+   "kind": "lemma",
+   "number": 33,
+   "header": "The tree",
+   "statement": "Let $1\\le t\\le L$ and $x\\in\\cQ_L$. Then $b:=x\\bmod g^t$ is a node, $x\\in I_b$, and $x=x_b+g^tz$ for an integer $0\\le z<Z_b$ (Definitions 1, 28 and 31).",
+   "lean": [
+    "tree"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 30 with $n=x^k$, $g\\nmid x^k$, so $g\\nmid b^k$ as $b\\equiv x\\pmod g$. Also $b^k\\bmod g^t=x^k\\bmod g^t$, so Lemma 30 gives $\\lfloor x^k/g^{L-t}\\rfloor=T_b$, i.e. $x\\in I_b$. As $x\\equiv b\\pmod{g^t}$, $x$ is one of the $Z_b$ integers $x_b+g^tz$, $0\\le z<Z_b$, in $I_b$.",
+   "length": 150,
+   "cites": [
+    "D1",
+    "D28",
+    "D31",
+    "L30"
+   ]
+  },
+  {
+   "id": "L34",
+   "kind": "lemma",
+   "number": 34,
+   "header": "Interval endpoints",
+   "statement": "For a node $b$: $g^{L-1}\\le y_0<y_1\\le\\min(g^L,2y_0)$, and $|I_b|=g^{L-t}/(k\\xi^{1-1/k})$ for some $\\xi\\in[y_0,y_1]$ (Definition 31).",
+   "lean": [
+    "interval_endpoints"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 32, $g^{t-1}\\le T_b$ and $T_b+1\\le g^t$, which gives the inequalities, as $y_1/y_0=1+1/T_b\\le2$. The formula for $|I_b|=y_1^{1/k}-y_0^{1/k}$ is the mean value theorem for $y\\mapsto y^{1/k}$.",
+   "length": 131,
+   "cites": [
+    "D31",
+    "L32"
+   ]
+  },
+  {
+   "id": "L35",
+   "kind": "lemma",
+   "number": 35,
+   "header": "Node sizes",
+   "statement": "For a node $b$: $Z(t)/k\\le|I_b|g^{-t}\\le gZ(t)/k$ and $Z(t)/k-1\\le Z_b\\le gZ(t)/k+1$ (Definitions 28 and 31).",
+   "lean": [
+    "node_sizes"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 34, $g^{(L-1)(1-1/k)}\\le\\xi^{1-1/k}\\le g^{L(1-1/k)}$, so $|I_b|$ lies between $g^{L/k-t}/k=g^tZ(t)/k$ and $g^{L/k-t+1}/k$. An interval of length $\\lambda$ contains between $\\lambda g^{-t}-1$ and $\\lambda g^{-t}+1$ integers $\\equiv b\\pmod{g^t}$.",
+   "length": 156,
+   "cites": [
+    "D28",
+    "D31",
+    "L34"
+   ]
+  },
+  {
+   "id": "L36",
+   "kind": "lemma",
+   "number": 36,
+   "header": "Nodes are not empty",
+   "statement": "Let $1\\le t\\le L$ with $Z(t)\\ge2k$. Then every node $b$ of level $t$ has $1\\le Z_b\\le2gZ(t)/k$ (Definition 31).",
+   "lean": [
+    "nodes_nonempty"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 35, $Z_b\\ge Z(t)/k-1\\ge1$ and $Z_b\\le gZ(t)/k+1\\le2gZ(t)/k$, as $gZ(t)/k\\ge1$.",
+   "length": 60,
+   "cites": [
+    "D31",
+    "L35"
+   ]
+  },
+  {
+   "id": "D37",
+   "kind": "definition",
+   "number": 37,
+   "header": "Phases",
+   "statement": "Fix integers $t,s$ with $1\\le s\\le t-2$ and $2(t+s)\\le L$; let $Q:=g^s$ (as in Definition 9), $Z:=Z(t)$ and $\\Lambda:=1+\\log(1+6g^t)$. For a node $b$ of level $t$ put $\\beta_b:=kb^{k-1}\\bmod Q$ and $d_b:=\\gcd(\\beta_b,Q)$. If moreover $Z_b\\ge1$, then for $\\ell,a\\in\\Z$ and an integer $z\\ge0$ put $\\alpha_b:=\\lfloor x_b^k/g^t\\rfloor\\bmod Q$, $\\delta_b:=kx_b^{k-1}g^{2t+s-L}$, $\\theta_{b,\\ell,a}:=(\\ell\\delta_b+a\\beta_b)/Q$ and $n_b(z):=(\\alpha_b+\\beta_bz)\\bmod Q$ (Definitions 1 and 31).",
+   "lean": [
+    "Admissible",
+    "LambdaT",
+    "alphaB",
+    "betaB",
+    "dB",
+    "deltaB",
+    "thetaB",
+    "nB"
+   ],
+   "lean_status": "definition",
+   "cites": [
+    "D9",
+    "D1",
+    "D31"
+   ]
+  },
+  {
+   "id": "D38",
+   "kind": "definition",
+   "number": 38,
+   "header": "Archimedean phases",
+   "statement": "In the setting of Definition 37, for real $z\\ge0$ put $\\phi_b(z):=(x_b+g^tz)^k/g^{L-t-s}-T_bg^s$ and $\\lambda_b(z):=\\phi_b(0)+\\delta_bz$; and for real $T>0$ put $\\delta(T):=k(Tg^{L-t})^{1-1/k}g^{2t+s-L}$ (Definition 31).",
+   "lean": [
+    "phiB",
+    "lambdaB",
+    "deltaT"
+   ],
+   "lean_status": "definition",
+   "cites": [
+    "D37",
+    "D31"
+   ]
+  },
+  {
+   "id": "L39",
+   "kind": "lemma",
+   "number": 39,
+   "header": "Formula for $\\delta(T)$",
+   "statement": "For $T>0$: $\\delta(T)=\\frac{kQ}Z(T/g^t)^{1-1/k}$; hence $kQ/(gZ)\\le\\delta(T)\\le kQ/Z$ for $g^{t-1}\\le T\\le g^t$ (Definitions 28, 31, 37 and 38).",
+   "lean": [
+    "deltaT_formula"
+   ],
+   "lean_status": "proved",
+   "proof": "As $Tg^{L-t}=(T/g^t)g^L$, $g^{L(1-1/k)}=g^L/X$ and $g^{2t}/X=1/Z$, $$\\delta(T)=k\\Bigl(\\frac T{g^t}\\Bigr)^{1-1/k}\\frac{g^L}X\\,g^{2t+s-L}=\\frac{kQ}Z\\Bigl(\\frac T{g^t}\\Bigr)^{1-1/k}.$$ Finally, if $T/g^t\\in[1/g,1]$ then $(T/g^t)^{1-1/k}\\in[1/g,1]$.",
+   "length": 127,
+   "cites": [
+    "D28",
+    "D31",
+    "D37",
+    "D38"
+   ]
+  },
+  {
+   "id": "L40",
+   "kind": "lemma",
+   "number": 40,
+   "header": "$\\delta_b$ is near $\\delta(T_b)$",
+   "statement": "For a node $b$ of level $t$ with $Z_b\\ge1$: $\\delta(T_b)\\le\\delta_b\\le(1+g^{1-t})\\delta(T_b)$ (Definitions 31, 37 and 38).",
+   "lean": [
+    "deltaB_near"
+   ],
+   "lean_status": "proved",
+   "proof": "With $y_0,y_1$ as in Definition 31, $\\delta_b/\\delta(T_b)=(x_b/y_0^{1/k})^{k-1}$ and $x_b\\in I_b=[y_0^{1/k},y_1^{1/k})$. So the ratio lies in $[1,(y_1/y_0)^{1-1/k}]\\subset[1,1+1/T_b]\\subset[1,1+g^{1-t}]$, by Lemma 32.",
+   "length": 136,
+   "cites": [
+    "D31",
+    "D37",
+    "D38",
+    "L32"
+   ]
+  },
+  {
+   "id": "L41",
+   "kind": "lemma",
+   "number": 41,
+   "header": "Lower block",
+   "statement": "Let $b$ be a node of level $t$ with $Z_b\\ge1$, and $x=x_b+g^tz$ with an integer $z\\ge0$. Then $\\lfloor x^k/g^t\\rfloor\\bmod Q=n_b(z)$ (Definitions 1, 31 and 37).",
+   "lean": [
+    "lower_block"
+   ],
+   "lean_status": "proved",
+   "proof": "By the binomial theorem $x^k=x_b^k+kx_b^{k-1}g^tz+g^{2t}N$ with $N\\in\\Z$, so $\\lfloor x^k/g^t\\rfloor=\\lfloor x_b^k/g^t\\rfloor+kx_b^{k-1}z+g^tN$. Reduce modulo $Q=g^s$, using $s\\le t$ and $x_b\\equiv b\\pmod{g^t}$.",
+   "length": 120,
+   "cites": [
+    "D1",
+    "D31",
+    "D37"
+   ]
+  },
+  {
+   "id": "L42",
+   "kind": "lemma",
+   "number": 42,
+   "header": "Upper block",
+   "statement": "Let $b$ be a node of level $t$ with $Z_b\\ge1$, and $x=x_b+g^tz\\in I_b$ with an integer $z\\ge0$. Then $\\lfloor x^k/g^{L-t-s}\\rfloor\\bmod Q=\\lfloor\\phi_b(z)\\rfloor$ (Definitions 1, 31, 37 and 38).",
+   "lean": [
+    "upper_block"
+   ],
+   "lean_status": "proved",
+   "proof": "As $x\\in I_b$, $T_bg^{L-t}\\le x^k<(T_b+1)g^{L-t}$, so $\\lfloor x^k/g^{L-t}\\rfloor=T_b$. Hence $\\lfloor x^k/g^{L-t-s}\\rfloor\\bmod g^s=\\lfloor x^k/g^{L-t-s}\\rfloor-g^s\\lfloor x^k/g^{L-t}\\rfloor =\\lfloor x^k/g^{L-t-s}-T_bg^s\\rfloor=\\lfloor\\phi_b(z)\\rfloor$.",
+   "length": 114,
+   "cites": [
+    "D1",
+    "D31",
+    "D37",
+    "D38"
+   ]
+  },
+  {
+   "id": "L43",
+   "kind": "lemma",
+   "number": 43,
+   "header": "Taylor bound",
+   "statement": "Let $b$ be a node of level $t$ with $Z_b\\ge1$, $z\\ge0$ real and $x_b+g^tz\\in I_b$. Then $0\\le\\phi_b(z)-\\lambda_b(z)\\le\\frac{k(k-1)}2y_1^{1-2/k}|I_b|^2g^{t+s-L}$, with $y_1$ as in Definition 31 (Definitions 1, 31, 37 and 38).",
+   "lean": [
+    "taylor_bound"
+   ],
+   "lean_status": "proved",
+   "proof": "$\\phi_b$ is convex with $\\phi_b'(0)=\\delta_b$, so $\\phi_b\\ge\\lambda_b$. By Taylor, $\\phi_b(z)-\\lambda_b(z)=\\phi_b''(\\zeta)z^2/2$ with $\\zeta\\in[0,z]$, and $\\phi_b''(\\zeta)z^2=k(k-1)(x_b+g^t\\zeta)^{k-2}(g^tz)^2g^{t+s-L}$, where $x_b+g^t\\zeta\\le y_1^{1/k}$ and $g^tz\\le|I_b|$.",
+   "length": 148,
+   "cites": [
+    "D31",
+    "D1",
+    "D37",
+    "D38"
+   ]
+  },
+  {
+   "id": "L44",
+   "kind": "lemma",
+   "number": 44,
+   "header": "Archimedean linearisation",
+   "statement": "In the setting of Lemma 43, $0\\le\\phi_b(z)-\\lambda_b(z)\\le1/g$ (Definitions 31, 37 and 38).",
+   "lean": [
+    "arch_linearisation"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 34, $|I_b|\\le g^{L-t}/(ky_0^{1-1/k})$, $y_1\\le2y_0$ and $y_0\\ge g^{L-1}$. So the bound of Lemma 43 is at most $\\frac{k-1}{2k}(y_1/y_0)^{1-2/k}y_0^{-1}g^{L-t+s}\\le\\frac{k-1}kg^{s+1-t}\\le\\frac1g$, as $s\\le t-2$.",
+   "length": 125,
+   "cites": [
+    "L43",
+    "D31",
+    "D37",
+    "D38",
+    "L34"
+   ]
+  },
+  {
+   "id": "L45",
+   "kind": "lemma",
+   "number": 45,
+   "header": "The palindrome condition",
+   "statement": "Let $b$ be a node of level $t$ with $Z_b\\ge1$, and $x=x_b+g^tz\\in\\cQ_L\\cap I_b$ with an integer $z\\ge0$. Then $\\lambda_b(z)-\\rev_s(n_b(z))\\in[-1/g,1)$ (Definitions 3, 28, 31, 37 and 38).",
+   "lean": [
+    "palindrome_condition"
+   ],
+   "lean_status": "proved",
+   "proof": "Let $N_r$ be the digits of $x^k$. By Lemmas 41, 42 and 4, $n_b(z)=\\sum_{i<s}N_{t+i}g^i$ and $\\lfloor\\phi_b(z)\\rfloor=\\sum_{i<s}N_{L-t-s+i}g^i$, which is $\\rev_s(n_b(z))$ as $N_r=N_{L-1-r}$. Now use $0\\le\\phi_b(z)-\\lfloor\\phi_b(z)\\rfloor<1$ and Lemma 44.",
+   "length": 143,
+   "cites": [
+    "D3",
+    "D28",
+    "D31",
+    "D37",
+    "D38",
+    "L41",
+    "L42",
+    "L4",
+    "L44"
+   ]
+  },
+  {
+   "id": "L46",
+   "kind": "lemma",
+   "number": 46,
+   "header": "Fejér identity",
+   "statement": "For an integer $K\\ge1$ and $x\\in\\R$: $\\sum_{|j|<K}(1-|j|/K)e(jx)=K^{-1}\\bigl|\\sum_{i=0}^{K-1}e(ix)\\bigr|^2$ (Definition 1).",
+   "lean": [
+    "fejer_identity"
+   ],
+   "lean_status": "proved",
+   "proof": "The right side is $K^{-1}\\sum_{i,i'<K}e((i-i')x)$, and for $|j|<K$ there are exactly $K-|j|$ pairs $(i,i')$ with $0\\le i,i'<K$ and $i-i'=j$.",
+   "length": 98,
+   "cites": [
+    "D1"
+   ]
+  },
+  {
+   "id": "L47",
+   "kind": "lemma",
+   "number": 47,
+   "header": "Fejér lower bound",
+   "statement": "If $K\\ge1$ is an integer and $|x|\\le1/(2K)$, then (Definition 1) $$K^{-1}\\Bigl|\\sum_{i<K}e(ix)\\Bigr|^2\\ge4K/\\pi^2.$$",
+   "lean": [
+    "fejer_lower"
+   ],
+   "lean_status": "proved",
+   "proof": "For $x=0$ the left side is $K$. Otherwise $$\\Bigl|\\sum_{i<K}e(ix)\\Bigr|=\\frac{|\\sin\\pi Kx|}{|\\sin\\pi x|}\\ge\\frac{2K|x|}{\\pi|x|}=\\frac{2K}\\pi,$$ as $\\sin y\\ge2y/\\pi$ for $0\\le y\\le\\pi/2$ and $|\\sin y|\\le|y|$.",
+   "length": 104,
+   "cites": [
+    "D1"
+   ]
+  },
+  {
+   "id": "L48",
+   "kind": "lemma",
+   "number": 48,
+   "header": "Size of $K$",
+   "statement": "For $Q$ as in Definition 9, $K:=\\lfloor2Q/3\\rfloor$ satisfies $Q/3\\le K\\le2Q/3<Q$ and $K\\ge1$.",
+   "lean": [
+    "Kq",
+    "Kq_size"
+   ],
+   "lean_status": "proved",
+   "proof": "$K\\le2Q/3$ by definition, and $Q=g^s\\ge2$ (Definition 1). If $Q=2$ then $K=1\\ge2/3$, and if $Q\\ge3$ then $K>2Q/3-1\\ge Q/3\\ge1$.",
+   "length": 86,
+   "cites": [
+    "D9",
+    "D1"
+   ]
+  },
+  {
+   "id": "D49",
+   "kind": "definition",
+   "number": 49,
+   "header": "Majorant",
+   "statement": "With $Q$ and $K$ as in Lemma 48, let $F(y):=\\frac{\\pi^2}{4K^2}\\bigl|\\sum_{i=0}^{K-1}e(i(y-1/4)/Q)\\bigr|^2$ for $y\\in\\R$, and $\\hat F_j:=\\frac{\\pi^2}{4K}\\bigl(1-\\frac{|j|}K\\bigr)e\\bigl(-\\frac j{4Q}\\bigr)$ for integers $|j|<K$ (Definitions 1 and 9).",
+   "lean": [
+    "Fmaj",
+    "Fhat"
+   ],
+   "lean_status": "definition",
+   "cites": [
+    "L48",
+    "D1",
+    "D9"
+   ]
+  },
+  {
+   "id": "L50",
+   "kind": "lemma",
+   "number": 50,
+   "header": "The majorant is large",
+   "statement": "$F\\ge0$, and $F(y)\\ge1$ for $y\\in[-1/2,1]$ (Definitions 1, 9 and 49).",
+   "lean": [
+    "maj_large"
+   ],
+   "lean_status": "proved",
+   "proof": "$F\\ge0$ is clear. For $y\\in[-1/2,1]$, $x:=(y-1/4)/Q$ satisfies $|x|\\le3/(4Q)\\le1/(2K)$ by Lemma 48, so by Lemma 47, $F(y)=\\frac{\\pi^2}{4K}\\cdot K^{-1}\\bigl|\\sum_{i<K}e(ix)\\bigr|^2\\ge\\frac{\\pi^2}{4K}\\cdot\\frac{4K}{\\pi^2}=1$.",
+   "length": 120,
+   "cites": [
+    "D1",
+    "D9",
+    "D49",
+    "L48",
+    "L47"
+   ]
+  },
+  {
+   "id": "L51",
+   "kind": "lemma",
+   "number": 51,
+   "header": "Majorant coefficients",
+   "statement": "$F(y)=\\sum_{|j|<K}\\hat F_je(jy/Q)$ for all $y\\in\\R$, and $|\\hat F_j|\\le8/Q$ for $|j|<K$ (Definitions 1, 9 and 49).",
+   "lean": [
+    "maj_coeffs"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 46 with $x=(y-1/4)/Q$, $F(y)=\\frac{\\pi^2}{4K}\\sum_{|j|<K}(1-|j|/K)e(-j/(4Q))e(jy/Q)=\\sum_{|j|<K}\\hat F_je(jy/Q)$. And $|\\hat F_j|\\le\\pi^2/(4K)\\le3\\pi^2/(4Q)<8/Q$ by Lemma 48.",
+   "length": 121,
+   "cites": [
+    "D1",
+    "D9",
+    "D49",
+    "L46",
+    "L48"
+   ]
+  },
+  {
+   "id": "L52",
+   "kind": "lemma",
+   "number": 52,
+   "header": "Counting in a node",
+   "statement": "For a node $b$ of level $t$ with $Z_b\\ge1$: $\\#\\{x\\in\\cQ_L:x\\equiv b\\pmod{g^t}\\}\\le\\sum_{z=0}^{Z_b-1}F(\\lambda_b(z)-\\rev_s(n_b(z)))$ (Definitions 3, 28, 31, 37, 38 and 49).",
+   "lean": [
+    "count_in_node"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 33 each such $x$ is $x_b+g^tz$ for some $0\\le z<Z_b$, and lies in $I_b$; distinct $x$ give distinct $z$. For these $z$ the summand is $\\ge1$ by Lemmas 45 and 50, as $[-1/g,1)\\subset[-1/2,1]$ (Definition 1), and all summands are $\\ge0$.",
+   "length": 167,
+   "cites": [
+    "D3",
+    "D28",
+    "D31",
+    "D37",
+    "D38",
+    "D49",
+    "L33",
+    "L45",
+    "L50",
+    "D1"
+   ]
+  },
+  {
+   "id": "L53",
+   "kind": "lemma",
+   "number": 53,
+   "header": "Twisted sums",
+   "statement": "For a node $b$ of level $t$ with $Z_b\\ge1$ and $0<|j|<Q$ (Definitions 1, 3, 9, 31, 37 and 38): $$\\Bigl|\\sum_{z<Z_b}e\\Bigl(\\frac{j(\\lambda_b(z)-\\rev_s(n_b(z)))}Q\\Bigr)\\Bigr|\\le \\frac1Q\\sum_{0<a<Q}|\\Psi_j(a)|\\min\\Bigl(Z_b,\\frac1{2\\|\\theta_{b,j,a}\\|}\\Bigr).$$",
+   "lean": [
+    "twisted_sum"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 12 with $n=n_b(z)\\equiv\\alpha_b+\\beta_bz$, and as $\\lambda_b(z)=\\lambda_b(0)+\\delta_bz$, the sum is $Q^{-1}\\sum_{a<Q}\\Psi_j(a)e(\\omega_a)\\sum_{z<Z_b}e(z\\theta_{b,j,a})$ with real $\\omega_a$. Apply Lemma 6; the term $a=0$ vanishes by Lemma 13.",
+   "length": 138,
+   "cites": [
+    "D1",
+    "D3",
+    "D9",
+    "D31",
+    "D37",
+    "D38",
+    "L12",
+    "L6",
+    "L13"
+   ]
+  },
+  {
+   "id": "D54",
+   "kind": "definition",
+   "number": 54,
+   "header": "Error term",
+   "statement": "For a set $\\cB$ of nodes $b$ of level $t$ with $Z_b\\ge1$ let $$E(\\cB):=\\sum_{b\\in\\cB}\\sum_{0<|j|<Q}\\sum_{0<a<Q}|\\Psi_j(a)|\\min\\Bigl(Z_b,\\frac1{2\\|\\theta_{b,j,a}\\|}\\Bigr)$$ (Definitions 1, 9, 31 and 37).",
+   "lean": [
+    "Eerr"
+   ],
+   "lean_status": "definition",
+   "cites": [
+    "D1",
+    "D9",
+    "D31",
+    "D37"
+   ]
+  },
+  {
+   "id": "L55",
+   "kind": "lemma",
+   "number": 55,
+   "header": "Reduction",
+   "statement": "For $\\cB$ as in Definition 54: $\\#\\{x\\in\\cQ_L:x\\bmod g^t\\in\\cB\\}\\le\\frac8Q\\sum_{b\\in\\cB}Z_b+\\frac8{Q^2}E(\\cB)$ (Definitions 1, 28 and 31).",
+   "lean": [
+    "reduction"
+   ],
+   "lean_status": "proved",
+   "proof": "For $b\\in\\cB$, by Lemmas 52 and 51 the count is at most $\\sum_{|j|<K}|\\hat F_j|\\bigl|\\sum_{z<Z_b}e(j(\\lambda_b(z)-\\rev_s(n_b(z)))/Q)\\bigr|$ (Definitions 3, 37, 38 and 49). The term $j=0$ is at most $8Z_b/Q$; bound the others by Lemma 53, as $K<Q$ (Lemma 48). Sum over $\\cB$.",
+   "length": 175,
+   "cites": [
+    "D54",
+    "D1",
+    "D28",
+    "D31",
+    "L52",
+    "L51",
+    "D3",
+    "D37",
+    "D38",
+    "D49",
+    "L53",
+    "L48"
+   ]
+  },
+  {
+   "id": "L56",
+   "kind": "lemma",
+   "number": 56,
+   "header": "Multiples",
+   "statement": "Let $Q\\ge1$ be any integer, $\\beta\\in\\Z$ and $d:=\\gcd(\\beta,Q)$. As $a$ runs over $0,\\dots,Q-1$, $a\\beta\\bmod Q$ runs over the multiples $rd$, $0\\le r<Q/d$, each exactly $d$ times; equivalently, $\\sum_{0\\le a<Q}\\varphi(a\\beta\\bmod Q)=d\\sum_{0\\le r<Q/d}\\varphi(rd)$ for every function $\\varphi$ (Definition 1).",
+   "lean": [
+    "multiples_sum"
+   ],
+   "lean_status": "proved",
+   "proof": "$a\\mapsto a\\beta\\bmod Q$ is a homomorphism of $\\Z/Q\\Z$ whose image is generated by $\\beta$, hence by $\\gcd(\\beta,Q)=d$; so the image is $d\\Z/Q\\Z$, of size $Q/d$, and each value is taken $Q/(Q/d)=d$ times. The second form follows by grouping the $a$ by the value $rd$.",
+   "length": 181,
+   "cites": [
+    "D1"
+   ]
+  },
+  {
+   "id": "L57",
+   "kind": "lemma",
+   "number": 57,
+   "header": "Distances",
+   "statement": "Let $R\\ge1$ and $j$ be integers with $0<|j|\\le R/2$, and let $|w_0|\\le1/2$. Then $\\|(j+w_0)/R\\|\\ge(2|j|-1)/(2R)$ (Definition 1).",
+   "lean": [
+    "dist_lower"
+   ],
+   "lean_status": "proved",
+   "proof": "For $n\\in\\Z$: if $n=0$ then $|j+w_0-nR|\\ge|j|-1/2$; if $n\\ne0$ then $|j+w_0-nR|\\ge R-|j|-1/2\\ge|j|-1/2$. Divide by $R$.",
+   "length": 82,
+   "cites": [
+    "D1"
+   ]
+  },
+  {
+   "id": "L58",
+   "kind": "lemma",
+   "number": 58,
+   "header": "Sum over residues",
+   "statement": "Let $R\\ge1$ be an integer, $w\\in\\R$ and $A\\ge1$. Then $\\sum_{r=0}^{R-1}\\min\\bigl(A,\\frac1{2\\|(w+r)/R\\|}\\bigr)\\le\\min\\bigl(A,\\frac R{2\\|w\\|}\\bigr)+R(2+\\log R)$ (Definition 1).",
+   "lean": [
+    "residue_sum"
+   ],
+   "lean_status": "proved",
+   "proof": "Write $w=n_0+w_0$ with $n_0\\in\\Z$ and $|w_0|=\\|w\\|\\le1/2$. As $r$ runs mod $R$, $j\\equiv n_0+r$ runs over the integers in $(-R/2,R/2]$, and $\\|(w+r)/R\\|=\\|(j+w_0)/R\\|$. The term $j=0$ is $\\min(A,R/(2\\|w\\|))$; bound the others by Lemmas 57 and 8.",
+   "length": 167,
+   "cites": [
+    "D1",
+    "L57",
+    "L8"
+   ]
+  },
+  {
+   "id": "L59",
+   "kind": "lemma",
+   "number": 59,
+   "header": "Sum over $a$",
+   "statement": "Let $y\\in\\R$, $\\beta\\in\\Z$, $d:=\\gcd(\\beta,Q)$ and $A\\ge1$. Then (Definitions 1 and 9) $$\\sum_{a=0}^{Q-1}\\min\\Bigl(A,\\frac1{2\\|(y+a\\beta)/Q\\|}\\Bigr)\\le\\min\\Bigl(dA,\\frac Q{2\\|y/d\\|}\\Bigr)+Q(2+\\log Q).$$",
+   "lean": [
+    "a_sum"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 56 the sum is $d\\sum_{r<Q/d}\\min(A,\\frac1{2\\|(y+rd)/Q\\|})$, and $(y+rd)/Q=(y/d+r)/(Q/d)$. By Lemma 58 with $R=Q/d$ and $w=y/d$, it is at most $d\\min(A,\\frac{Q/d}{2\\|y/d\\|})+d\\frac Qd(2+\\log\\frac Qd)$.",
+   "length": 137,
+   "cites": [
+    "D1",
+    "D9",
+    "L56",
+    "L58"
+   ]
+  },
+  {
+   "id": "D60",
+   "kind": "definition",
+   "number": 60,
+   "header": "$g$-parts",
+   "statement": "For a prime $p$ let $v_p$ be the $p$-adic valuation. For an integer $n\\ge1$ let $m_g(n):=\\prod_{p\\mid g}p^{v_p(n)}$, the product over the primes $p$ dividing $g$. Let $\\omega(g)$ be the number of primes dividing $g$, $P$ the largest of them, and for real $D\\ge1$ let $\\tau(D)$ be the number of integers $1\\le m\\le D$ all of whose prime factors divide $g$ (Definition 1).",
+   "lean": [
+    "mg",
+    "omegaG",
+    "Pmax",
+    "tauG"
+   ],
+   "lean_status": "definition",
+   "cites": [
+    "D1"
+   ]
+  },
+  {
+   "id": "L61",
+   "kind": "lemma",
+   "number": 61,
+   "header": "Few $g$-smooth numbers",
+   "statement": "$\\tau$ is non-decreasing, and $\\tau(D)\\le(1+\\log_2D)^{\\omega(g)}$ for $D\\ge1$ (Definition 60).",
+   "lean": [
+    "tauG_bound"
+   ],
+   "lean_status": "proved",
+   "proof": "Monotonicity is clear. Each $m$ counted is $\\prod_{p\\mid g}p^{e_p}$ with $p^{e_p}\\le D$, so $0\\le e_p\\le\\log_2D$: at most $1+\\log_2D$ choices for each of the $\\omega(g)$ exponents.",
+   "length": 109,
+   "cites": [
+    "D60"
+   ]
+  },
+  {
+   "id": "L62",
+   "kind": "lemma",
+   "number": 62,
+   "header": "Common factor of $\\beta_b$",
+   "statement": "If $b$ is a node of level $t$ and $m:=m_g(b)$, then $d_b$ divides $Q$ and $km^{k-1}$ (Definitions 31, 37 and 60).",
+   "lean": [
+    "dB_dvd"
+   ],
+   "lean_status": "proved",
+   "proof": "As $g\\nmid b^k$, $b\\ne0$; write $b=mu$ with $\\gcd(u,g)=1$. Then $\\beta_b\\equiv km^{k-1}u^{k-1}\\pmod Q$, so $d_b=\\gcd(km^{k-1}u^{k-1},Q)=\\gcd(km^{k-1},Q)$, as $u$ is coprime to $Q$.",
+   "length": 110,
+   "cites": [
+    "D31",
+    "D37",
+    "D60"
+   ]
+  },
+  {
+   "id": "L63",
+   "kind": "lemma",
+   "number": 63,
+   "header": "Binomial congruence",
+   "statement": "Let $p$ be a prime, $j\\ge2$ and $u,w\\in\\Z$. Then $(u+p^jw)^k\\equiv u^k+ku^{k-1}p^jw\\pmod{p^{v_p(k)+j+1}}$ (Definition 60).",
+   "lean": [
+    "binomial_congr"
+   ],
+   "lean_status": "proved",
+   "proof": "The other terms are $\\binom kiu^{k-i}p^{ij}w^i$, $2\\le i\\le k$. From $i\\binom ki=k\\binom{k-1}{i-1}$ and $v_p(i)\\le i-1$ we get $v_p\\binom ki\\ge v_p(k)-i+1$, and $ij-i+1\\ge j+1$, as $(i-1)(j-1)\\ge1$.",
+   "length": 110,
+   "cites": [
+    "D60"
+   ]
+  },
+  {
+   "id": "L64",
+   "kind": "lemma",
+   "number": 64,
+   "header": "Close roots agree",
+   "statement": "Let $p$ be a prime, $N>v_p(k)$, and $u,u'\\in\\Z$ with $p\\nmid u$, $u^k\\equiv u'^k\\pmod{p^N}$ and $u\\equiv u'\\pmod{p^2}$. Then $u\\equiv u'\\pmod{p^{N-v_p(k)}}$ (Definition 60).",
+   "lean": [
+    "close_roots_agree"
+   ],
+   "lean_status": "proved",
+   "proof": "If not, let $j$ be maximal with $p^j\\mid u'-u$; then $2\\le j<N-v_p(k)$ and $u'=u+p^jw$ with $p\\nmid w$. By Lemma 63, $u'^k-u^k\\equiv ku^{k-1}p^jw\\pmod{p^{v_p(k)+j+1}}$, whose valuation is $v_p(k)+j<N$, contradicting $p^N\\mid u'^k-u^k$.",
+   "length": 155,
+   "cites": [
+    "D60",
+    "L63"
+   ]
+  },
+  {
+   "id": "L65",
+   "kind": "lemma",
+   "number": 65,
+   "header": "Few roots modulo $p^N$",
+   "statement": "Let $p$ be a prime, $N\\ge1$ and $w\\in\\Z$ with $p\\nmid w$. Then $u^k\\equiv w\\pmod{p^N}$ has at most $p^{v_p(k)+2}$ solutions $u\\bmod p^N$ (Definitions 1 and 60).",
+   "lean": [
+    "roots_mod_prime_pow"
+   ],
+   "lean_status": "proved",
+   "proof": "If $N\\le v_p(k)+2$ this is clear. Otherwise every solution has $p\\nmid u$, and by Lemma 64, solutions in the same class mod $p^2$ agree mod $p^{N-v_p(k)}$. So each of the $p^2$ classes contains at most $p^{v_p(k)}$ solutions mod $p^N$.",
+   "length": 165,
+   "cites": [
+    "D1",
+    "D60",
+    "L64"
+   ]
+  },
+  {
+   "id": "L66",
+   "kind": "lemma",
+   "number": 66,
+   "header": "Few roots modulo $n$",
+   "statement": "Let $n\\ge1$ have all its prime factors dividing $g$, and $\\gcd(w,n)=1$. Then $u^k\\equiv w\\pmod n$ has at most $kg^2$ solutions $u\\bmod n$ (Definitions 1 and 60).",
+   "lean": [
+    "roots_mod_n"
+   ],
+   "lean_status": "proved",
+   "proof": "By the Chinese remainder theorem the number of solutions is the product over $p\\mid n$ of the numbers of solutions mod $p^{v_p(n)}$, each at most $p^{v_p(k)+2}$ by Lemma 65. Finally $\\prod_{p\\mid g}p^{v_p(k)}\\le k$ and $\\prod_{p\\mid g}p^2\\le g^2$.",
+   "length": 158,
+   "cites": [
+    "D1",
+    "D60",
+    "L65"
+   ]
+  },
+  {
+   "id": "L67",
+   "kind": "lemma",
+   "number": 67,
+   "header": "Rigid $g$-part",
+   "statement": "Let $D\\ge1$ with $D^k<2^t$, and let $b,b'$ be nodes of level $t$ with $T_b=T_{b'}$ and $m:=m_g(b)\\le D$ (Definitions 31 and 60). Then $m^k\\mid g^t$ and $m_g(b')=m$.",
+   "lean": [
+    "rigid_gpart"
+   ],
+   "lean_status": "proved",
+   "proof": "Let $p\\mid g$ and $v:=v_p(b)$. Then $p^{kv}\\le m^k<2^t\\le p^{v_p(g)t}$, so $kv<v_p(g)t$; hence $m^k\\mid g^t$. By Lemma 5, $b^k\\equiv b'^k\\pmod{g^t}$, so $b'^k\\equiv b^k\\pmod{p^{v_p(g)t}}$, $v_p(b'^k)=kv$ and $v_p(b')=v$.",
+   "length": 129,
+   "cites": [
+    "D31",
+    "D60",
+    "L5"
+   ]
+  },
+  {
+   "id": "L68",
+   "kind": "lemma",
+   "number": 68,
+   "header": "Fibres",
+   "statement": "Let $D\\ge1$ with $D^k<2^t$, and $b$ a node of level $t$ with $m:=m_g(b)\\le D$. Then at most $kg^2m^{k-1}$ nodes $b'$ of level $t$ satisfy $T_{b'}=T_b$ (Definitions 31 and 60).",
+   "lean": [
+    "fibre_bound"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 67, $m^k\\mid g^t$, $b=mu$, $b'=mu'$ with $u,u'$ coprime to $g$. By Lemma 5, $b'^k\\equiv b^k\\pmod{g^t}$, so $u'^k\\equiv u^k\\pmod n$, $n:=g^t/m^k$. By Lemma 66, $u'$ lies in at most $kg^2$ classes mod $n$, each with $m^{k-1}$ lifts mod $g^t/m$, which fix $b'$.",
+   "length": 168,
+   "cites": [
+    "D31",
+    "D60",
+    "L67",
+    "L5",
+    "L66"
+   ]
+  },
+  {
+   "id": "D70",
+   "kind": "definition",
+   "number": 70,
+   "header": "Data for one frequency",
+   "statement": "In the setting of Definition 37, let $0<|\\ell|<Q$ and $D\\ge1$ with $D^k<2^t$, and suppose $Z\\ge2k$, so that every node $b$ of level $t$ has $Z_b\\ge1$ (Lemma 36). Let $\\cB$ be a set of nodes $b$ of level $t$ with $m_g(b)\\le D$ (Definitions 31 and 60). Let $Z_+:=gZ/k+1$, and for $b\\in\\cB$ let $y_b:=\\ell\\delta_b/d_b$, $\\Phi_b:=\\min\\bigl(d_bZ_+,\\frac Q{2\\|y_b\\|}\\bigr)$ and $W_\\ell:=\\sum_{b\\in\\cB}\\sum_{0<a<Q}\\min\\bigl(Z_b,\\frac1{2\\|\\theta_{b,\\ell,a}\\|}\\bigr)$ (Definition 1).",
+   "lean": [
+    "FreqSetting",
+    "Zplus",
+    "yB",
+    "PhiB",
+    "Wl"
+   ],
+   "lean_status": "definition",
+   "cites": [
+    "D37",
+    "L36",
+    "D31",
+    "D60",
+    "D1"
+   ]
+  },
+  {
+   "id": "L71",
+   "kind": "lemma",
+   "number": 71,
+   "header": "From $W_\\ell$ to $\\Phi_b$",
+   "statement": "$W_\\ell\\le\\sum_{b\\in\\cB}\\Phi_b+g^tQ(2+\\log Q)$ (Definitions 1, 37 and 70).",
+   "lean": [
+    "W_to_Phi"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemmas 36 and 35, $1\\le Z_b\\le Z_+$. For each $b\\in\\cB$ apply Lemma 59 with $y=\\ell\\delta_b$, $\\beta=\\beta_b$ and $A=Z_b$, after adding the term $a=0$, and use $\\min(d_bZ_b,\\cdot)\\le\\min(d_bZ_+,\\cdot)$. Finally $\\#\\cB\\le g^t$ (Definition 31).",
+   "length": 147,
+   "cites": [
+    "D1",
+    "D37",
+    "D70",
+    "L36",
+    "L35",
+    "L59",
+    "D31"
+   ]
+  },
+  {
+   "id": "L72",
+   "kind": "lemma",
+   "number": 72,
+   "header": "Small phases",
+   "statement": "If $b\\in\\cB$ and $|\\ell|\\delta_b\\le d_b/2$, then $\\Phi_b\\le gZd_b/(2k|\\ell|)$ (Definitions 1, 37 and 70).",
+   "lean": [
+    "small_phases"
+   ],
+   "lean_status": "proved",
+   "proof": "Then $|y_b|\\le1/2$, so $\\|y_b\\|=|\\ell|\\delta_b/d_b$ and $\\Phi_b\\le Qd_b/(2|\\ell|\\delta_b)$. By Lemmas 40, 39 and 32, $\\delta_b\\ge\\delta(T_b)\\ge kQ/(gZ)$ (Definitions 31 and 38).",
+   "length": 103,
+   "cites": [
+    "D1",
+    "D37",
+    "D70",
+    "L40",
+    "L39",
+    "L32",
+    "D31",
+    "D38"
+   ]
+  },
+  {
+   "id": "L73",
+   "kind": "lemma",
+   "number": 73,
+   "header": "Sum of $d_b$",
+   "statement": "$\\sum_{b\\in\\cB}d_b\\le k\\tau(D)D^{k-2}g^t$ (Definitions 1, 37, 60 and 70).",
+   "lean": [
+    "sum_dB"
+   ],
+   "lean_status": "proved",
+   "proof": "For $b\\in\\cB$ let $m:=m_g(b)\\le D$. By Lemma 62, $d_b\\le km^{k-1}$, and $m\\mid g^t$ by Lemma 67 (with $b'=b$). Exactly $g^t/m$ integers in $[0,g^t)$ are divisible by $m$, and $m$ takes at most $\\tau(D)$ values; so the sum is at most $\\tau(D)\\max_m(g^t/m)km^{k-1}\\le k\\tau(D)D^{k-2}g^t$, as $k\\ge2$.",
+   "length": 189,
+   "cites": [
+    "D1",
+    "D37",
+    "D60",
+    "D70",
+    "L62",
+    "L67"
+   ]
+  },
+  {
+   "id": "D74",
+   "kind": "definition",
+   "number": 74,
+   "header": "Phase curve",
+   "statement": "In the setting of Definition 70, for an integer $d\\ge1$ and real $T>0$ let $h_d(T):=\\ell\\delta(T)/d$; let $\\cT_d$ be the set of integers $T\\in[g^{t-1},g^t)$ with $|h_d(T)|\\ge1/3$, and put $\\mu:=(1-1/k)|h_d(g^t)|/g^t$ and $\\Delta:=|h_d(g^t)-h_d(g^{t-1})|$ (both depend on $d$) (Definitions 1 and 38).",
+   "lean": [
+    "hd",
+    "Tset",
+    "muD",
+    "DeltaD"
+   ],
+   "lean_status": "definition",
+   "cites": [
+    "D70",
+    "D1",
+    "D38"
+   ]
+  },
+  {
+   "id": "L75",
+   "kind": "lemma",
+   "number": 75,
+   "header": "Perturbation",
+   "statement": "If $b\\in\\cB$ and $|\\ell|\\delta_b>d_b/2$, then $T_b\\in\\cT_{d_b}$ and $|y_b-h_{d_b}(T_b)|\\le\\varepsilon_b:=kg^{s-1}/(d_bZ)$ (Definitions 1, 31, 37, 38, 70 and 74).",
+   "lean": [
+    "epsB",
+    "perturbation"
+   ],
+   "lean_status": "proved",
+   "proof": "Let $h:=h_{d_b}(T_b)$. By Lemmas 40, 39 and 32, $|y_b-h|\\le|\\ell|g^{1-t}\\delta(T_b)/d_b\\le g^sg^{1-t}kQ/(Zd_b)\\le\\varepsilon_b$, as $s\\le t-2$. Also $|h|\\ge|\\ell|\\delta_b/((1+g^{1-t})d_b)>1/(2+2g^{1-t})\\ge1/3$, as $t\\ge3$; and $g^{t-1}\\le T_b<g^t$.",
+   "length": 145,
+   "cites": [
+    "D1",
+    "D31",
+    "D37",
+    "D38",
+    "D70",
+    "D74",
+    "L40",
+    "L39",
+    "L32"
+   ]
+  },
+  {
+   "id": "L76",
+   "kind": "lemma",
+   "number": 76,
+   "header": "Replacement",
+   "statement": "In the setting of Lemma 75, $\\Phi_b\\le5\\min\\bigl(d_bZ_+,\\frac Q{2\\|h_{d_b}(T_b)\\|}\\bigr)$ (Definitions 1, 31, 37, 70 and 74).",
+   "lean": [
+    "replacement"
+   ],
+   "lean_status": "proved",
+   "proof": "Let $h:=h_{d_b}(T_b)$. If $\\|h\\|\\ge2\\varepsilon_b$ then $\\|y_b\\|\\ge\\|h\\|/2$, which gives the factor $2$. Otherwise $\\frac Q{2\\|h\\|}>\\frac Q{4\\varepsilon_b}=\\frac{gd_bZ}{4k}$ and $d_bZ_+\\ge\\frac{gd_bZ}k$, so the right side is at least $\\frac{5gd_bZ}{4k}\\ge d_bZ_+\\ge\\Phi_b$, as $gZ\\ge4k$.",
+   "length": 146,
+   "cites": [
+    "L75",
+    "D1",
+    "D31",
+    "D37",
+    "D70",
+    "D74"
+   ]
+  },
+  {
+   "id": "L77",
+   "kind": "lemma",
+   "number": 77,
+   "header": "Shape of $h_d$",
+   "statement": "On $[g^{t-1},g^t]$, $|h_d|$ is non-decreasing, $h_d'(T)=(1-1/k)h_d(T)/T$, $|h_d'|$ is non-increasing, and $|h_d'(T)|\\le g\\mu$, where $\\mu=|h_d'(g^t)|$ (Definitions 1, 37 and 74).",
+   "lean": [
+    "hd_shape"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 39, $h_d(T)=\\frac{\\ell kQ}{dZ}(T/g^t)^{1-1/k}$. This gives the first two claims, and $|h_d'(T)|$ is a constant times $T^{-1/k}$, so it is non-increasing, $|h_d'(g^t)|=(1-\\frac1k)|h_d(g^t)|/g^t=\\mu$, and $|h_d'(T)|/\\mu=(g^t/T)^{1/k}\\le g$.",
+   "length": 170,
+   "cites": [
+    "D1",
+    "D37",
+    "D74",
+    "L39"
+   ]
+  },
+  {
+   "id": "L78",
+   "kind": "lemma",
+   "number": 78,
+   "header": "Gaps",
+   "statement": "Suppose $\\cT_d\\ne\\emptyset$. Then $\\mu\\ge1/(6g^t)$, and $|h_d(T')-h_d(T)|\\ge\\mu$ for distinct $T,T'\\in\\cT_d$ (Definitions 1 and 74).",
+   "lean": [
+    "gaps"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 77, $|h_d(g^t)|\\ge|h_d(T)|\\ge1/3$ for $T\\in\\cT_d$, so $\\mu=(1-\\frac1k)|h_d(g^t)|/g^t\\ge1/(6g^t)$. Also $|h_d'|\\ge\\mu$ on $[g^{t-1},g^t]$, and $|T'-T|\\ge1$; apply the mean value theorem.",
+   "length": 128,
+   "cites": [
+    "D1",
+    "D74",
+    "L77"
+   ]
+  },
+  {
+   "id": "L79",
+   "kind": "lemma",
+   "number": 79,
+   "header": "Range",
+   "statement": "If $\\cT_d\\ne\\emptyset$, then $h_d(T)$ lies between $h_d(g^{t-1})$ and $h_d(g^t)$ for every $T\\in\\cT_d$; moreover $\\Delta\\le g^{t+1}\\mu$ and $\\Delta\\le kg^{2s}/(dZ)$ (Definitions 37, 70 and 74).",
+   "lean": [
+    "range_bound"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 39, $h_d(T)=\\frac{\\ell kQ}{dZ}(T/g^t)^{1-1/k}$ is monotone and of constant sign on $[g^{t-1},g^t]$. This gives the first claim, and $\\Delta\\le|h_d(g^t)|\\le|\\ell|kQ/(dZ)\\le kg^{2s}/(dZ)$, as $|\\ell|<Q=g^s$. By Lemma 77 and the mean value theorem, $\\Delta\\le g^t\\cdot g\\mu$.",
+   "length": 180,
+   "cites": [
+    "D37",
+    "D70",
+    "D74",
+    "L39",
+    "L77"
+   ]
+  },
+  {
+   "id": "L80",
+   "kind": "lemma",
+   "number": 80,
+   "header": "Spacing near one integer",
+   "statement": "Let $\\mu>0$, $m\\ge1$, $A,H>0$ be real and $n\\in\\Z$. Let finitely many reals $y_i\\in(n-\\frac12,n+\\frac12]$ with integer weights $w_i\\ge0$ be such that every half-open interval $[a,a+\\mu)$ carries total weight $\\sum_{y_i\\in[a,a+\\mu)}w_i\\le m$. Then $\\sum_iw_i\\min(A,\\frac H{|y_i-n|})\\le2mA+2m\\frac H\\mu(1+\\log(1+\\frac1\\mu))$ (Definition 1).",
+   "lean": [
+    "spacing_one"
+   ],
+   "lean_status": "proved",
+   "proof": "Let $J:=\\lfloor1/(2\\mu)\\rfloor+1$. The intervals $[n+j\\mu,n+(j+1)\\mu)$ and $[n-(j+1)\\mu,n-j\\mu)$, $0\\le j<J$, cover $(n-\\frac12,n+\\frac12]$, each carries weight at most $m$, and the $y_i$ in them have $|y_i-n|\\ge j\\mu$. Use $\\sum_{1\\le j<J}\\frac1j\\le1+\\log(1+\\frac1\\mu)$ (Lemma 7).",
+   "length": 170,
+   "cites": [
+    "D1",
+    "L7"
+   ]
+  },
+  {
+   "id": "L81",
+   "kind": "lemma",
+   "number": 81,
+   "header": "Spacing sum",
+   "statement": "Let $\\mu>0$, $m\\ge1$, $A,H>0$, $\\Delta\\ge0$ and $a_0$ be real. Let finitely many reals $y_i\\in[a_0,a_0+\\Delta]$ with integer weights $w_i\\ge0$ be such that every half-open interval of length $\\mu$ carries total weight at most $m$. Then $\\sum_iw_i\\min(A,\\frac H{\\|y_i\\|})\\le m(\\Delta+2)\\bigl(2A+2\\frac H\\mu(1+\\log(1+\\frac1\\mu))\\bigr)$ (Definition 1).",
+   "lean": [
+    "spacing_sum"
+   ],
+   "lean_status": "proved",
+   "proof": "Each $y_i$ lies in $(n-\\frac12,n+\\frac12]$ for a unique $n\\in\\Z$, and then $\\|y_i\\|=|y_i-n|$. These $n$ lie in $[a_0-\\frac12,a_0+\\Delta+\\frac12)$, so at most $\\Delta+2$ of them occur. Apply Lemma 80 for each $n$.",
+   "length": 127,
+   "cites": [
+    "D1",
+    "L80"
+   ]
+  },
+  {
+   "id": "L82",
+   "kind": "lemma",
+   "number": 82,
+   "header": "Count over $T$",
+   "statement": "Let $d\\ge1$ be an integer with $\\cT_d\\ne\\emptyset$, let $\\kappa\\ge1$ be real, and let integers $0\\le N_T\\le\\kappa$ be given for $T\\in\\cT_d$. Then (Definitions 1, 37, 70 and 74) $$\\sum_{T\\in\\cT_d}N_T\\min\\Bigl(dZ_+,\\frac Q{2\\|h_d(T)\\|}\\Bigr)\\le\\kappa(\\Delta+2)\\Bigl(2dZ_++\\frac Q\\mu\\Lambda\\Bigr).$$",
+   "lean": [
+    "count_over_T"
+   ],
+   "lean_status": "proved",
+   "proof": "Apply Lemma 81 to the numbers $h_d(T)$, $T\\in\\cT_d$, with weights $N_T$, $m=\\kappa$, $A=dZ_+$, $H=Q/2$, and the interval between $h_d(g^{t-1})$ and $h_d(g^t)$ (Lemma 79): by Lemma 78, $\\mu>0$, each half-open interval of length $\\mu$ contains $h_d(T)$ for at most one $T$, and $1+\\log(1+1/\\mu)\\le\\Lambda$.",
+   "length": 202,
+   "cites": [
+    "D1",
+    "D37",
+    "D70",
+    "D74",
+    "L81",
+    "L79",
+    "L78"
+   ]
+  },
+  {
+   "id": "L83",
+   "kind": "lemma",
+   "number": 83,
+   "header": "Count over $T$, explicitly",
+   "statement": "If moreover $d\\le kD^{k-1}$, the bound in Lemma 82 is at most $\\kappa(4g^{2s+1}+8gD^{k-1}Z+7g^{t+1}Q\\Lambda)$ (Definitions 1, 37, 70 and 74).",
+   "lean": [
+    "count_over_T_explicit"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 79, $dZ_+\\Delta\\le\\frac{2gZ}k\\cdot\\frac{kg^{2s}}Z=2g^{2s+1}$, as $Z_+\\le2gZ/k$ (since $Z\\ge2k$). Next $4dZ_+\\le8gD^{k-1}Z$. Finally $(\\Delta+2)/\\mu\\le g^{t+1}+2/\\mu\\le g^{t+1}+12g^t\\le7g^{t+1}$ by Lemma 78.",
+   "length": 121,
+   "cites": [
+    "L82",
+    "D1",
+    "D37",
+    "D70",
+    "D74",
+    "L79",
+    "L78"
+   ]
+  },
+  {
+   "id": "L84",
+   "kind": "lemma",
+   "number": 84,
+   "header": "Large phases",
+   "statement": "Let $\\cB_2:=\\{b\\in\\cB:|\\ell|\\delta_b>d_b/2\\}$. Then (Definitions 1, 31, 37, 60 and 70) $$\\sum_{b\\in\\cB_2}\\Phi_b\\le5\\tau(kD^{k-1})kg^2D^{k-1}(4g^{2s+1}+8gD^{k-1}Z+7g^{t+1}Q\\Lambda).$$",
+   "lean": [
+    "large_phases"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemmas 75 and 76, $\\Phi_b\\le5\\min(d_bZ_+,\\frac Q{2\\|h_{d_b}(T_b)\\|})$, $T_b\\in\\cT_{d_b}$ (Definition 74). By Lemma 62, $d_b\\mid Q$ and $d_b\\le kD^{k-1}$: at most $\\tau(kD^{k-1})$ values. For each value $d$ use Lemma 83 with $\\kappa:=kg^2D^{k-1}$ and $N_T:=\\#\\{b\\in\\cB_2:d_b=d,T_b=T\\}\\le\\kappa$ (Lemma 68).",
+   "length": 183,
+   "cites": [
+    "D1",
+    "D31",
+    "D37",
+    "D60",
+    "D70",
+    "L75",
+    "L76",
+    "D74",
+    "L62",
+    "L83",
+    "L68"
+   ]
+  },
+  {
+   "id": "L85",
+   "kind": "lemma",
+   "number": 85,
+   "header": "Bound for $W_\\ell$",
+   "statement": "In the setting of Definition 70 (with Definitions 1, 37 and 60), $$\\begin{gathered}W_\\ell\\le g^tQ(2+\\log Q)+\\frac{g\\tau(D)D^{k-2}Zg^t}{2|\\ell|}\\\\ +5\\tau(kD^{k-1})kg^2D^{k-1}(4g^{2s+1}+8gD^{k-1}Z+7g^{t+1}Q\\Lambda).\\end{gathered}$$",
+   "lean": [
+    "W_bound"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 71 it suffices to bound $\\sum_{b\\in\\cB}\\Phi_b$. For $b\\in\\cB\\setminus\\cB_2$ use Lemma 72 and then Lemma 73: $\\sum\\Phi_b\\le\\frac{gZ}{2k|\\ell|}k\\tau(D)D^{k-2}g^t$. For $b\\in\\cB_2$ use Lemma 84.",
+   "length": 106,
+   "cites": [
+    "D70",
+    "D1",
+    "D37",
+    "D60",
+    "L71",
+    "L72",
+    "L73",
+    "L84"
+   ]
+  },
+  {
+   "id": "L86",
+   "kind": "lemma",
+   "number": 86,
+   "header": "Bound for $E$",
+   "statement": "In the setting of Definition 37, let $D\\ge1$ with $D^k<2^t$, suppose $Z\\ge2k$, and let $\\cB$ be the set of all nodes $b$ of level $t$ with $m_g(b)\\le D$, so that $Z_b\\ge1$ for $b\\in\\cB$ (Lemma 36). Then $E(\\cB)\\le S(s)V+(1+\\log Q)Qg\\tau(D)D^{k-2}Zg^t$, where $V$ is the sum of the first and last terms in Lemma 85 (Definitions 1, 9, 31, 54 and 60).",
+   "lean": [
+    "nodesSmall",
+    "Vterm",
+    "E_bound"
+   ],
+   "lean_status": "proved",
+   "proof": "As $|\\Psi_\\ell(a)|\\le M(\\ell)$, $E(\\cB)\\le\\sum_{0<|\\ell|<Q}M(\\ell)W_\\ell$, with $W_\\ell$ as in Definition 70. Insert Lemma 85. In the middle term use $M(\\ell)\\le Q$ (each term of $\\Psi_\\ell(a)$ has modulus $1$) and $\\sum_{0<|\\ell|<Q}\\frac1{2|\\ell|}\\le1+\\log Q$ (Lemma 7).",
+   "length": 154,
+   "cites": [
+    "D37",
+    "L36",
+    "L85",
+    "D1",
+    "D9",
+    "D31",
+    "D54",
+    "D60",
+    "D70",
+    "L7"
+   ]
+  },
+  {
+   "id": "L87",
+   "kind": "lemma",
+   "number": 87,
+   "header": "A divisor in a window",
+   "statement": "Let $D\\ge1$ and $n\\ge1$ with $m_g(n)>D$. Then $m_g(n)$ has a divisor $m'$ with $D<m'\\le PD$ (Definition 60).",
+   "lean": [
+    "divisor_window"
+   ],
+   "lean_status": "proved",
+   "proof": "Write $m_g(n)=p_1\\cdots p_r$ with primes $p_i\\mid g$, so $p_i\\le P$, and let $m_j:=p_1\\cdots p_j$. Then $m_0=1\\le D<m_r$; for the least $j$ with $m_j>D$ we have $m_j\\le Pm_{j-1}\\le PD$.",
+   "length": 110,
+   "cites": [
+    "D60"
+   ]
+  },
+  {
+   "id": "L88",
+   "kind": "lemma",
+   "number": 88,
+   "header": "A good level",
+   "statement": "Let $L\\ge1$, $D\\ge1$ with $PD\\le X^{\\log2/(2\\log g)}$, and $t':=\\lceil L/(2k)\\rceil$. Then $X^{1/2}\\le g^{t'}<gX^{1/2}$, $1\\le t'\\le L$, $Z(t')\\le1$, and every divisor $m'\\le PD$ of some $m_g(n)$, $n\\ge1$, divides $g^{t'}$ (Definitions 1, 28, 31 and 60).",
+   "lean": [
+    "tPrime",
+    "good_level"
+   ],
+   "lean_status": "proved",
+   "proof": "As $X^{1/2}=g^{L/(2k)}$ and $L/(2k)\\le t'<L/(2k)+1$, the first claim holds; $1\\le t'\\le L$ as $0<L/(2k)\\le L$; and $Z(t')=Xg^{-2t'}\\le1$. For $p\\mid g$, $p^{v_p(m')}\\le PD\\le(X^{1/2})^{\\log2/\\log g}\\le2^{t'}\\le p^{v_p(g)t'}$; and $m'$ has no other prime factors.",
+   "length": 167,
+   "cites": [
+    "D1",
+    "D28",
+    "D31",
+    "D60"
+   ]
+  },
+  {
+   "id": "L89",
+   "kind": "lemma",
+   "number": 89,
+   "header": "Large $g$-part",
+   "statement": "Under the hypotheses of Lemma 88, $\\#\\{x\\in\\cQ_L:m_g(x)>D\\}\\le\\tau(PD)(g/k+1)gX^{1/2}/D$ (Definitions 1, 28, 31 and 60).",
+   "lean": [
+    "large_gpart"
+   ],
+   "lean_status": "proved",
+   "proof": "For such $x$ pick $m'$ by Lemma 87; then $m'\\mid g^{t'}$ (Lemma 88), so $m'$ divides the node $b:=x\\bmod g^{t'}$ (Lemma 33). For fixed $m'$ there are $g^{t'}/m'<gX^{1/2}/D$ such $b$, each containing at most $Z_b\\le g/k+1$ such $x$ (Lemmas 33 and 35); and $m'$ takes at most $\\tau(PD)$ values.",
+   "length": 197,
+   "cites": [
+    "L88",
+    "D1",
+    "D28",
+    "D31",
+    "D60",
+    "L87",
+    "L33",
+    "L35"
+   ]
+  },
+  {
+   "id": "D90",
+   "kind": "definition",
+   "number": 90,
+   "header": "Parameters",
+   "statement": "Let $c,C$ be as in Lemma 26, $\\eta:=c/(32k)$, $\\nu:=(2-c)/(4-c)$, $D:=X^\\eta$, $t:=\\lfloor L/(k(4-c))\\rfloor$ ($=\\lfloor\\log_gX/(4-c)\\rfloor$) and $s:=t-2$ (Definitions 1 and 28).",
+   "lean": [
+    "eta",
+    "nu",
+    "Dpar",
+    "tpar",
+    "spar"
+   ],
+   "lean_status": "definition",
+   "cites": [
+    "L26",
+    "D1",
+    "D28"
+   ]
+  },
+  {
+   "id": "L91",
+   "kind": "lemma",
+   "number": 91,
+   "header": "Admissible parameters",
+   "statement": "For $L$ large: $t\\ge3$, $1\\le s\\le t-2$, $2(t+s)\\le L$, $Z(t)\\ge2k$, $g^t\\le X^{1/(4-c)}<g^{t+1}$, and $Z(t)\\le g^2X^\\nu$ (Definitions 1, 28, 31 and 90).",
+   "lean": [
+    "admissible_params"
+   ],
+   "lean_status": "proved",
+   "proof": "The fifth claim holds by the definition of $t$, as $X^{1/(4-c)}=g^{L/(k(4-c))}$. As $\\log_gX=L/k$ and $k(4-c)\\ge6$ (Lemma 26), $t\\ge L/(4k)-1$ and $t\\le L/6$, so $t\\ge3$ for $L$ large, and $2(t+s)\\le4t\\le L$. Next, $Z(t)=Xg^{-2t}$ lies between $X^{1-2/(4-c)}=X^\\nu$ and $g^2X^\\nu$, and $X^\\nu\\to\\infty$, as $c<2$.",
+   "length": 202,
+   "cites": [
+    "D1",
+    "D28",
+    "D31",
+    "D90",
+    "L26"
+   ]
+  },
+  {
+   "id": "L92",
+   "kind": "lemma",
+   "number": 92,
+   "header": "Admissible $D$",
+   "statement": "For $L$ large: $D^k<2^t$ and $PD\\le X^{\\log2/(2\\log g)}$ (Definitions 1, 28, 60 and 90).",
+   "lean": [
+    "admissible_D"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 26, $c\\le\\frac{\\log2}{2\\log g}$, so $D^k=X^{c/32}\\le X^{\\log2/(64\\log g)}$ and $PD\\le PX^{\\log2/(64\\log g)}$. By Lemma 91, $2^t>2^{-1}\\cdot2^{\\log_gX/(4-c)}\\ge2^{-1}X^{\\log2/(4\\log g)}$. Both claims follow for $L$ large.",
+   "length": 142,
+   "cites": [
+    "D1",
+    "D28",
+    "D60",
+    "D90",
+    "L26",
+    "L91"
+   ]
+  },
+  {
+   "id": "D93",
+   "kind": "definition",
+   "number": 93,
+   "header": "The main set of nodes",
+   "statement": "Let $L$ be large enough for Lemmas 91 and 92. Then $t$ and $s$ (Definition 90) satisfy the hypotheses of Definition 37, whose notation ($Q$, $Z=Z(t)$, $\\Lambda$, …) we use for them, and $D^k<2^t$. Let $\\cB$ be the set of nodes $b$ of level $t$ with $m_g(b)\\le D$ (Definitions 31 and 60).",
+   "lean": [
+    "Bmain"
+   ],
+   "lean_status": "definition",
+   "cites": [
+    "L91",
+    "L92",
+    "D90",
+    "D37",
+    "D31",
+    "D60"
+   ]
+  },
+  {
+   "id": "L94",
+   "kind": "lemma",
+   "number": 94,
+   "header": "Main term",
+   "statement": "For $L$ large: $\\frac8Q\\sum_{b\\in\\cB}Z_b\\ll X^\\nu$ (Definitions 1, 28, 31, 90 and 93).",
+   "lean": [
+    "main_term"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 91, $Z\\ge2k$, so Lemma 36 gives $\\sum_{b\\in\\cB}Z_b\\le g^t\\cdot2gZ/k$. Now $g^t/Q=g^2$ and $Z\\le g^2X^\\nu$ by Lemma 91.",
+   "length": 73,
+   "cites": [
+    "D1",
+    "D28",
+    "D31",
+    "D90",
+    "D93",
+    "L91",
+    "L36"
+   ]
+  },
+  {
+   "id": "L95",
+   "kind": "lemma",
+   "number": 95,
+   "header": "Auxiliary bounds",
+   "statement": "For $L$ large: $S(s)\\le CQ^2$, $S(s)\\le CX^\\nu$, $g^t=g^2Q$, $2+\\log Q\\le\\Lambda\\ll L$, and $\\tau(D)\\le\\tau(kD^{k-1})\\ll L^{\\omega(g)}$ (Definitions 1, 9, 28, 60, 90 and 93).",
+   "lean": [
+    "aux_bounds"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 26, $S(s)\\le Cg^{(2-c)s}$, which is at most $Cg^{2s}=CQ^2$ and at most $Cg^{(2-c)t}\\le CX^\\nu$ (Lemma 91). As $g^t=g^2Q\\ge4Q$, $2+\\log Q\\le1+\\log(24Q)\\le\\Lambda\\le1+\\log(7g^t)\\ll L$. By Lemma 61, as $X=g^{L/k}$ and $\\tau$ is non-decreasing, $$\\tau(kD^{k-1})\\le(1+\\log_2(kX^{k\\eta}))^{\\omega(g)}\\ll L^{\\omega(g)}.$$",
+   "length": 194,
+   "cites": [
+    "D1",
+    "D9",
+    "D28",
+    "D60",
+    "D90",
+    "D93",
+    "L26",
+    "L91",
+    "L61"
+   ]
+  },
+  {
+   "id": "L96",
+   "kind": "lemma",
+   "number": 96,
+   "header": "First error piece",
+   "statement": "For $L$ large: $S(s)V/Q^2\\ll L^{\\omega(g)+1}D^{2k-2}X^\\nu$, with $V$ as in Lemma 86 for the parameters of Definition 93 (Definitions 1, 9, 28, 60 and 90).",
+   "lean": [
+    "err_piece1"
+   ],
+   "lean_status": "proved",
+   "proof": "Write $S=S(s)$. By Lemmas 85, 95 and 91, $$\\begin{gathered}Sg^tQ(2+\\log Q)/Q^2\\le g^2S\\Lambda\\ll LX^\\nu,\\qquad Sg^{2s+1}/Q^2=gS\\ll X^\\nu,\\\\ SD^{k-1}Z/Q^2\\le CD^{k-1}Z\\ll D^{k-1}X^\\nu,\\qquad Sg^{t+1}Q\\Lambda/Q^2=g^3S\\Lambda\\ll LX^\\nu.\\end{gathered}$$ Multiply the last three by $\\tau(kD^{k-1})D^{k-1}\\ll L^{\\omega(g)}D^{k-1}$.",
+   "length": 161,
+   "cites": [
+    "L86",
+    "D93",
+    "D1",
+    "D9",
+    "D28",
+    "D60",
+    "D90",
+    "L85",
+    "L95",
+    "L91"
+   ]
+  },
+  {
+   "id": "L97",
+   "kind": "lemma",
+   "number": 97,
+   "header": "Second error piece",
+   "statement": "For $L$ large (Definitions 1, 28, 60, 90 and 93): $$(1+\\log Q)Qg\\tau(D)D^{k-2}Zg^t/Q^2\\ll L^{\\omega(g)+1}D^{k-2}X^\\nu.$$",
+   "lean": [
+    "err_piece2"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 95, $g^t/Q=g^2$, $1+\\log Q\\le\\Lambda\\ll L$ and $\\tau(D)\\ll L^{\\omega(g)}$; and $Z\\le g^2X^\\nu$ by Lemma 91.",
+   "length": 61,
+   "cites": [
+    "D1",
+    "D28",
+    "D60",
+    "D90",
+    "D93",
+    "L95",
+    "L91"
+   ]
+  },
+  {
+   "id": "L98",
+   "kind": "lemma",
+   "number": 98,
+   "header": "Small $g$-part",
+   "statement": "For $L$ large: $\\#\\{x\\in\\cQ_L:m_g(x)\\le D\\}\\ll L^{\\omega(g)+1}D^{2k-2}X^\\nu$ (Definitions 1, 28, 31, 60, 90 and 93).",
+   "lean": [
+    "small_gpart"
+   ],
+   "lean_status": "proved",
+   "proof": "If $m_g(x)\\le D$ then $p^{v_p(x)}\\le D<2^t\\le p^{v_p(g)t}$ for $p\\mid g$, so $b:=x\\bmod g^t$ has $m_g(b)=m_g(x)$, and $b$ is a node (Lemma 33); so $b\\in\\cB$. By Lemmas 91 and 36, $Z_b\\ge1$ on $\\cB$. Apply Lemma 55, then Lemmas 94, 86, 96 and 97.",
+   "length": 153,
+   "cites": [
+    "D1",
+    "D28",
+    "D31",
+    "D60",
+    "D90",
+    "D93",
+    "L33",
+    "L91",
+    "L36",
+    "L55",
+    "L94",
+    "L86",
+    "L96",
+    "L97"
+   ]
+  },
+  {
+   "id": "L99",
+   "kind": "lemma",
+   "number": 99,
+   "header": "Exponents",
+   "statement": "$\\nu+(2k-2)\\eta\\le\\frac12-\\eta$ (Definition 90).",
+   "lean": [
+    "exponents"
+   ],
+   "lean_status": "proved",
+   "proof": "By Lemma 26, $0<c<4$, and $\\nu=\\frac12-\\frac c{2(4-c)}\\le\\frac12-\\frac c8=\\frac12-4k\\eta$; and $(2k-2)\\eta+\\eta<2k\\eta\\le4k\\eta$.",
+   "length": 66,
+   "cites": [
+    "D90",
+    "L26"
+   ]
+  },
+  {
+   "id": "L100",
+   "kind": "lemma",
+   "number": 100,
+   "header": "Counting solutions",
+   "statement": "For $L$ large: $\\#\\cQ_L\\ll X^{(1-\\eta)/2}$ (Definitions 1, 28, 60 and 90).",
+   "lean": [
+    "count_solutions"
+   ],
+   "lean_status": "proved",
+   "proof": "Lemma 89 applies with $D=X^\\eta$ (by Lemma 92) and gives $\\ll\\tau(PD)X^{1/2-\\eta}\\ll L^{\\omega(g)}X^{1/2-\\eta}$ (Lemma 61). By Lemmas 98 and 99, $\\#\\{x:m_g(x)\\le D\\}\\ll L^{\\omega(g)+1}X^{1/2-\\eta}$. Finally $L^{\\omega(g)+1}\\le X^{\\eta/2}$ for $L$ large, as $\\eta>0$ (Lemma 26).",
+   "length": 162,
+   "cites": [
+    "D1",
+    "D28",
+    "D60",
+    "D90",
+    "L89",
+    "L92",
+    "L61",
+    "L98",
+    "L99",
+    "L26"
+   ]
+  },
+  {
+   "id": "T101",
+   "kind": "theorem",
+   "number": 101,
+   "header": "Palindromic perfect powers",
+   "statement": "For all integers $g\\ge2$ and $k\\ge2$ there are $\\gamma=\\gamma(g,k)\\in(0,1)$ and $C'=C'(g,k)$ such that, for every $L\\ge1$, the number of $L$-digit palindromes in base $g$ that are perfect $k$-th powers is at most $C'(\\#\\cP_L)^{\\gamma/k}$ (Definitions 1 and 28).",
+   "lean": [
+    "main_theorem",
+    "main_theorem_unconditional",
+    "main_theorem_digits"
+   ],
+   "lean_status": "proved",
+   "proof": "The map $x\\mapsto x^k$ is a bijection from $\\cQ_L$ onto these powers. Let $\\gamma:=1-\\eta\\in(0,1)$, as $0<c<1$ (Definition 90 and Lemma 26). For $L$ large, Lemmas 100 and 29 give $\\#\\cQ_L\\ll X^{(1-\\eta)/2}\\le(g\\#\\cP_L)^{\\gamma/k}$. For the finitely many other $L$, $\\#\\cQ_L\\le\\#\\cP_L$; enlarge $C'$.",
+   "length": 186,
+   "cites": [
+    "D1",
+    "D28",
+    "D90",
+    "L26",
+    "L100",
+    "L29"
+   ]
+  }
+ ],
+ "references": [
+  {
+   "key": "BhS",
+   "text": "G. Bhowmik and Y. Suzuki, \\emph{On Telhcirid's theorem on arithmetic progressions}, preprint, arXiv:2406.13334 (2024)."
+  },
+  {
+   "key": "CLS",
+   "text": "J. Cilleruelo, F. Luca and I. E. Shparlinski, \\emph{Power values of palindromes}, J. Comb. Number Theory \\textbf{1} (2009), no. 2, 101–107."
+  },
+  {
+   "key": "Col",
+   "text": "S. Col, \\emph{Palindromes dans les progressions arithmétiques}, Acta Arith. \\textbf{137} (2009), no. 1, 1–41."
+  },
+  {
+   "key": "DMRSS",
+   "text": "C. Dartyge, B. Martin, J. Rivat, I. E. Shparlinski and C. Swaenepoel, \\emph{Reversible primes}, J. Lond. Math. Soc. (2) \\textbf{109} (2024), no. 3, e12883."
+  },
+  {
+   "key": "HFF",
+   "text": "S. Iyer, \\emph{Checking AI-generated proofs: the Human Friendly Form}, note, October 2026."
+  },
+  {
+   "key": "Pal",
+   "text": "\\emph{Palindromic perfect powers: an improvement of the Cilleruelo–Luca–Shparlinski bound}, manuscript, October 2026 (palindromic_powers.pdf)."
+  },
+  {
+   "key": "TP",
+   "text": "A. Tuxanidy and D. Panario, \\emph{Infinitude of palindromic almost-prime numbers}, Int. Math. Res. Not. IMRN \\textbf{2024}, no. 18, 12466–12503."
+  }
+ ]
+}

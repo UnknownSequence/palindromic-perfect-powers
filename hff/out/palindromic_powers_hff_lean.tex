@@ -1,0 +1,728 @@
+\documentclass[11pt]{article}
+\IfFileExists{lmodern.sty}{\usepackage[T1]{fontenc}\usepackage{lmodern}}{\PassOptionsToPackage{expansion=false}{microtype}}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{microtype}
+\setlength{\emergencystretch}{2.5em}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+\newcounter{hffc}
+\theoremstyle{definition}\newtheorem{hffdef}[hffc]{Definition}
+\theoremstyle{plain}\newtheorem{hfflem}[hffc]{Lemma}\newtheorem{hffthm}[hffc]{Theorem}
+\theoremstyle{remark}\newtheorem{hffrem}[hffc]{Remark}
+\newcommand{\HFFmark}{\par\medskip\begin{center}{\Large$\maltese$}\end{center}\medskip\par}
+\newcommand{\hffcost}{}
+\newcommand{\setcost}[1]{\renewcommand{\hffcost}{#1}}
+\newcommand{\rev}{\operatorname{rev}}
+\newcommand{\cP}{\mathcal{P}}\newcommand{\cQ}{\mathcal{Q}}\newcommand{\cB}{\mathcal{B}}\newcommand{\cT}{\mathcal{T}}
+\newcommand{\Z}{\mathbb{Z}}\newcommand{\R}{\mathbb{R}}\newcommand{\N}{\mathbb{N}}
+
+\renewcommand{\qedsymbol}{{\footnotesize\color{black!55}[\hffcost]}\enspace\openbox}
+\title{Palindromic perfect powers in Human Friendly Form\\[0.4em]\large A power saving over the Cilleruelo--Luca--Shparlinski bound\\[0.3em]\normalsize Lean-friendly version, matched block by block to the Lean formalization}
+\author{}\date{October 2026}
+\begin{document}
+\maketitle
+\section*{Overview}
+\paragraph{The theorem.} Fix a base $g\ge2$ and an exponent $k\ge2$, and consider the palindromes with $L$ digits in base $g$; there are about $g^{L/2}$ of them. Cilleruelo, Luca and Shparlinski~\cite{CLS} proved that at most a constant times $(\#\cP_L)^{1/k}$ of them are perfect $k$-th powers. We prove (Theorem~\hyperref[T:main]{101}) that the exponent $1/k$ can be replaced by $\gamma/k$ for some $\gamma=\gamma(g,k)<1$, for every base and every exponent. This is a weak form of the main result of the accompanying paper~\cite{Pal}, which gives explicit values such as $\gamma=0.9674$ for $g=2$; those values need a certified computer calculation, while the argument here needs none.
+
+\paragraph{The starting point.} If $x^k$ is a palindrome with $L$ digits, its first $t$ digits are the reversal of its last $t$ digits. We sort the candidates $x$ by their residue class $b$ modulo $g^t$, that is, by the last $t$ digits of $x$ (a \emph{node}). The last $t$ digits of $x^k$ depend only on $b$, hence so do the first $t$ digits of $x^k$, and these confine $x$ to a short interval. So the possible $x$ in a node form an arithmetic progression of length about $Z=g^{L/k}g^{-2t}$ (Lemmas~\hyperref[L:tree]{33} and \hyperref[L:sizes]{35}), and counting all of them gives the bound of~\cite{CLS}.
+
+\paragraph{The strategy.} We also use the next $s$ digits from both ends. Inside a node write $x=x_b+g^tz$. The digits of $x^k$ in positions $t,\dots,t+s-1$ form an affine function of $z$ modulo $g^s$ (Lemma~\hyperref[L:low]{41}), and the digits in positions $L-t-s,\dots,L-t-1$ form the integer part of a function of $z$ that lies within $1/g$ of an affine function over the reals (Lemmas~\hyperref[L:up]{42} and \hyperref[L:arch]{44}). The palindrome condition says that the second block is the reversal of the first (Lemma~\hyperref[L:local]{45}). We detect this with a Fej\'er-kernel majorant (Lemmas~\hyperref[L:majlarge]{50} and \hyperref[L:majcoef]{51}) and expand the reversal map in additive characters modulo $g^s$ (Lemma~\hyperref[L:fourier]{12}). The coefficients of this expansion are the values of the \emph{reversal transform} $\Psi_\ell(a)$, a discrete Fourier transform of digit reversal. Summing the resulting geometric series in $z$ splits the count into a main term, smaller than the bound of~\cite{CLS} by the factor $g^s$, and an error term (Lemma~\hyperref[L:red]{55}).
+
+\paragraph{The error term.} Two ingredients control the error term. First, a power saving for the sum over $\ell$ of $\max_a|\Psi_\ell(a)|$ (Lemma~\hyperref[L:saving]{26}). The modulus of $\Psi_\ell(a)$ is a product of digit factors (Lemma~\hyperref[L:prod]{11}), and consecutive factors satisfy an identity in which $a$ cancels (Lemma~\hyperref[L:ident]{16}). So whenever two neighbouring digits of $(g^2-1)\ell\bmod g^s$ are not both $0$ or both $g-1$, one of two consecutive factors is bounded away from $1$, whatever $a$ is (Lemma~\hyperref[L:badprod]{22}), and a count of digit strings (Lemma~\hyperref[L:strings]{24}) gives the saving. Arguments of this kind go back to Col~\cite{Col} and appear in~\cite{TP}, \cite{DMRSS} and~\cite{BhS}. Second, after replacing $|\Psi_\ell(a)|$ by its maximum over $a$, the sums over $a$ are taken node by node (Lemma~\hyperref[L:asum]{59}), and the averaging over the nodes comes from the archimedean phases alone: they are close to the values of a smooth monotone function of the first $t$ digits, these values are well spaced (Lemmas~\hyperref[L:gaps]{78} and \hyperref[L:space]{81}), and few nodes share the same first digits (Lemma~\hyperref[L:fibre]{68}). The last point rests on an elementary count of $k$-th roots modulo prime powers (Lemmas~\hyperref[L:binom]{63}--\hyperref[L:rootsn]{66}) and on the $g$-part of a node, its largest divisor composed of primes dividing $g$ (Lemma~\hyperref[L:rigid]{67}).
+
+\paragraph{Large $g$-parts and parameters.} Integers $x$ that share a large factor with a power of $g$ are counted separately by a direct argument (Lemma~\hyperref[L:largeg]{89}); this matters only when $g$ is not a prime power. Finally we choose $t$ with $g^{(4-c)t}$ about $g^{L/k}$, $s=t-2$, and a threshold $D=g^{\eta L/k}$ for the $g$-part (Definition~\hyperref[D:par]{90}), and the bookkeeping (blocks~\hyperref[D:par]{90}--\hyperref[L:final]{100}) gives the theorem (Theorem~\hyperref[T:main]{101}).
+
+\paragraph{Routine and delicate steps.} Routine: digits, reversal and harmonic sums (blocks~\hyperref[D:conv]{1}--\hyperref[L:harm]{8}); the elementary properties of the reversal transform (blocks~\hyperref[D:psi]{9}--\hyperref[L:gap]{15}); the tree of nodes (blocks~\hyperref[D:pal]{28}--\hyperref[L:nonempty]{36}); the linearisation (blocks~\hyperref[D:phase]{37}--\hyperref[L:local]{45}); the Fej\'er majorant (blocks~\hyperref[L:fejer]{46}--\hyperref[L:red]{55}); the sums over residues (blocks~\hyperref[L:mult]{56}--\hyperref[L:asum]{59}); the count of roots (blocks~\hyperref[D:gpart]{60}--\hyperref[L:rootsn]{66}); the reduction to the quantities $\Phi_b$ (blocks~\hyperref[D:count]{70}--\hyperref[L:sumd]{73}); and the final bookkeeping with the deduction of the theorem (blocks~\hyperref[D:par]{90}--\hyperref[T:main]{101}). Delicate: the power saving (blocks~\hyperref[L:ident]{16}--\hyperref[L:saving]{26}); the rigidity of $g$-parts and the fibre bound (Lemmas~\hyperref[L:rigid]{67} and \hyperref[L:fibre]{68}); the replacement of the phases $\delta_b$ by values of a smooth function, and the spacing argument (blocks~\hyperref[D:curve]{74}--\hyperref[L:E]{86}); and the large $g$-part (blocks~\hyperref[L:mdiv]{87}--\hyperref[L:largeg]{89}). The key lemmas are Lemmas~\hyperref[L:saving]{26}, \hyperref[L:red]{55}, \hyperref[L:fibre]{68}, \hyperref[L:E]{86}, \hyperref[L:largeg]{89} and \hyperref[L:final]{100}.
+
+\paragraph{Prerequisites.} Division with remainder, congruences, greatest common divisors, $p$-adic valuations and the Chinese remainder theorem; the binomial theorem; the mean value theorem, Taylor's theorem with the Lagrange remainder, the fact that a continuous function on a compact interval attains its maximum, and $\int_1^x\frac{dy}y=\log x$; the identity $|e(y)-1|=2|\sin\pi y|$ and the inequalities $|\sin\pi y|\ge2\|y\|$, $|\sin y|\le|y|$ and $\sin y\ge2y/\pi$ for $0\le y\le\pi/2$; and the properties $\|x-y\|\le\|x\|+\|y\|$ and $\|nx\|\le|n|\,\|x\|$ ($n\in\Z$) of the distance to the nearest integer. No result from the literature is imported, and no computer calculation is used. In the Lean formalization the algebraic prerequisites are taken from Lean and Mathlib, and the analytic ones are the fields of the structure \texttt{KnownResults} in \texttt{PalindromicPowers/\allowbreak Assumptions.lean}, documented in \texttt{palindromic\_powers\_lean/\allowbreak assumptions.md} and proved from Mathlib in \texttt{PalindromicPowers/\allowbreak Discharge.lean}; no published result is assumed.
+
+\paragraph{About this document.} This document follows the Human Friendly Form of~\cite{HFF}. After the mark $\maltese$ the proof consists only of definitions, lemmas and remarks, numbered in one sequence; every lemma is proved directly below its statement in fewer than $300$ visible characters (the length is shown in grey at the end of each proof); every block cites, by number, each earlier block whose notation or results it uses; and remarks carry no logical weight. This is the \emph{Lean-friendly version}: its statements are those of the Lean formalization \texttt{palindromic\_powers\_lean}, and every definition, lemma and theorem names its Lean counterpart in a grey line below the statement (the Lean declarations of block $n$ have docstrings beginning \texttt{[HFF n]}). The correspondence follows fixed conventions: the digit $n_i$ is \texttt{digit g n i}; $\min(A,H/y)$ is \texttt{minDiv A H y}, which is $A$ for $y=0$ (the convention $H/0=\infty$); $\|x\|$ is \texttt{distZ x}; and all constants are explicit: ``$A\ll B$ for $L$ large'' becomes $\exists\,C_1,L_0\ \forall L\ge L_0:\ A\le C_1B$, and $\varepsilon_*$, $u_*$, $c$, $C$, $t'$ and the parameters of Definition~\hyperref[D:par]{90} are given by formulas. A table of notation is in \texttt{hff/LEAN\_CONVENTIONS.md}. The dependency graph can be explored in the accompanying map, \texttt{palindromic\_powers\_hff\_lean\_map.html}. The document was written by Claude (Anthropic), from the accompanying paper~\cite{Pal}, and revised to match the Lean statements.
+
+\HFFmark
+
+\begin{hffdef}[Conventions]\label{D:conv}
+Throughout, $g\ge2$ and $k\ge2$ are fixed integers. We write $e(x)=e^{2\pi ix}$, $\|x\|$ for the distance from $x\in\R$ to the nearest integer, $\log$ for the natural logarithm, and $n\bmod q\in\{0,\dots,q-1\}$ for the remainder of $n\in\Z$ on division by an integer $q\ge1$. For real $A$, $H$, $y$, $\min(A,H/y)$ has its usual meaning if $y\ne0$, and $\min(A,H/0):=A$ (the convention $H/0=\infty$). ``For $L$ large'' means for all $L\ge L_0$, where $L_0$ depends only on $g$ and $k$; and ``$A\ll B$ for $L$ large'' means: there are $C_1$ and $L_0$, depending only on $g$ and $k$, with $|A|\le C_1B$ for all $L\ge L_0$.
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{e}, \texttt{distZ}, \texttt{minDiv}\par}
+\end{hffdef}
+
+\begin{hfflem}[Digits]\label{L:digits}
+For $j\ge0$, the map $(n_0,\dots,n_{j-1})\mapsto\sum_{i<j}n_ig^i$ is a bijection from $\{0,\dots,g-1\}^j$ onto $\{0,\dots,g^j-1\}$ (Definition~\hyperref[D:conv]{1}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{digits\_bijection}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 174/300}The image lies in $[0,(g-1)\sum_{i<j}g^i]=[0,g^j-1]$, and both sets have $g^j$ elements, so it suffices to show injectivity. If $\sum_in_ig^i=\sum_in'_ig^i$, reducing modulo $g$ gives $n_0=n'_0$; subtract, divide by $g$, and use induction on $j$.
+\end{proof}
+
+\begin{hffdef}[Digits and reversal]\label{D:digits}
+For integers $n,i\ge0$, the $i$-th \emph{digit} of $n$ is $n_i:=\lfloor n/g^i\rfloor\bmod g\in\{0,\dots,g-1\}$. For $j\ge0$ put $\rev_j(n):=\sum_{i<j}n_ig^{j-1-i}$ (Definition~\hyperref[D:conv]{1}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{digit}, \texttt{rev}\par}
+\end{hffdef}
+
+\begin{hfflem}[Blocks of digits]\label{L:window}
+Let $n\ge0$ have digits $n_r$, and let $0\le i\le i'$ (Definition~\hyperref[D:digits]{3}). Then $n\bmod g^i=\sum_{r<i}n_rg^r$ and $\lfloor n/g^i\rfloor\bmod g^{i'-i}=\sum_{i\le r<i'}n_rg^{r-i}$ (Definition~\hyperref[D:conv]{1}). Moreover, if $j\ge0$ and $d_r\in\{0,\dots,g-1\}$ for $r<j$, then the digits of $\sum_{r<j}d_rg^r$ are $d_0,\dots,d_{j-1}$ (in positions $0,\dots,j-1$).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{digit\_window}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 213/300}The first claim follows by induction on $i$ from $n\bmod g^{i+1}=n\bmod g^i+g^in_i$. The second is the first for $\lfloor n/g^i\rfloor$, whose $r$-th digit is $n_{i+r}$, as $\lfloor\lfloor n/g^i\rfloor/g^r\rfloor= \lfloor n/g^{i+r}\rfloor$. For the third, $m:=\sum_{r<j}d_rg^r<g^j$ (Lemma~\hyperref[L:digits]{2}), so $m=m\bmod g^j=\sum_{r<j}m_rg^r$; now use the uniqueness in Lemma~\hyperref[L:digits]{2}.
+\end{proof}
+
+\begin{hfflem}[Reversal is an involution]\label{L:inv}
+Let $j\ge0$. For every $n\ge0$, $\rev_j(n)<g^j$ and the digits of $\rev_j(n)$ in positions $i<j$ are $n_{j-1-i}$; and $\rev_j(\rev_j(n))=n$ if $n<g^j$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:digits]{3}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{rev\_involution}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 145/300}As $\rev_j(n)=\sum_{i<j}n_{j-1-i}g^i$ with all $n_{j-1-i}\le g-1$, $\rev_j(n)<g^j$ by Lemma~\hyperref[L:digits]{2}, and its digits are the $n_{j-1-i}$ by Lemma~\hyperref[L:window]{4}. So $\rev_j(\rev_j(n))=\sum_{i<j}n_ig^i=n\bmod g^j$ (Lemma~\hyperref[L:window]{4}), which is $n$ if $n<g^j$.
+\end{proof}
+
+\begin{hfflem}[Geometric sums]\label{L:geom}
+For $\theta\in\R$ and an integer $n\ge1$, $\bigl|\sum_{z=0}^{n-1}e(z\theta)\bigr|\le\min\bigl(n,\frac1{2\|\theta\|}\bigr)$ (Definition~\hyperref[D:conv]{1}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{geom\_sum\_le}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 117/300}Each term has modulus $1$. If $\theta\notin\Z$, the sum is $(e(n\theta)-1)/(e(\theta)-1)$, of modulus at most $2/|e(\theta)-1|=1/|\sin\pi\theta|\le1/(2\|\theta\|)$, since $|\sin\pi\theta|\ge2\|\theta\|$.
+\end{proof}
+
+\begin{hfflem}[Harmonic numbers]\label{L:harm1}
+For every integer $n\ge1$, $\sum_{j=1}^n\frac1j\le1+\log n$ (Definition~\hyperref[D:conv]{1}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{harmonic\_le}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 78/300}For $j\ge2$, $\frac1j\le\int_{j-1}^j\frac{dx}x$, as $\frac1x\ge\frac1j$ on $[j-1,j]$. Summing over $2\le j\le n$ gives $\sum_{j=1}^n\frac1j\le1+\int_1^n\frac{dx}x=1+\log n$.
+\end{proof}
+
+\begin{hfflem}[An odd harmonic sum]\label{L:harm}
+For every integer $R\ge1$, $\sum_{0<|j|\le R/2}\frac1{2|j|-1}\le2+\log R$ (Definition~\hyperref[D:conv]{1}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{odd\_harmonic\_le}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 97/300}For $R=1$ the sum is empty. For $R\ge2$ it is $2\sum_{1\le j\le R/2}\frac1{2j-1}\le 2+2\int_1^{R/2}\frac{dx}{2x-1}=2+\log(R-1)$, since $\frac1{2j-1}\le\int_{j-1}^{j}\frac{dx}{2x-1}$ for $j\ge2$.
+\end{proof}
+
+\begin{hffdef}[Reversal transform]\label{D:psi}
+Let $s\ge1$ and $Q:=g^s$. For $\ell,a\in\Z$ put $\Psi_\ell(a):=\sum_{m=0}^{Q-1}e\bigl(-(\ell\rev_s(m)+am)/Q\bigr)$, $M(\ell):=\max_{0\le a<Q}|\Psi_\ell(a)|$ and $S(s):=\sum_{0<|\ell|<Q}M(\ell)$. For $\theta\in\R$ let $f(\theta):=\frac1g\bigl|\sum_{d=0}^{g-1}e(d\theta)\bigr|$, and for $0\le i<s$ let $\theta_i=\theta_i(\ell,a):=(\ell g^{s-1-i}+ag^i)/Q$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:digits]{3}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{Psi}, \texttt{Mmax}, \texttt{Ssum}, \texttt{fdig}, \texttt{theta}\par}
+\end{hffdef}
+
+\begin{hfflem}[Periodicity]\label{L:per}
+$\Psi_\ell(a)$ depends only on $\ell\bmod Q$ and $a\bmod Q$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:digits]{3} and \hyperref[D:psi]{9}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{Psi\_periodic}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 113/300}Changing $\ell$ or $a$ by a multiple of $Q$ changes each argument $-(\ell\rev_s(m)+am)/Q$ by an integer, as $\rev_s(m)$ and $m$ are integers, and $e$ has period $1$.
+\end{proof}
+
+\begin{hfflem}[Product formula]\label{L:prod}
+For all $\ell,a\in\Z$: $|\Psi_\ell(a)|=Q\prod_{i=0}^{s-1}f(\theta_i(\ell,a))$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:psi]{9}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{norm\_Psi\_eq}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 204/300}For $0\le m<Q$, $m=\sum_{i<s}m_ig^i$ (Definition~\hyperref[D:digits]{3} and Lemma~\hyperref[L:window]{4}), so $\ell\rev_s(m)+am=\sum_im_i(\ell g^{s-1-i}+ag^i)=Q\sum_im_i\theta_i$; and $(m_i)_{i<s}$ runs over $\{0,\dots,g-1\}^s$ as $m$ does (Lemmas~\hyperref[L:digits]{2} and \hyperref[L:window]{4}). So $\Psi_\ell(a)=\prod_{i<s}\sum_{d<g}e(-d\theta_i)$; each factor is the conjugate of $\sum_{d<g}e(d\theta_i)$, of modulus $gf(\theta_i)$.
+\end{proof}
+
+\begin{hfflem}[Fourier inversion]\label{L:fourier}
+For $\ell\in\Z$ and $0\le n<Q$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:digits]{3} and \hyperref[D:psi]{9}): \[e(-\ell\rev_s(n)/Q)=Q^{-1}\sum_{a=0}^{Q-1}\Psi_\ell(a)e(an/Q).\]
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{fourier\_inversion}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 150/300}By Definition~\hyperref[D:psi]{9} the right side is $Q^{-1}\sum_{m<Q}e(-\ell\rev_s(m)/Q)\sum_{a<Q}e(a(n-m)/Q)$. The inner sum is $Q$ if $m=n$, and $0$ otherwise, since it sums the powers of the $Q$-th root of unity $e((n-m)/Q)\ne1$.
+\end{proof}
+
+\begin{hfflem}[Zero frequency]\label{L:zero}
+If $Q\nmid\ell$, then $\Psi_\ell(0)=0$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:digits]{3} and \hyperref[D:psi]{9}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{Psi\_zero}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 107/300}By Lemma~\hyperref[L:inv]{5}, $n=\rev_s(m)$ runs over $\{0,\dots,Q-1\}$ as $m$ does. So $\Psi_\ell(0)=\sum_{n<Q}\omega^n$ with $\omega:=e(-\ell/Q)$, and $\omega\ne1=\omega^Q$; the sum is $(\omega^Q-1)/(\omega-1)=0$.
+\end{proof}
+
+\begin{hfflem}[Shape of $f$]\label{L:f}
+$f$ is continuous and $1$-periodic, $0\le f\le1$, and $f(\theta)<1$ for $\theta\notin\Z$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:psi]{9}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{fdig\_shape}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 152/300}Continuity and periodicity are clear, and $f\le1$ by the triangle inequality. If $f(\theta)=1$, equality holds there, so the unit vectors $e(d\theta)$, $d<g$, coincide; as $g\ge2$, $e(\theta)=e(0)=1$, i.e.\ $\theta\in\Z$.
+\end{proof}
+
+\begin{hfflem}[Uniform gap]\label{L:gap}
+Let $\varepsilon_*:=1/(g^2(g+1))$ and $u_*:=\bigl(\sup_{\varepsilon_*\le\theta\le1-\varepsilon_*}f(\theta)\bigr)^{1/2}$. Then $0\le u_*<1$, and $f(\theta)\le u_*^2$ whenever $\|\theta\|\ge\varepsilon_*$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:psi]{9}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{epsStar}, \texttt{uStar}, \texttt{uStar\_spec}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 173/300}As $g\ge2$, $0<\varepsilon_*<1/2$. By Lemma~\hyperref[L:f]{14}, $f$ is continuous, $\ge0$, and $<1$ on the compact set $[\varepsilon_*,1-\varepsilon_*]$, which contains no integer; so the supremum is a maximum, and $0\le u_*^2<1$. If $\|\theta\|\ge\varepsilon_*$ then $\theta-\lfloor\theta\rfloor\in[\varepsilon_*,1-\varepsilon_*]$, and $f$ has period $1$.
+\end{proof}
+
+\begin{hfflem}[Consecutive arguments]\label{L:ident}
+For $\ell,a\in\Z$ and $0\le i\le s-2$: $g\theta_i-\theta_{i+1}=(g^2-1)\ell/g^{i+2}$, where $\theta_i=\theta_i(\ell,a)$ (Definition~\hyperref[D:psi]{9}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{theta\_consecutive}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 96/300}By Definition~\hyperref[D:psi]{9}, $g\theta_i=\ell/g^{i}+a/g^{s-1-i}$ and $\theta_{i+1}=\ell/g^{i+2}+a/g^{s-1-i}$. Subtracting gives $\ell/g^i-\ell/g^{i+2}=(g^2-1)\ell/g^{i+2}$.
+\end{proof}
+
+\begin{hfflem}[One of two is far]\label{L:far2}
+For $0\le i\le s-2$: $\max(\|\theta_i\|,\|\theta_{i+1}\|)\ge\|(g^2-1)\ell/g^{i+2}\|/(g+1)$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:psi]{9}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{one\_of\_two\_far}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 133/300}For $x,y\in\R$ and integers $n\ge1$, $\|x-y\|\le\|x\|+\|y\|$ and $\|nx\|\le n\|x\|$. By Lemma~\hyperref[L:ident]{16}, $\|(g^2-1)\ell/g^{i+2}\|=\|g\theta_i-\theta_{i+1}\|\le g\|\theta_i\|+\|\theta_{i+1}\|$, which is at most $(g+1)\max(\|\theta_i\|,\|\theta_{i+1}\|)$.
+\end{proof}
+
+\begin{hffdef}[Bad indices]\label{D:bad}
+For $\ell\in\Z$ let $\ell':=(g^2-1)\ell\bmod Q$. For integers $n\ge1$ and $r\ge0$ with digits $r_i$, an index $0\le i\le n-2$ is \emph{bad} for $r$ if $(r_{i+1},r_i)$ is neither $(0,0)$ nor $(g-1,g-1)$; let $\beta_n(r)$ be the number of these bad indices, and $b(\ell):=\beta_s(\ell')$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:digits]{3} and \hyperref[D:psi]{9}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{twist}, \texttt{IsBad}, \texttt{badCount}, \texttt{bBad}\par}
+\end{hffdef}
+
+\begin{hfflem}[Twisting is bijective]\label{L:twist}
+The map $\ell\mapsto\ell'$ is a bijection of $\{0,\dots,Q-1\}$, and $\ell'$ (hence $b(\ell)$) depends only on $\ell\bmod Q$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:psi]{9} and \hyperref[D:bad]{18}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{twist\_bijective}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 139/300}A prime factor of $Q=g^s$ divides $g^2$, hence not $g^2-1$; so $\gcd(g^2-1,Q)=1$, and multiplication by $g^2-1$ is invertible modulo $Q$. Also $\ell'$, and hence $b(\ell)$, depends only on $\ell\bmod Q$.
+\end{proof}
+
+\begin{hfflem}[Fractional parts]\label{L:frac}
+For $0\le i\le s-2$: $(g^2-1)\ell/g^{i+2}\equiv v_i+w_i\pmod1$, where $v_i:=\ell'_{i+1}/g+\ell'_i/g^2$ and $0\le w_i<1/g^2$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:digits]{3}, \hyperref[D:psi]{9} and \hyperref[D:bad]{18}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{frac\_parts}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 159/300}As $i+2\le s$ and $(g^2-1)\ell\equiv\ell'\pmod{g^s}$, the number $((g^2-1)\ell-\ell')/g^{i+2}$ is an integer, and $\ell'/g^{i+2}\equiv(\ell'\bmod g^{i+2})/g^{i+2}=\sum_{j\le i+1}\ell'_jg^{j-i-2}\pmod1$ (Lemma~\hyperref[L:window]{4}). This is $v_i+w_i$ with $w_i:=\sum_{j<i}\ell'_jg^{j-i-2}<g^{-2}$.
+\end{proof}
+
+\begin{hfflem}[Bad indices are far]\label{L:badfar}
+If $0\le i\le s-2$ is bad for $\ell'$, then $\|(g^2-1)\ell/g^{i+2}\|\ge1/g^2$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:bad]{18}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{bad\_far}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 157/300}By Lemma~\hyperref[L:frac]{20} it suffices that $1/g^2\le v_i+w_i\le1-1/g^2$. Now $v_i$ is a multiple of $1/g^2$ in $[0,1-1/g^2]$; it is $0$ only if $\ell'_{i+1}=\ell'_i=0$, and $1-1/g^2$ only if both are $g-1$. So $1/g^2\le v_i\le1-2/g^2$, while $0\le w_i<1/g^2$.
+\end{proof}
+
+\begin{hfflem}[Bad pair product]\label{L:badprod}
+If $0\le i\le s-2$ is bad for $\ell'$ (Definition~\hyperref[D:bad]{18}), then $f(\theta_i)f(\theta_{i+1})\le u_*^2$ for every $a\in\Z$ (Definition~\hyperref[D:psi]{9} and Lemma~\hyperref[L:gap]{15}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{bad\_pair\_prod}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 122/300}By Lemmas~\hyperref[L:far2]{17} and \hyperref[L:badfar]{21}, $\max(\|\theta_i\|,\|\theta_{i+1}\|)\ge1/(g^2(g+1))=\varepsilon_*$ (Definition~\hyperref[D:conv]{1}). By Lemma~\hyperref[L:gap]{15} that factor is at most $u_*^2$, and the other is at most $1$ by Lemma~\hyperref[L:f]{14}.
+\end{proof}
+
+\begin{hfflem}[Sup bound]\label{L:sup}
+For every $\ell\in\Z$: $M(\ell)\le Q\,u_*^{b(\ell)}$ (Definition~\hyperref[D:psi]{9}, Definition~\hyperref[D:bad]{18} and Lemma~\hyperref[L:gap]{15}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{Mmax\_le}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 147/300}Fix $a$ and let $\varphi_i:=f(\theta_i)\in[0,1]$ (Lemma~\hyperref[L:f]{14}). As $\varphi\le\varphi^{1/2}$ on $[0,1]$, $\prod_{i<s}\varphi_i\le\prod_{i\le s-2}(\varphi_i\varphi_{i+1})^{1/2}$, the right side being $(\varphi_0\varphi_{s-1})^{1/2}\prod_{0<i<s-1}\varphi_i$ if $s\ge2$. Use Lemma~\hyperref[L:badprod]{22} for bad $i$, then Lemma~\hyperref[L:prod]{11}.
+\end{proof}
+
+\begin{hfflem}[Weighted digit strings]\label{L:strings}
+Let $0\le u\le1$ and $n\ge1$. Then $\sum_{0\le r<g^n}u^{\beta_n(r)}\le g(1+(g-1)u)^{n-1}$ (Definitions~\hyperref[D:digits]{3} and \hyperref[D:bad]{18}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{weighted\_strings}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 213/300}By Lemmas~\hyperref[L:digits]{2} and \hyperref[L:window]{4}, $r\mapsto(r_i)_{i<n}$ maps $[0,g^n)$ bijectively onto $\{0,\dots,g-1\}^n$, and $\beta_n(r)=:\beta(d)$ depends only on $d=(r_i)_{i<n}$. Induct on $n$; for $n=1$ the sum is $g$. Appending $d_n$ to $d$ raises $\beta$ by $1$ unless $d_n=d_{n-1}\in\{0,g-1\}$, so $\sum_{d_n}u^{\beta(d,d_n)}\le u^{\beta(d)}(1+(g-1)u)$, as $gu\le1+(g-1)u$.
+\end{proof}
+
+\begin{hfflem}[Sum over frequencies]\label{L:twsum}
+Let $\rho:=1+(g-1)u_*$. Then $\rho<g$, and $S(s)\le2gQ\rho^{s-1}$ (Definition~\hyperref[D:psi]{9} and Lemma~\hyperref[L:gap]{15}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{rho}, \texttt{Ssum\_le}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 185/300}$\rho<g$ as $u_*<1$. By Lemma~\hyperref[L:per]{10}, each residue mod $Q$ is $\ell\bmod Q$ for at most two $\ell$ with $0<|\ell|<Q$, so $S(s)\le2\sum_{0\le\ell<Q}M(\ell)$ (Definition~\hyperref[D:conv]{1}). By Lemma~\hyperref[L:sup]{23}, Lemma~\hyperref[L:twist]{19} and Definition~\hyperref[D:bad]{18} this is at most $2Q\sum_{0\le r<Q}u_*^{\beta_s(r)}$, and Lemma~\hyperref[L:strings]{24} ($u=u_*$, $n=s$) applies.
+\end{proof}
+
+\begin{hfflem}[Power saving]\label{L:saving}
+Let $\rho$ be as in Lemma~\hyperref[L:twsum]{25}, $c:=\min\bigl(1-\log_g\rho,\frac{\log2}{2\log g}\bigr)$ and $C:=2g$. Then $0<c\le\frac{\log2}{2\log g}$, $C\ge1$, and $S(s)\le Cg^{(2-c)s}$ for all $s\ge1$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:psi]{9}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{cSave}, \texttt{CSave}, \texttt{power\_saving}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 108/300}As $\rho<g$ (Lemma~\hyperref[L:twsum]{25}), $c>0$. Also $1\le\rho\le g^{1-c}$, as $u_*\ge0$ (Lemma~\hyperref[L:gap]{15}), so Lemma~\hyperref[L:twsum]{25} gives $S(s)\le2gQ\rho^{s-1}\le2g\cdot g^s\cdot g^{(1-c)s}=Cg^{(2-c)s}$; and $C=2g\ge1$.
+\end{proof}
+
+\begin{hffrem}[The size of $c$]\label{R:saving}
+Digit reversal is used in an essential way only in Lemmas~\hyperref[L:prod]{11} and \hyperref[L:ident]{16}, in which $a$ cancels. The constant $c$ of Lemma~\hyperref[L:saving]{26} is tiny; the accompanying paper~\cite{Pal} bounds $S(s)$ much more precisely, with a certified computation over windows of consecutive digits. Here only $c>0$ matters.
+\end{hffrem}
+
+\begin{hffdef}[Palindromes]\label{D:pal}
+For $L\ge1$ let $\cP_L$ be the set of integers $g^{L-1}\le n<g^L$ whose digits $n_i$ ($i<L$) satisfy $n_i=n_{L-1-i}$ for all $i<L$. Let $\cQ_L:=\{x\in\N:x^k\in\cP_L\}$ and $X:=g^{L/k}$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:digits]{3}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{palSet}, \texttt{powSet}, \texttt{Xr}\par}
+\end{hffdef}
+
+\begin{hfflem}[Many palindromes]\label{L:npal}
+For $L\ge1$: $\#\cP_L\ge g^{L/2-1}$, and hence $X\le(g\#\cP_L)^{2/k}$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:pal]{28}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{many\_palindromes}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 208/300}Choose digits $n_i$ for $(L-1)/2\le i<L$ with $n_{L-1}\ne0$, and put $n_i:=n_{L-1-i}$ for smaller $i$. Then $n:=\sum_in_ig^i\in[g^{L-1},g^L)$ has these digits (Lemma~\hyperref[L:window]{4}), so it lies in $\cP_L$, and distinct choices give distinct $n$ (Lemma~\hyperref[L:digits]{2}). So $\#\cP_L\ge(g-1)g^{\lceil L/2\rceil-1}\ge g^{L/2-1}$, and $X=(g^{L/2})^{2/k}$.
+\end{proof}
+
+\begin{hfflem}[First digits of palindromes]\label{L:first}
+Let $n\in\cP_L$ and $1\le t\le L$. Then $g\nmid n$ and $\lfloor n/g^{L-t}\rfloor=\rev_t(n\bmod g^t)$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:digits]{3} and \hyperref[D:pal]{28}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{first\_digits}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 162/300}Let $n_r$ be the digits of $n$. By Lemma~\hyperref[L:window]{4}, $n\bmod g^t=\sum_{r<t}n_rg^r$ has digits $n_r$, $r<t$, and $\lfloor n/g^{L-t}\rfloor=\sum_{r<t}n_{L-t+r}g^r$ as $n<g^L$. As $n_{L-t+r}=n_{t-1-r}$, the latter is $\rev_t(n\bmod g^t)$. For $t=1$: $n\bmod g=\lfloor n/g^{L-1}\rfloor\ge1$, as $n\ge g^{L-1}$.
+\end{proof}
+
+\begin{hffdef}[Nodes]\label{D:node}
+Let $1\le t\le L$. A \emph{node} (of level $t$) is an integer $0\le b<g^t$ with $g\nmid b^k$. For a node $b$ put $T_b:=\rev_t(b^k\bmod g^t)$, $y_0:=T_bg^{L-t}$, $y_1:=y_0+g^{L-t}$, $I_b:=[y_0^{1/k},y_1^{1/k})$ (so an integer $x\ge0$ lies in $I_b$ iff $y_0\le x^k<y_1$) and $|I_b|:=y_1^{1/k}-y_0^{1/k}$; let $Z_b$ be the number of integers $x\in I_b$ with $x\equiv b\pmod{g^t}$, and if $Z_b\ge1$ let $x_b$ be the least of them. Let $Z(t):=Xg^{-2t}$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:digits]{3} and \hyperref[D:pal]{28}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{IsNode}, \texttt{Tb}, \texttt{y0}, \texttt{y1}, \texttt{InI}, \texttt{Ilen}, \texttt{nodeElems}, \texttt{Zb}, \texttt{xb}, \texttt{Zt}\par}
+\end{hffdef}
+
+\begin{hfflem}[Leading digit]\label{L:lead}
+For a node $b$: $g^{t-1}\le T_b<g^t$ (Definition~\hyperref[D:node]{31}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{leading\_digit}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 130/300}Let $n:=b^k\bmod g^t$, with digits $n_i$ (Definition~\hyperref[D:digits]{3}). By Lemma~\hyperref[L:window]{4}, $n_0=n\bmod g=b^k\bmod g\ne0$, as $g\nmid b^k$ (Definition~\hyperref[D:conv]{1}). So $T_b=\rev_t(n)\ge n_0g^{t-1}\ge g^{t-1}$, and $T_b<g^t$ by Lemma~\hyperref[L:inv]{5}.
+\end{proof}
+
+\begin{hfflem}[The tree]\label{L:tree}
+Let $1\le t\le L$ and $x\in\cQ_L$. Then $b:=x\bmod g^t$ is a node, $x\in I_b$, and $x=x_b+g^tz$ for an integer $0\le z<Z_b$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:pal]{28} and \hyperref[D:node]{31}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{tree}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 150/300}By Lemma~\hyperref[L:first]{30} with $n=x^k$, $g\nmid x^k$, so $g\nmid b^k$ as $b\equiv x\pmod g$. Also $b^k\bmod g^t=x^k\bmod g^t$, so Lemma~\hyperref[L:first]{30} gives $\lfloor x^k/g^{L-t}\rfloor=T_b$, i.e.\ $x\in I_b$. As $x\equiv b\pmod{g^t}$, $x$ is one of the $Z_b$ integers $x_b+g^tz$, $0\le z<Z_b$, in $I_b$.
+\end{proof}
+
+\begin{hfflem}[Interval endpoints]\label{L:mvt}
+For a node $b$: $g^{L-1}\le y_0<y_1\le\min(g^L,2y_0)$, and $|I_b|=g^{L-t}/(k\xi^{1-1/k})$ for some $\xi\in[y_0,y_1]$ (Definition~\hyperref[D:node]{31}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{interval\_endpoints}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 131/300}By Lemma~\hyperref[L:lead]{32}, $g^{t-1}\le T_b$ and $T_b+1\le g^t$, which gives the inequalities, as $y_1/y_0=1+1/T_b\le2$. The formula for $|I_b|=y_1^{1/k}-y_0^{1/k}$ is the mean value theorem for $y\mapsto y^{1/k}$.
+\end{proof}
+
+\begin{hfflem}[Node sizes]\label{L:sizes}
+For a node $b$: $Z(t)/k\le|I_b|g^{-t}\le gZ(t)/k$ and $Z(t)/k-1\le Z_b\le gZ(t)/k+1$ (Definitions~\hyperref[D:pal]{28} and \hyperref[D:node]{31}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{node\_sizes}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 156/300}By Lemma~\hyperref[L:mvt]{34}, $g^{(L-1)(1-1/k)}\le\xi^{1-1/k}\le g^{L(1-1/k)}$, so $|I_b|$ lies between $g^{L/k-t}/k=g^tZ(t)/k$ and $g^{L/k-t+1}/k$. An interval of length $\lambda$ contains between $\lambda g^{-t}-1$ and $\lambda g^{-t}+1$ integers $\equiv b\pmod{g^t}$.
+\end{proof}
+
+\begin{hfflem}[Nodes are not empty]\label{L:nonempty}
+Let $1\le t\le L$ with $Z(t)\ge2k$. Then every node $b$ of level $t$ has $1\le Z_b\le2gZ(t)/k$ (Definition~\hyperref[D:node]{31}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{nodes\_nonempty}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 60/300}By Lemma~\hyperref[L:sizes]{35}, $Z_b\ge Z(t)/k-1\ge1$ and $Z_b\le gZ(t)/k+1\le2gZ(t)/k$, as $gZ(t)/k\ge1$.
+\end{proof}
+
+\begin{hffdef}[Phases]\label{D:phase}
+Fix integers $t,s$ with $1\le s\le t-2$ and $2(t+s)\le L$; let $Q:=g^s$ (as in Definition~\hyperref[D:psi]{9}), $Z:=Z(t)$ and $\Lambda:=1+\log(1+6g^t)$. For a node $b$ of level $t$ put $\beta_b:=kb^{k-1}\bmod Q$ and $d_b:=\gcd(\beta_b,Q)$. If moreover $Z_b\ge1$, then for $\ell,a\in\Z$ and an integer $z\ge0$ put $\alpha_b:=\lfloor x_b^k/g^t\rfloor\bmod Q$, $\delta_b:=kx_b^{k-1}g^{2t+s-L}$, $\theta_{b,\ell,a}:=(\ell\delta_b+a\beta_b)/Q$ and $n_b(z):=(\alpha_b+\beta_bz)\bmod Q$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:node]{31}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{Admissible}, \texttt{LambdaT}, \texttt{alphaB}, \texttt{betaB}, \texttt{dB}, \texttt{deltaB}, \texttt{thetaB}, \texttt{nB}\par}
+\end{hffdef}
+
+\begin{hffdef}[Archimedean phases]\label{D:arch}
+In the setting of Definition~\hyperref[D:phase]{37}, for real $z\ge0$ put $\phi_b(z):=(x_b+g^tz)^k/g^{L-t-s}-T_bg^s$ and $\lambda_b(z):=\phi_b(0)+\delta_bz$; and for real $T>0$ put $\delta(T):=k(Tg^{L-t})^{1-1/k}g^{2t+s-L}$ (Definition~\hyperref[D:node]{31}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{phiB}, \texttt{lambdaB}, \texttt{deltaT}\par}
+\end{hffdef}
+
+\begin{hfflem}[Formula for $\delta(T)$]\label{L:delta}
+For $T>0$: $\delta(T)=\frac{kQ}Z(T/g^t)^{1-1/k}$; hence $kQ/(gZ)\le\delta(T)\le kQ/Z$ for $g^{t-1}\le T\le g^t$ (Definitions~\hyperref[D:pal]{28}, \hyperref[D:node]{31}, \hyperref[D:phase]{37} and \hyperref[D:arch]{38}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{deltaT\_formula}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 127/300}As $Tg^{L-t}=(T/g^t)g^L$, $g^{L(1-1/k)}=g^L/X$ and $g^{2t}/X=1/Z$, \[\delta(T)=k\Bigl(\frac T{g^t}\Bigr)^{1-1/k}\frac{g^L}X\,g^{2t+s-L}=\frac{kQ}Z\Bigl(\frac T{g^t}\Bigr)^{1-1/k}.\] Finally, if $T/g^t\in[1/g,1]$ then $(T/g^t)^{1-1/k}\in[1/g,1]$.
+\end{proof}
+
+\begin{hfflem}[$\delta_b$ is near $\delta(T_b)$]\label{L:deltab}
+For a node $b$ of level $t$ with $Z_b\ge1$: $\delta(T_b)\le\delta_b\le(1+g^{1-t})\delta(T_b)$ (Definitions~\hyperref[D:node]{31}, \hyperref[D:phase]{37} and \hyperref[D:arch]{38}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{deltaB\_near}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 136/300}With $y_0,y_1$ as in Definition~\hyperref[D:node]{31}, $\delta_b/\delta(T_b)=(x_b/y_0^{1/k})^{k-1}$ and $x_b\in I_b=[y_0^{1/k},y_1^{1/k})$. So the ratio lies in $[1,(y_1/y_0)^{1-1/k}]\subset[1,1+1/T_b]\subset[1,1+g^{1-t}]$, by Lemma~\hyperref[L:lead]{32}.
+\end{proof}
+
+\begin{hfflem}[Lower block]\label{L:low}
+Let $b$ be a node of level $t$ with $Z_b\ge1$, and $x=x_b+g^tz$ with an integer $z\ge0$. Then $\lfloor x^k/g^t\rfloor\bmod Q=n_b(z)$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:node]{31} and \hyperref[D:phase]{37}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{lower\_block}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 120/300}By the binomial theorem $x^k=x_b^k+kx_b^{k-1}g^tz+g^{2t}N$ with $N\in\Z$, so $\lfloor x^k/g^t\rfloor=\lfloor x_b^k/g^t\rfloor+kx_b^{k-1}z+g^tN$. Reduce modulo $Q=g^s$, using $s\le t$ and $x_b\equiv b\pmod{g^t}$.
+\end{proof}
+
+\begin{hfflem}[Upper block]\label{L:up}
+Let $b$ be a node of level $t$ with $Z_b\ge1$, and $x=x_b+g^tz\in I_b$ with an integer $z\ge0$. Then $\lfloor x^k/g^{L-t-s}\rfloor\bmod Q=\lfloor\phi_b(z)\rfloor$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:node]{31}, \hyperref[D:phase]{37} and \hyperref[D:arch]{38}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{upper\_block}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 114/300}As $x\in I_b$, $T_bg^{L-t}\le x^k<(T_b+1)g^{L-t}$, so $\lfloor x^k/g^{L-t}\rfloor=T_b$. Hence $\lfloor x^k/g^{L-t-s}\rfloor\bmod g^s=\lfloor x^k/g^{L-t-s}\rfloor-g^s\lfloor x^k/g^{L-t}\rfloor =\lfloor x^k/g^{L-t-s}-T_bg^s\rfloor=\lfloor\phi_b(z)\rfloor$.
+\end{proof}
+
+\begin{hfflem}[Taylor bound]\label{L:taylor}
+Let $b$ be a node of level $t$ with $Z_b\ge1$, $z\ge0$ real and $x_b+g^tz\in I_b$. Then $0\le\phi_b(z)-\lambda_b(z)\le\frac{k(k-1)}2y_1^{1-2/k}|I_b|^2g^{t+s-L}$, with $y_1$ as in Definition~\hyperref[D:node]{31} (Definitions~\hyperref[D:conv]{1}, \hyperref[D:node]{31}, \hyperref[D:phase]{37} and \hyperref[D:arch]{38}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{taylor\_bound}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 148/300}$\phi_b$ is convex with $\phi_b'(0)=\delta_b$, so $\phi_b\ge\lambda_b$. By Taylor, $\phi_b(z)-\lambda_b(z)=\phi_b''(\zeta)z^2/2$ with $\zeta\in[0,z]$, and $\phi_b''(\zeta)z^2=k(k-1)(x_b+g^t\zeta)^{k-2}(g^tz)^2g^{t+s-L}$, where $x_b+g^t\zeta\le y_1^{1/k}$ and $g^tz\le|I_b|$.
+\end{proof}
+
+\begin{hfflem}[Archimedean linearisation]\label{L:arch}
+In the setting of Lemma~\hyperref[L:taylor]{43}, $0\le\phi_b(z)-\lambda_b(z)\le1/g$ (Definitions~\hyperref[D:node]{31}, \hyperref[D:phase]{37} and \hyperref[D:arch]{38}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{arch\_linearisation}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 125/300}By Lemma~\hyperref[L:mvt]{34}, $|I_b|\le g^{L-t}/(ky_0^{1-1/k})$, $y_1\le2y_0$ and $y_0\ge g^{L-1}$. So the bound of Lemma~\hyperref[L:taylor]{43} is at most $\frac{k-1}{2k}(y_1/y_0)^{1-2/k}y_0^{-1}g^{L-t+s}\le\frac{k-1}kg^{s+1-t}\le\frac1g$, as $s\le t-2$.
+\end{proof}
+
+\begin{hfflem}[The palindrome condition]\label{L:local}
+Let $b$ be a node of level $t$ with $Z_b\ge1$, and $x=x_b+g^tz\in\cQ_L\cap I_b$ with an integer $z\ge0$. Then $\lambda_b(z)-\rev_s(n_b(z))\in[-1/g,1)$ (Definitions~\hyperref[D:digits]{3}, \hyperref[D:pal]{28}, \hyperref[D:node]{31}, \hyperref[D:phase]{37} and \hyperref[D:arch]{38}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{palindrome\_condition}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 143/300}Let $N_r$ be the digits of $x^k$. By Lemmas~\hyperref[L:low]{41}, \hyperref[L:up]{42} and \hyperref[L:window]{4}, $n_b(z)=\sum_{i<s}N_{t+i}g^i$ and $\lfloor\phi_b(z)\rfloor=\sum_{i<s}N_{L-t-s+i}g^i$, which is $\rev_s(n_b(z))$ as $N_r=N_{L-1-r}$. Now use $0\le\phi_b(z)-\lfloor\phi_b(z)\rfloor<1$ and Lemma~\hyperref[L:arch]{44}.
+\end{proof}
+
+\begin{hfflem}[Fej\'er identity]\label{L:fejer}
+For an integer $K\ge1$ and $x\in\R$: $\sum_{|j|<K}(1-|j|/K)e(jx)=K^{-1}\bigl|\sum_{i=0}^{K-1}e(ix)\bigr|^2$ (Definition~\hyperref[D:conv]{1}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{fejer\_identity}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 98/300}The right side is $K^{-1}\sum_{i,i'<K}e((i-i')x)$, and for $|j|<K$ there are exactly $K-|j|$ pairs $(i,i')$ with $0\le i,i'<K$ and $i-i'=j$.
+\end{proof}
+
+\begin{hfflem}[Fej\'er lower bound]\label{L:fejerlow}
+If $K\ge1$ is an integer and $|x|\le1/(2K)$, then (Definition~\hyperref[D:conv]{1}) \[K^{-1}\Bigl|\sum_{i<K}e(ix)\Bigr|^2\ge4K/\pi^2.\]
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{fejer\_lower}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 104/300}For $x=0$ the left side is $K$. Otherwise \[\Bigl|\sum_{i<K}e(ix)\Bigr|=\frac{|\sin\pi Kx|}{|\sin\pi x|}\ge\frac{2K|x|}{\pi|x|}=\frac{2K}\pi,\] as $\sin y\ge2y/\pi$ for $0\le y\le\pi/2$ and $|\sin y|\le|y|$.
+\end{proof}
+
+\begin{hfflem}[Size of $K$]\label{L:K}
+For $Q$ as in Definition~\hyperref[D:psi]{9}, $K:=\lfloor2Q/3\rfloor$ satisfies $Q/3\le K\le2Q/3<Q$ and $K\ge1$.
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{Kq}, \texttt{Kq\_size}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 86/300}$K\le2Q/3$ by definition, and $Q=g^s\ge2$ (Definition~\hyperref[D:conv]{1}). If $Q=2$ then $K=1\ge2/3$, and if $Q\ge3$ then $K>2Q/3-1\ge Q/3\ge1$.
+\end{proof}
+
+\begin{hffdef}[Majorant]\label{D:maj}
+With $Q$ and $K$ as in Lemma~\hyperref[L:K]{48}, let $F(y):=\frac{\pi^2}{4K^2}\bigl|\sum_{i=0}^{K-1}e(i(y-1/4)/Q)\bigr|^2$ for $y\in\R$, and $\hat F_j:=\frac{\pi^2}{4K}\bigl(1-\frac{|j|}K\bigr)e\bigl(-\frac j{4Q}\bigr)$ for integers $|j|<K$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:psi]{9}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{Fmaj}, \texttt{Fhat}\par}
+\end{hffdef}
+
+\begin{hfflem}[The majorant is large]\label{L:majlarge}
+$F\ge0$, and $F(y)\ge1$ for $y\in[-1/2,1]$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:psi]{9} and \hyperref[D:maj]{49}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{maj\_large}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 120/300}$F\ge0$ is clear. For $y\in[-1/2,1]$, $x:=(y-1/4)/Q$ satisfies $|x|\le3/(4Q)\le1/(2K)$ by Lemma~\hyperref[L:K]{48}, so by Lemma~\hyperref[L:fejerlow]{47}, $F(y)=\frac{\pi^2}{4K}\cdot K^{-1}\bigl|\sum_{i<K}e(ix)\bigr|^2\ge\frac{\pi^2}{4K}\cdot\frac{4K}{\pi^2}=1$.
+\end{proof}
+
+\begin{hfflem}[Majorant coefficients]\label{L:majcoef}
+$F(y)=\sum_{|j|<K}\hat F_je(jy/Q)$ for all $y\in\R$, and $|\hat F_j|\le8/Q$ for $|j|<K$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:psi]{9} and \hyperref[D:maj]{49}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{maj\_coeffs}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 121/300}By Lemma~\hyperref[L:fejer]{46} with $x=(y-1/4)/Q$, $F(y)=\frac{\pi^2}{4K}\sum_{|j|<K}(1-|j|/K)e(-j/(4Q))e(jy/Q)=\sum_{|j|<K}\hat F_je(jy/Q)$. And $|\hat F_j|\le\pi^2/(4K)\le3\pi^2/(4Q)<8/Q$ by Lemma~\hyperref[L:K]{48}.
+\end{proof}
+
+\begin{hfflem}[Counting in a node]\label{L:innode}
+For a node $b$ of level $t$ with $Z_b\ge1$: $\#\{x\in\cQ_L:x\equiv b\pmod{g^t}\}\le\sum_{z=0}^{Z_b-1}F(\lambda_b(z)-\rev_s(n_b(z)))$ (Definitions~\hyperref[D:digits]{3}, \hyperref[D:pal]{28}, \hyperref[D:node]{31}, \hyperref[D:phase]{37}, \hyperref[D:arch]{38} and \hyperref[D:maj]{49}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{count\_in\_node}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 167/300}By Lemma~\hyperref[L:tree]{33} each such $x$ is $x_b+g^tz$ for some $0\le z<Z_b$, and lies in $I_b$; distinct $x$ give distinct $z$. For these $z$ the summand is $\ge1$ by Lemmas~\hyperref[L:local]{45} and \hyperref[L:majlarge]{50}, as $[-1/g,1)\subset[-1/2,1]$ (Definition~\hyperref[D:conv]{1}), and all summands are $\ge0$.
+\end{proof}
+
+\begin{hfflem}[Twisted sums]\label{L:twisted}
+For a node $b$ of level $t$ with $Z_b\ge1$ and $0<|j|<Q$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:digits]{3}, \hyperref[D:psi]{9}, \hyperref[D:node]{31}, \hyperref[D:phase]{37} and \hyperref[D:arch]{38}): \[\Bigl|\sum_{z<Z_b}e\Bigl(\frac{j(\lambda_b(z)-\rev_s(n_b(z)))}Q\Bigr)\Bigr|\le \frac1Q\sum_{0<a<Q}|\Psi_j(a)|\min\Bigl(Z_b,\frac1{2\|\theta_{b,j,a}\|}\Bigr).\]
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{twisted\_sum}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 138/300}By Lemma~\hyperref[L:fourier]{12} with $n=n_b(z)\equiv\alpha_b+\beta_bz$, and as $\lambda_b(z)=\lambda_b(0)+\delta_bz$, the sum is $Q^{-1}\sum_{a<Q}\Psi_j(a)e(\omega_a)\sum_{z<Z_b}e(z\theta_{b,j,a})$ with real $\omega_a$. Apply Lemma~\hyperref[L:geom]{6}; the term $a=0$ vanishes by Lemma~\hyperref[L:zero]{13}.
+\end{proof}
+
+\begin{hffdef}[Error term]\label{D:err}
+For a set $\cB$ of nodes $b$ of level $t$ with $Z_b\ge1$ let \[E(\cB):=\sum_{b\in\cB}\sum_{0<|j|<Q}\sum_{0<a<Q}|\Psi_j(a)|\min\Bigl(Z_b,\frac1{2\|\theta_{b,j,a}\|}\Bigr)\] (Definitions~\hyperref[D:conv]{1}, \hyperref[D:psi]{9}, \hyperref[D:node]{31} and \hyperref[D:phase]{37}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{Eerr}\par}
+\end{hffdef}
+
+\begin{hfflem}[Reduction]\label{L:red}
+For $\cB$ as in Definition~\hyperref[D:err]{54}: $\#\{x\in\cQ_L:x\bmod g^t\in\cB\}\le\frac8Q\sum_{b\in\cB}Z_b+\frac8{Q^2}E(\cB)$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:pal]{28} and \hyperref[D:node]{31}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{reduction}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 175/300}For $b\in\cB$, by Lemmas~\hyperref[L:innode]{52} and \hyperref[L:majcoef]{51} the count is at most $\sum_{|j|<K}|\hat F_j|\bigl|\sum_{z<Z_b}e(j(\lambda_b(z)-\rev_s(n_b(z)))/Q)\bigr|$ (Definitions~\hyperref[D:digits]{3}, \hyperref[D:phase]{37}, \hyperref[D:arch]{38} and \hyperref[D:maj]{49}). The term $j=0$ is at most $8Z_b/Q$; bound the others by Lemma~\hyperref[L:twisted]{53}, as $K<Q$ (Lemma~\hyperref[L:K]{48}). Sum over $\cB$.
+\end{proof}
+
+\begin{hfflem}[Multiples]\label{L:mult}
+Let $Q\ge1$ be any integer, $\beta\in\Z$ and $d:=\gcd(\beta,Q)$. As $a$ runs over $0,\dots,Q-1$, $a\beta\bmod Q$ runs over the multiples $rd$, $0\le r<Q/d$, each exactly $d$ times; equivalently, $\sum_{0\le a<Q}\varphi(a\beta\bmod Q)=d\sum_{0\le r<Q/d}\varphi(rd)$ for every function $\varphi$ (Definition~\hyperref[D:conv]{1}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{multiples\_sum}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 181/300}$a\mapsto a\beta\bmod Q$ is a homomorphism of $\Z/Q\Z$ whose image is generated by $\beta$, hence by $\gcd(\beta,Q)=d$; so the image is $d\Z/Q\Z$, of size $Q/d$, and each value is taken $Q/(Q/d)=d$ times. The second form follows by grouping the $a$ by the value $rd$.
+\end{proof}
+
+\begin{hfflem}[Distances]\label{L:dist}
+Let $R\ge1$ and $j$ be integers with $0<|j|\le R/2$, and let $|w_0|\le1/2$. Then $\|(j+w_0)/R\|\ge(2|j|-1)/(2R)$ (Definition~\hyperref[D:conv]{1}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{dist\_lower}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 82/300}For $n\in\Z$: if $n=0$ then $|j+w_0-nR|\ge|j|-1/2$; if $n\ne0$ then $|j+w_0-nR|\ge R-|j|-1/2\ge|j|-1/2$. Divide by $R$.
+\end{proof}
+
+\begin{hfflem}[Sum over residues]\label{L:ressum}
+Let $R\ge1$ be an integer, $w\in\R$ and $A\ge1$. Then $\sum_{r=0}^{R-1}\min\bigl(A,\frac1{2\|(w+r)/R\|}\bigr)\le\min\bigl(A,\frac R{2\|w\|}\bigr)+R(2+\log R)$ (Definition~\hyperref[D:conv]{1}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{residue\_sum}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 167/300}Write $w=n_0+w_0$ with $n_0\in\Z$ and $|w_0|=\|w\|\le1/2$. As $r$ runs mod $R$, $j\equiv n_0+r$ runs over the integers in $(-R/2,R/2]$, and $\|(w+r)/R\|=\|(j+w_0)/R\|$. The term $j=0$ is $\min(A,R/(2\|w\|))$; bound the others by Lemmas~\hyperref[L:dist]{57} and \hyperref[L:harm]{8}.
+\end{proof}
+
+\begin{hfflem}[Sum over $a$]\label{L:asum}
+Let $y\in\R$, $\beta\in\Z$, $d:=\gcd(\beta,Q)$ and $A\ge1$. Then (Definitions~\hyperref[D:conv]{1} and \hyperref[D:psi]{9}) \[\sum_{a=0}^{Q-1}\min\Bigl(A,\frac1{2\|(y+a\beta)/Q\|}\Bigr)\le\min\Bigl(dA,\frac Q{2\|y/d\|}\Bigr)+Q(2+\log Q).\]
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{a\_sum}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 137/300}By Lemma~\hyperref[L:mult]{56} the sum is $d\sum_{r<Q/d}\min(A,\frac1{2\|(y+rd)/Q\|})$, and $(y+rd)/Q=(y/d+r)/(Q/d)$. By Lemma~\hyperref[L:ressum]{58} with $R=Q/d$ and $w=y/d$, it is at most $d\min(A,\frac{Q/d}{2\|y/d\|})+d\frac Qd(2+\log\frac Qd)$.
+\end{proof}
+
+\begin{hffdef}[$g$-parts]\label{D:gpart}
+For a prime $p$ let $v_p$ be the $p$-adic valuation. For an integer $n\ge1$ let $m_g(n):=\prod_{p\mid g}p^{v_p(n)}$, the product over the primes $p$ dividing $g$. Let $\omega(g)$ be the number of primes dividing $g$, $P$ the largest of them, and for real $D\ge1$ let $\tau(D)$ be the number of integers $1\le m\le D$ all of whose prime factors divide $g$ (Definition~\hyperref[D:conv]{1}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{mg}, \texttt{omegaG}, \texttt{Pmax}, \texttt{tauG}\par}
+\end{hffdef}
+
+\begin{hfflem}[Few $g$-smooth numbers]\label{L:tau}
+$\tau$ is non-decreasing, and $\tau(D)\le(1+\log_2D)^{\omega(g)}$ for $D\ge1$ (Definition~\hyperref[D:gpart]{60}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{tauG\_bound}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 109/300}Monotonicity is clear. Each $m$ counted is $\prod_{p\mid g}p^{e_p}$ with $p^{e_p}\le D$, so $0\le e_p\le\log_2D$: at most $1+\log_2D$ choices for each of the $\omega(g)$ exponents.
+\end{proof}
+
+\begin{hfflem}[Common factor of $\beta_b$]\label{L:gcd}
+If $b$ is a node of level $t$ and $m:=m_g(b)$, then $d_b$ divides $Q$ and $km^{k-1}$ (Definitions~\hyperref[D:node]{31}, \hyperref[D:phase]{37} and \hyperref[D:gpart]{60}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{dB\_dvd}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 110/300}As $g\nmid b^k$, $b\ne0$; write $b=mu$ with $\gcd(u,g)=1$. Then $\beta_b\equiv km^{k-1}u^{k-1}\pmod Q$, so $d_b=\gcd(km^{k-1}u^{k-1},Q)=\gcd(km^{k-1},Q)$, as $u$ is coprime to $Q$.
+\end{proof}
+
+\begin{hfflem}[Binomial congruence]\label{L:binom}
+Let $p$ be a prime, $j\ge2$ and $u,w\in\Z$. Then $(u+p^jw)^k\equiv u^k+ku^{k-1}p^jw\pmod{p^{v_p(k)+j+1}}$ (Definition~\hyperref[D:gpart]{60}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{binomial\_congr}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 110/300}The other terms are $\binom kiu^{k-i}p^{ij}w^i$, $2\le i\le k$. From $i\binom ki=k\binom{k-1}{i-1}$ and $v_p(i)\le i-1$ we get $v_p\binom ki\ge v_p(k)-i+1$, and $ij-i+1\ge j+1$, as $(i-1)(j-1)\ge1$.
+\end{proof}
+
+\begin{hfflem}[Close roots agree]\label{L:close}
+Let $p$ be a prime, $N>v_p(k)$, and $u,u'\in\Z$ with $p\nmid u$, $u^k\equiv u'^k\pmod{p^N}$ and $u\equiv u'\pmod{p^2}$. Then $u\equiv u'\pmod{p^{N-v_p(k)}}$ (Definition~\hyperref[D:gpart]{60}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{close\_roots\_agree}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 155/300}If not, let $j$ be maximal with $p^j\mid u'-u$; then $2\le j<N-v_p(k)$ and $u'=u+p^jw$ with $p\nmid w$. By Lemma~\hyperref[L:binom]{63}, $u'^k-u^k\equiv ku^{k-1}p^jw\pmod{p^{v_p(k)+j+1}}$, whose valuation is $v_p(k)+j<N$, contradicting $p^N\mid u'^k-u^k$.
+\end{proof}
+
+\begin{hfflem}[Few roots modulo $p^N$]\label{L:rootsp}
+Let $p$ be a prime, $N\ge1$ and $w\in\Z$ with $p\nmid w$. Then $u^k\equiv w\pmod{p^N}$ has at most $p^{v_p(k)+2}$ solutions $u\bmod p^N$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:gpart]{60}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{roots\_mod\_prime\_pow}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 165/300}If $N\le v_p(k)+2$ this is clear. Otherwise every solution has $p\nmid u$, and by Lemma~\hyperref[L:close]{64}, solutions in the same class mod $p^2$ agree mod $p^{N-v_p(k)}$. So each of the $p^2$ classes contains at most $p^{v_p(k)}$ solutions mod $p^N$.
+\end{proof}
+
+\begin{hfflem}[Few roots modulo $n$]\label{L:rootsn}
+Let $n\ge1$ have all its prime factors dividing $g$, and $\gcd(w,n)=1$. Then $u^k\equiv w\pmod n$ has at most $kg^2$ solutions $u\bmod n$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:gpart]{60}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{roots\_mod\_n}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 158/300}By the Chinese remainder theorem the number of solutions is the product over $p\mid n$ of the numbers of solutions mod $p^{v_p(n)}$, each at most $p^{v_p(k)+2}$ by Lemma~\hyperref[L:rootsp]{65}. Finally $\prod_{p\mid g}p^{v_p(k)}\le k$ and $\prod_{p\mid g}p^2\le g^2$.
+\end{proof}
+
+\begin{hfflem}[Rigid $g$-part]\label{L:rigid}
+Let $D\ge1$ with $D^k<2^t$, and let $b,b'$ be nodes of level $t$ with $T_b=T_{b'}$ and $m:=m_g(b)\le D$ (Definitions~\hyperref[D:node]{31} and \hyperref[D:gpart]{60}). Then $m^k\mid g^t$ and $m_g(b')=m$.
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{rigid\_gpart}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 129/300}Let $p\mid g$ and $v:=v_p(b)$. Then $p^{kv}\le m^k<2^t\le p^{v_p(g)t}$, so $kv<v_p(g)t$; hence $m^k\mid g^t$. By Lemma~\hyperref[L:inv]{5}, $b^k\equiv b'^k\pmod{g^t}$, so $b'^k\equiv b^k\pmod{p^{v_p(g)t}}$, $v_p(b'^k)=kv$ and $v_p(b')=v$.
+\end{proof}
+
+\begin{hfflem}[Fibres]\label{L:fibre}
+Let $D\ge1$ with $D^k<2^t$, and $b$ a node of level $t$ with $m:=m_g(b)\le D$. Then at most $kg^2m^{k-1}$ nodes $b'$ of level $t$ satisfy $T_{b'}=T_b$ (Definitions~\hyperref[D:node]{31} and \hyperref[D:gpart]{60}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{fibre\_bound}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 168/300}By Lemma~\hyperref[L:rigid]{67}, $m^k\mid g^t$, $b=mu$, $b'=mu'$ with $u,u'$ coprime to $g$. By Lemma~\hyperref[L:inv]{5}, $b'^k\equiv b^k\pmod{g^t}$, so $u'^k\equiv u^k\pmod n$, $n:=g^t/m^k$. By Lemma~\hyperref[L:rootsn]{66}, $u'$ lies in at most $kg^2$ classes mod $n$, each with $m^{k-1}$ lifts mod $g^t/m$, which fix $b'$.
+\end{proof}
+
+\begin{hffrem}[The archimedean count]\label{R:arch}
+The next blocks bound the sums over $a$ and over the nodes. The $g$-adic phases $a\beta_b$ are summed for each node separately (Lemma~\hyperref[L:asum]{59}). The averaging over nodes comes from the archimedean phases $\ell\delta_b$: they are close to the values of the monotone function $\ell\delta(T)$ at $T=T_b$, these values are well spaced, and few nodes share the same $T_b$ (Lemma~\hyperref[L:fibre]{68}).
+\end{hffrem}
+
+\begin{hffdef}[Data for one frequency]\label{D:count}
+In the setting of Definition~\hyperref[D:phase]{37}, let $0<|\ell|<Q$ and $D\ge1$ with $D^k<2^t$, and suppose $Z\ge2k$, so that every node $b$ of level $t$ has $Z_b\ge1$ (Lemma~\hyperref[L:nonempty]{36}). Let $\cB$ be a set of nodes $b$ of level $t$ with $m_g(b)\le D$ (Definitions~\hyperref[D:node]{31} and \hyperref[D:gpart]{60}). Let $Z_+:=gZ/k+1$, and for $b\in\cB$ let $y_b:=\ell\delta_b/d_b$, $\Phi_b:=\min\bigl(d_bZ_+,\frac Q{2\|y_b\|}\bigr)$ and $W_\ell:=\sum_{b\in\cB}\sum_{0<a<Q}\min\bigl(Z_b,\frac1{2\|\theta_{b,\ell,a}\|}\bigr)$ (Definition~\hyperref[D:conv]{1}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{FreqSetting}, \texttt{Zplus}, \texttt{yB}, \texttt{PhiB}, \texttt{Wl}\par}
+\end{hffdef}
+
+\begin{hfflem}[From $W_\ell$ to $\Phi_b$]\label{L:wphi}
+$W_\ell\le\sum_{b\in\cB}\Phi_b+g^tQ(2+\log Q)$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:phase]{37} and \hyperref[D:count]{70}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{W\_to\_Phi}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 147/300}By Lemmas~\hyperref[L:nonempty]{36} and \hyperref[L:sizes]{35}, $1\le Z_b\le Z_+$. For each $b\in\cB$ apply Lemma~\hyperref[L:asum]{59} with $y=\ell\delta_b$, $\beta=\beta_b$ and $A=Z_b$, after adding the term $a=0$, and use $\min(d_bZ_b,\cdot)\le\min(d_bZ_+,\cdot)$. Finally $\#\cB\le g^t$ (Definition~\hyperref[D:node]{31}).
+\end{proof}
+
+\begin{hfflem}[Small phases]\label{L:small}
+If $b\in\cB$ and $|\ell|\delta_b\le d_b/2$, then $\Phi_b\le gZd_b/(2k|\ell|)$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:phase]{37} and \hyperref[D:count]{70}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{small\_phases}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 103/300}Then $|y_b|\le1/2$, so $\|y_b\|=|\ell|\delta_b/d_b$ and $\Phi_b\le Qd_b/(2|\ell|\delta_b)$. By Lemmas~\hyperref[L:deltab]{40}, \hyperref[L:delta]{39} and \hyperref[L:lead]{32}, $\delta_b\ge\delta(T_b)\ge kQ/(gZ)$ (Definitions~\hyperref[D:node]{31} and \hyperref[D:arch]{38}).
+\end{proof}
+
+\begin{hfflem}[Sum of $d_b$]\label{L:sumd}
+$\sum_{b\in\cB}d_b\le k\tau(D)D^{k-2}g^t$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:phase]{37}, \hyperref[D:gpart]{60} and \hyperref[D:count]{70}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{sum\_dB}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 189/300}For $b\in\cB$ let $m:=m_g(b)\le D$. By Lemma~\hyperref[L:gcd]{62}, $d_b\le km^{k-1}$, and $m\mid g^t$ by Lemma~\hyperref[L:rigid]{67} (with $b'=b$). Exactly $g^t/m$ integers in $[0,g^t)$ are divisible by $m$, and $m$ takes at most $\tau(D)$ values; so the sum is at most $\tau(D)\max_m(g^t/m)km^{k-1}\le k\tau(D)D^{k-2}g^t$, as $k\ge2$.
+\end{proof}
+
+\begin{hffdef}[Phase curve]\label{D:curve}
+In the setting of Definition~\hyperref[D:count]{70}, for an integer $d\ge1$ and real $T>0$ let $h_d(T):=\ell\delta(T)/d$; let $\cT_d$ be the set of integers $T\in[g^{t-1},g^t)$ with $|h_d(T)|\ge1/3$, and put $\mu:=(1-1/k)|h_d(g^t)|/g^t$ and $\Delta:=|h_d(g^t)-h_d(g^{t-1})|$ (both depend on $d$) (Definitions~\hyperref[D:conv]{1} and \hyperref[D:arch]{38}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{hd}, \texttt{Tset}, \texttt{muD}, \texttt{DeltaD}\par}
+\end{hffdef}
+
+\begin{hfflem}[Perturbation]\label{L:pert}
+If $b\in\cB$ and $|\ell|\delta_b>d_b/2$, then $T_b\in\cT_{d_b}$ and $|y_b-h_{d_b}(T_b)|\le\varepsilon_b:=kg^{s-1}/(d_bZ)$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:node]{31}, \hyperref[D:phase]{37}, \hyperref[D:arch]{38}, \hyperref[D:count]{70} and \hyperref[D:curve]{74}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{epsB}, \texttt{perturbation}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 145/300}Let $h:=h_{d_b}(T_b)$. By Lemmas~\hyperref[L:deltab]{40}, \hyperref[L:delta]{39} and \hyperref[L:lead]{32}, $|y_b-h|\le|\ell|g^{1-t}\delta(T_b)/d_b\le g^sg^{1-t}kQ/(Zd_b)\le\varepsilon_b$, as $s\le t-2$. Also $|h|\ge|\ell|\delta_b/((1+g^{1-t})d_b)>1/(2+2g^{1-t})\ge1/3$, as $t\ge3$; and $g^{t-1}\le T_b<g^t$.
+\end{proof}
+
+\begin{hfflem}[Replacement]\label{L:repl}
+In the setting of Lemma~\hyperref[L:pert]{75}, $\Phi_b\le5\min\bigl(d_bZ_+,\frac Q{2\|h_{d_b}(T_b)\|}\bigr)$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:node]{31}, \hyperref[D:phase]{37}, \hyperref[D:count]{70} and \hyperref[D:curve]{74}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{replacement}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 146/300}Let $h:=h_{d_b}(T_b)$. If $\|h\|\ge2\varepsilon_b$ then $\|y_b\|\ge\|h\|/2$, which gives the factor $2$. Otherwise $\frac Q{2\|h\|}>\frac Q{4\varepsilon_b}=\frac{gd_bZ}{4k}$ and $d_bZ_+\ge\frac{gd_bZ}k$, so the right side is at least $\frac{5gd_bZ}{4k}\ge d_bZ_+\ge\Phi_b$, as $gZ\ge4k$.
+\end{proof}
+
+\begin{hfflem}[Shape of $h_d$]\label{L:shape}
+On $[g^{t-1},g^t]$, $|h_d|$ is non-decreasing, $h_d'(T)=(1-1/k)h_d(T)/T$, $|h_d'|$ is non-increasing, and $|h_d'(T)|\le g\mu$, where $\mu=|h_d'(g^t)|$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:phase]{37} and \hyperref[D:curve]{74}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{hd\_shape}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 170/300}By Lemma~\hyperref[L:delta]{39}, $h_d(T)=\frac{\ell kQ}{dZ}(T/g^t)^{1-1/k}$. This gives the first two claims, and $|h_d'(T)|$ is a constant times $T^{-1/k}$, so it is non-increasing, $|h_d'(g^t)|=(1-\frac1k)|h_d(g^t)|/g^t=\mu$, and $|h_d'(T)|/\mu=(g^t/T)^{1/k}\le g$.
+\end{proof}
+
+\begin{hfflem}[Gaps]\label{L:gaps}
+Suppose $\cT_d\ne\emptyset$. Then $\mu\ge1/(6g^t)$, and $|h_d(T')-h_d(T)|\ge\mu$ for distinct $T,T'\in\cT_d$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:curve]{74}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{gaps}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 128/300}By Lemma~\hyperref[L:shape]{77}, $|h_d(g^t)|\ge|h_d(T)|\ge1/3$ for $T\in\cT_d$, so $\mu=(1-\frac1k)|h_d(g^t)|/g^t\ge1/(6g^t)$. Also $|h_d'|\ge\mu$ on $[g^{t-1},g^t]$, and $|T'-T|\ge1$; apply the mean value theorem.
+\end{proof}
+
+\begin{hfflem}[Range]\label{L:range}
+If $\cT_d\ne\emptyset$, then $h_d(T)$ lies between $h_d(g^{t-1})$ and $h_d(g^t)$ for every $T\in\cT_d$; moreover $\Delta\le g^{t+1}\mu$ and $\Delta\le kg^{2s}/(dZ)$ (Definitions~\hyperref[D:phase]{37}, \hyperref[D:count]{70} and \hyperref[D:curve]{74}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{range\_bound}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 180/300}By Lemma~\hyperref[L:delta]{39}, $h_d(T)=\frac{\ell kQ}{dZ}(T/g^t)^{1-1/k}$ is monotone and of constant sign on $[g^{t-1},g^t]$. This gives the first claim, and $\Delta\le|h_d(g^t)|\le|\ell|kQ/(dZ)\le kg^{2s}/(dZ)$, as $|\ell|<Q=g^s$. By Lemma~\hyperref[L:shape]{77} and the mean value theorem, $\Delta\le g^t\cdot g\mu$.
+\end{proof}
+
+\begin{hfflem}[Spacing near one integer]\label{L:space1}
+Let $\mu>0$, $m\ge1$, $A,H>0$ be real and $n\in\Z$. Let finitely many reals $y_i\in(n-\frac12,n+\frac12]$ with integer weights $w_i\ge0$ be such that every half-open interval $[a,a+\mu)$ carries total weight $\sum_{y_i\in[a,a+\mu)}w_i\le m$. Then $\sum_iw_i\min(A,\frac H{|y_i-n|})\le2mA+2m\frac H\mu(1+\log(1+\frac1\mu))$ (Definition~\hyperref[D:conv]{1}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{spacing\_one}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 170/300}Let $J:=\lfloor1/(2\mu)\rfloor+1$. The intervals $[n+j\mu,n+(j+1)\mu)$ and $[n-(j+1)\mu,n-j\mu)$, $0\le j<J$, cover $(n-\frac12,n+\frac12]$, each carries weight at most $m$, and the $y_i$ in them have $|y_i-n|\ge j\mu$. Use $\sum_{1\le j<J}\frac1j\le1+\log(1+\frac1\mu)$ (Lemma~\hyperref[L:harm1]{7}).
+\end{proof}
+
+\begin{hfflem}[Spacing sum]\label{L:space}
+Let $\mu>0$, $m\ge1$, $A,H>0$, $\Delta\ge0$ and $a_0$ be real. Let finitely many reals $y_i\in[a_0,a_0+\Delta]$ with integer weights $w_i\ge0$ be such that every half-open interval of length $\mu$ carries total weight at most $m$. Then $\sum_iw_i\min(A,\frac H{\|y_i\|})\le m(\Delta+2)\bigl(2A+2\frac H\mu(1+\log(1+\frac1\mu))\bigr)$ (Definition~\hyperref[D:conv]{1}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{spacing\_sum}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 127/300}Each $y_i$ lies in $(n-\frac12,n+\frac12]$ for a unique $n\in\Z$, and then $\|y_i\|=|y_i-n|$. These $n$ lie in $[a_0-\frac12,a_0+\Delta+\frac12)$, so at most $\Delta+2$ of them occur. Apply Lemma~\hyperref[L:space1]{80} for each $n$.
+\end{proof}
+
+\begin{hfflem}[Count over $T$]\label{L:countT}
+Let $d\ge1$ be an integer with $\cT_d\ne\emptyset$, let $\kappa\ge1$ be real, and let integers $0\le N_T\le\kappa$ be given for $T\in\cT_d$. Then (Definitions~\hyperref[D:conv]{1}, \hyperref[D:phase]{37}, \hyperref[D:count]{70} and \hyperref[D:curve]{74}) \[\sum_{T\in\cT_d}N_T\min\Bigl(dZ_+,\frac Q{2\|h_d(T)\|}\Bigr)\le\kappa(\Delta+2)\Bigl(2dZ_++\frac Q\mu\Lambda\Bigr).\]
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{count\_over\_T}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 202/300}Apply Lemma~\hyperref[L:space]{81} to the numbers $h_d(T)$, $T\in\cT_d$, with weights $N_T$, $m=\kappa$, $A=dZ_+$, $H=Q/2$, and the interval between $h_d(g^{t-1})$ and $h_d(g^t)$ (Lemma~\hyperref[L:range]{79}): by Lemma~\hyperref[L:gaps]{78}, $\mu>0$, each half-open interval of length $\mu$ contains $h_d(T)$ for at most one $T$, and $1+\log(1+1/\mu)\le\Lambda$.
+\end{proof}
+
+\begin{hfflem}[Count over $T$, explicitly]\label{L:countT2}
+If moreover $d\le kD^{k-1}$, the bound in Lemma~\hyperref[L:countT]{82} is at most $\kappa(4g^{2s+1}+8gD^{k-1}Z+7g^{t+1}Q\Lambda)$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:phase]{37}, \hyperref[D:count]{70} and \hyperref[D:curve]{74}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{count\_over\_T\_explicit}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 121/300}By Lemma~\hyperref[L:range]{79}, $dZ_+\Delta\le\frac{2gZ}k\cdot\frac{kg^{2s}}Z=2g^{2s+1}$, as $Z_+\le2gZ/k$ (since $Z\ge2k$). Next $4dZ_+\le8gD^{k-1}Z$. Finally $(\Delta+2)/\mu\le g^{t+1}+2/\mu\le g^{t+1}+12g^t\le7g^{t+1}$ by Lemma~\hyperref[L:gaps]{78}.
+\end{proof}
+
+\begin{hfflem}[Large phases]\label{L:large}
+Let $\cB_2:=\{b\in\cB:|\ell|\delta_b>d_b/2\}$. Then (Definitions~\hyperref[D:conv]{1}, \hyperref[D:node]{31}, \hyperref[D:phase]{37}, \hyperref[D:gpart]{60} and \hyperref[D:count]{70}) \[\sum_{b\in\cB_2}\Phi_b\le5\tau(kD^{k-1})kg^2D^{k-1}(4g^{2s+1}+8gD^{k-1}Z+7g^{t+1}Q\Lambda).\]
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{large\_phases}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 183/300}By Lemmas~\hyperref[L:pert]{75} and \hyperref[L:repl]{76}, $\Phi_b\le5\min(d_bZ_+,\frac Q{2\|h_{d_b}(T_b)\|})$, $T_b\in\cT_{d_b}$ (Definition~\hyperref[D:curve]{74}). By Lemma~\hyperref[L:gcd]{62}, $d_b\mid Q$ and $d_b\le kD^{k-1}$: at most $\tau(kD^{k-1})$ values. For each value $d$ use Lemma~\hyperref[L:countT2]{83} with $\kappa:=kg^2D^{k-1}$ and $N_T:=\#\{b\in\cB_2:d_b=d,T_b=T\}\le\kappa$ (Lemma~\hyperref[L:fibre]{68}).
+\end{proof}
+
+\begin{hfflem}[Bound for $W_\ell$]\label{L:W}
+In the setting of Definition~\hyperref[D:count]{70} (with Definitions~\hyperref[D:conv]{1}, \hyperref[D:phase]{37} and \hyperref[D:gpart]{60}), \[\begin{gathered}W_\ell\le g^tQ(2+\log Q)+\frac{g\tau(D)D^{k-2}Zg^t}{2|\ell|}\\ +5\tau(kD^{k-1})kg^2D^{k-1}(4g^{2s+1}+8gD^{k-1}Z+7g^{t+1}Q\Lambda).\end{gathered}\]
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{W\_bound}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 106/300}By Lemma~\hyperref[L:wphi]{71} it suffices to bound $\sum_{b\in\cB}\Phi_b$. For $b\in\cB\setminus\cB_2$ use Lemma~\hyperref[L:small]{72} and then Lemma~\hyperref[L:sumd]{73}: $\sum\Phi_b\le\frac{gZ}{2k|\ell|}k\tau(D)D^{k-2}g^t$. For $b\in\cB_2$ use Lemma~\hyperref[L:large]{84}.
+\end{proof}
+
+\begin{hfflem}[Bound for $E$]\label{L:E}
+In the setting of Definition~\hyperref[D:phase]{37}, let $D\ge1$ with $D^k<2^t$, suppose $Z\ge2k$, and let $\cB$ be the set of all nodes $b$ of level $t$ with $m_g(b)\le D$, so that $Z_b\ge1$ for $b\in\cB$ (Lemma~\hyperref[L:nonempty]{36}). Then $E(\cB)\le S(s)V+(1+\log Q)Qg\tau(D)D^{k-2}Zg^t$, where $V$ is the sum of the first and last terms in Lemma~\hyperref[L:W]{85} (Definitions~\hyperref[D:conv]{1}, \hyperref[D:psi]{9}, \hyperref[D:node]{31}, \hyperref[D:err]{54} and \hyperref[D:gpart]{60}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{nodesSmall}, \texttt{Vterm}, \texttt{E\_bound}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 154/300}As $|\Psi_\ell(a)|\le M(\ell)$, $E(\cB)\le\sum_{0<|\ell|<Q}M(\ell)W_\ell$, with $W_\ell$ as in Definition~\hyperref[D:count]{70}. Insert Lemma~\hyperref[L:W]{85}. In the middle term use $M(\ell)\le Q$ (each term of $\Psi_\ell(a)$ has modulus $1$) and $\sum_{0<|\ell|<Q}\frac1{2|\ell|}\le1+\log Q$ (Lemma~\hyperref[L:harm1]{7}).
+\end{proof}
+
+\begin{hfflem}[A divisor in a window]\label{L:mdiv}
+Let $D\ge1$ and $n\ge1$ with $m_g(n)>D$. Then $m_g(n)$ has a divisor $m'$ with $D<m'\le PD$ (Definition~\hyperref[D:gpart]{60}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{divisor\_window}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 110/300}Write $m_g(n)=p_1\cdots p_r$ with primes $p_i\mid g$, so $p_i\le P$, and let $m_j:=p_1\cdots p_j$. Then $m_0=1\le D<m_r$; for the least $j$ with $m_j>D$ we have $m_j\le Pm_{j-1}\le PD$.
+\end{proof}
+
+\begin{hfflem}[A good level]\label{L:level}
+Let $L\ge1$, $D\ge1$ with $PD\le X^{\log2/(2\log g)}$, and $t':=\lceil L/(2k)\rceil$. Then $X^{1/2}\le g^{t'}<gX^{1/2}$, $1\le t'\le L$, $Z(t')\le1$, and every divisor $m'\le PD$ of some $m_g(n)$, $n\ge1$, divides $g^{t'}$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:pal]{28}, \hyperref[D:node]{31} and \hyperref[D:gpart]{60}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{tPrime}, \texttt{good\_level}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 167/300}As $X^{1/2}=g^{L/(2k)}$ and $L/(2k)\le t'<L/(2k)+1$, the first claim holds; $1\le t'\le L$ as $0<L/(2k)\le L$; and $Z(t')=Xg^{-2t'}\le1$. For $p\mid g$, $p^{v_p(m')}\le PD\le(X^{1/2})^{\log2/\log g}\le2^{t'}\le p^{v_p(g)t'}$; and $m'$ has no other prime factors.
+\end{proof}
+
+\begin{hfflem}[Large $g$-part]\label{L:largeg}
+Under the hypotheses of Lemma~\hyperref[L:level]{88}, $\#\{x\in\cQ_L:m_g(x)>D\}\le\tau(PD)(g/k+1)gX^{1/2}/D$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:pal]{28}, \hyperref[D:node]{31} and \hyperref[D:gpart]{60}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{large\_gpart}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 197/300}For such $x$ pick $m'$ by Lemma~\hyperref[L:mdiv]{87}; then $m'\mid g^{t'}$ (Lemma~\hyperref[L:level]{88}), so $m'$ divides the node $b:=x\bmod g^{t'}$ (Lemma~\hyperref[L:tree]{33}). For fixed $m'$ there are $g^{t'}/m'<gX^{1/2}/D$ such $b$, each containing at most $Z_b\le g/k+1$ such $x$ (Lemmas~\hyperref[L:tree]{33} and \hyperref[L:sizes]{35}); and $m'$ takes at most $\tau(PD)$ values.
+\end{proof}
+
+\begin{hffdef}[Parameters]\label{D:par}
+Let $c,C$ be as in Lemma~\hyperref[L:saving]{26}, $\eta:=c/(32k)$, $\nu:=(2-c)/(4-c)$, $D:=X^\eta$, $t:=\lfloor L/(k(4-c))\rfloor$ ($=\lfloor\log_gX/(4-c)\rfloor$) and $s:=t-2$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:pal]{28}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{eta}, \texttt{nu}, \texttt{Dpar}, \texttt{tpar}, \texttt{spar}\par}
+\end{hffdef}
+
+\begin{hfflem}[Admissible parameters]\label{L:adm}
+For $L$ large: $t\ge3$, $1\le s\le t-2$, $2(t+s)\le L$, $Z(t)\ge2k$, $g^t\le X^{1/(4-c)}<g^{t+1}$, and $Z(t)\le g^2X^\nu$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:pal]{28}, \hyperref[D:node]{31} and \hyperref[D:par]{90}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{admissible\_params}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 202/300}The fifth claim holds by the definition of $t$, as $X^{1/(4-c)}=g^{L/(k(4-c))}$. As $\log_gX=L/k$ and $k(4-c)\ge6$ (Lemma~\hyperref[L:saving]{26}), $t\ge L/(4k)-1$ and $t\le L/6$, so $t\ge3$ for $L$ large, and $2(t+s)\le4t\le L$. Next, $Z(t)=Xg^{-2t}$ lies between $X^{1-2/(4-c)}=X^\nu$ and $g^2X^\nu$, and $X^\nu\to\infty$, as $c<2$.
+\end{proof}
+
+\begin{hfflem}[Admissible $D$]\label{L:admD}
+For $L$ large: $D^k<2^t$ and $PD\le X^{\log2/(2\log g)}$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:pal]{28}, \hyperref[D:gpart]{60} and \hyperref[D:par]{90}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{admissible\_D}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 142/300}By Lemma~\hyperref[L:saving]{26}, $c\le\frac{\log2}{2\log g}$, so $D^k=X^{c/32}\le X^{\log2/(64\log g)}$ and $PD\le PX^{\log2/(64\log g)}$. By Lemma~\hyperref[L:adm]{91}, $2^t>2^{-1}\cdot2^{\log_gX/(4-c)}\ge2^{-1}X^{\log2/(4\log g)}$. Both claims follow for $L$ large.
+\end{proof}
+
+\begin{hffdef}[The main set of nodes]\label{D:setB}
+Let $L$ be large enough for Lemmas~\hyperref[L:adm]{91} and \hyperref[L:admD]{92}. Then $t$ and $s$ (Definition~\hyperref[D:par]{90}) satisfy the hypotheses of Definition~\hyperref[D:phase]{37}, whose notation ($Q$, $Z=Z(t)$, $\Lambda$, \dots) we use for them, and $D^k<2^t$. Let $\cB$ be the set of nodes $b$ of level $t$ with $m_g(b)\le D$ (Definitions~\hyperref[D:node]{31} and \hyperref[D:gpart]{60}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{Bmain}\par}
+\end{hffdef}
+
+\begin{hfflem}[Main term]\label{L:main}
+For $L$ large: $\frac8Q\sum_{b\in\cB}Z_b\ll X^\nu$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:pal]{28}, \hyperref[D:node]{31}, \hyperref[D:par]{90} and \hyperref[D:setB]{93}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{main\_term}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 73/300}By Lemma~\hyperref[L:adm]{91}, $Z\ge2k$, so Lemma~\hyperref[L:nonempty]{36} gives $\sum_{b\in\cB}Z_b\le g^t\cdot2gZ/k$. Now $g^t/Q=g^2$ and $Z\le g^2X^\nu$ by Lemma~\hyperref[L:adm]{91}.
+\end{proof}
+
+\begin{hfflem}[Auxiliary bounds]\label{L:aux}
+For $L$ large: $S(s)\le CQ^2$, $S(s)\le CX^\nu$, $g^t=g^2Q$, $2+\log Q\le\Lambda\ll L$, and $\tau(D)\le\tau(kD^{k-1})\ll L^{\omega(g)}$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:psi]{9}, \hyperref[D:pal]{28}, \hyperref[D:gpart]{60}, \hyperref[D:par]{90} and \hyperref[D:setB]{93}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{aux\_bounds}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 194/300}By Lemma~\hyperref[L:saving]{26}, $S(s)\le Cg^{(2-c)s}$, which is at most $Cg^{2s}=CQ^2$ and at most $Cg^{(2-c)t}\le CX^\nu$ (Lemma~\hyperref[L:adm]{91}). As $g^t=g^2Q\ge4Q$, $2+\log Q\le1+\log(24Q)\le\Lambda\le1+\log(7g^t)\ll L$. By Lemma~\hyperref[L:tau]{61}, as $X=g^{L/k}$ and $\tau$ is non-decreasing, \[\tau(kD^{k-1})\le(1+\log_2(kX^{k\eta}))^{\omega(g)}\ll L^{\omega(g)}.\]
+\end{proof}
+
+\begin{hfflem}[First error piece]\label{L:err1}
+For $L$ large: $S(s)V/Q^2\ll L^{\omega(g)+1}D^{2k-2}X^\nu$, with $V$ as in Lemma~\hyperref[L:E]{86} for the parameters of Definition~\hyperref[D:setB]{93} (Definitions~\hyperref[D:conv]{1}, \hyperref[D:psi]{9}, \hyperref[D:pal]{28}, \hyperref[D:gpart]{60} and \hyperref[D:par]{90}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{err\_piece1}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 161/300}Write $S=S(s)$. By Lemmas~\hyperref[L:W]{85}, \hyperref[L:aux]{95} and \hyperref[L:adm]{91}, \[\begin{gathered}Sg^tQ(2+\log Q)/Q^2\le g^2S\Lambda\ll LX^\nu,\qquad Sg^{2s+1}/Q^2=gS\ll X^\nu,\\ SD^{k-1}Z/Q^2\le CD^{k-1}Z\ll D^{k-1}X^\nu,\qquad Sg^{t+1}Q\Lambda/Q^2=g^3S\Lambda\ll LX^\nu.\end{gathered}\] Multiply the last three by $\tau(kD^{k-1})D^{k-1}\ll L^{\omega(g)}D^{k-1}$.
+\end{proof}
+
+\begin{hfflem}[Second error piece]\label{L:err2}
+For $L$ large (Definitions~\hyperref[D:conv]{1}, \hyperref[D:pal]{28}, \hyperref[D:gpart]{60}, \hyperref[D:par]{90} and \hyperref[D:setB]{93}): \[(1+\log Q)Qg\tau(D)D^{k-2}Zg^t/Q^2\ll L^{\omega(g)+1}D^{k-2}X^\nu.\]
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{err\_piece2}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 61/300}By Lemma~\hyperref[L:aux]{95}, $g^t/Q=g^2$, $1+\log Q\le\Lambda\ll L$ and $\tau(D)\ll L^{\omega(g)}$; and $Z\le g^2X^\nu$ by Lemma~\hyperref[L:adm]{91}.
+\end{proof}
+
+\begin{hfflem}[Small $g$-part]\label{L:smallg}
+For $L$ large: $\#\{x\in\cQ_L:m_g(x)\le D\}\ll L^{\omega(g)+1}D^{2k-2}X^\nu$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:pal]{28}, \hyperref[D:node]{31}, \hyperref[D:gpart]{60}, \hyperref[D:par]{90} and \hyperref[D:setB]{93}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{small\_gpart}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 153/300}If $m_g(x)\le D$ then $p^{v_p(x)}\le D<2^t\le p^{v_p(g)t}$ for $p\mid g$, so $b:=x\bmod g^t$ has $m_g(b)=m_g(x)$, and $b$ is a node (Lemma~\hyperref[L:tree]{33}); so $b\in\cB$. By Lemmas~\hyperref[L:adm]{91} and \hyperref[L:nonempty]{36}, $Z_b\ge1$ on $\cB$. Apply Lemma~\hyperref[L:red]{55}, then Lemmas~\hyperref[L:main]{94}, \hyperref[L:E]{86}, \hyperref[L:err1]{96} and \hyperref[L:err2]{97}.
+\end{proof}
+
+\begin{hfflem}[Exponents]\label{L:expo}
+$\nu+(2k-2)\eta\le\frac12-\eta$ (Definition~\hyperref[D:par]{90}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{exponents}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 66/300}By Lemma~\hyperref[L:saving]{26}, $0<c<4$, and $\nu=\frac12-\frac c{2(4-c)}\le\frac12-\frac c8=\frac12-4k\eta$; and $(2k-2)\eta+\eta<2k\eta\le4k\eta$.
+\end{proof}
+
+\begin{hfflem}[Counting solutions]\label{L:final}
+For $L$ large: $\#\cQ_L\ll X^{(1-\eta)/2}$ (Definitions~\hyperref[D:conv]{1}, \hyperref[D:pal]{28}, \hyperref[D:gpart]{60} and \hyperref[D:par]{90}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{count\_solutions}\par}
+\end{hfflem}
+\begin{proof}\setcost{length 162/300}Lemma~\hyperref[L:largeg]{89} applies with $D=X^\eta$ (by Lemma~\hyperref[L:admD]{92}) and gives $\ll\tau(PD)X^{1/2-\eta}\ll L^{\omega(g)}X^{1/2-\eta}$ (Lemma~\hyperref[L:tau]{61}). By Lemmas~\hyperref[L:smallg]{98} and \hyperref[L:expo]{99}, $\#\{x:m_g(x)\le D\}\ll L^{\omega(g)+1}X^{1/2-\eta}$. Finally $L^{\omega(g)+1}\le X^{\eta/2}$ for $L$ large, as $\eta>0$ (Lemma~\hyperref[L:saving]{26}).
+\end{proof}
+
+\begin{hffthm}[Palindromic perfect powers]\label{T:main}
+For all integers $g\ge2$ and $k\ge2$ there are $\gamma=\gamma(g,k)\in(0,1)$ and $C'=C'(g,k)$ such that, for every $L\ge1$, the number of $L$-digit palindromes in base $g$ that are perfect $k$-th powers is at most $C'(\#\cP_L)^{\gamma/k}$ (Definitions~\hyperref[D:conv]{1} and \hyperref[D:pal]{28}).
+\par\nopagebreak\noindent{\upshape\footnotesize\color{black!55}Lean: \texttt{main\_theorem}, \texttt{main\_theorem\_unconditional}, \texttt{main\_theorem\_digits}\par}
+\end{hffthm}
+\begin{proof}\setcost{length 186/300}The map $x\mapsto x^k$ is a bijection from $\cQ_L$ onto these powers. Let $\gamma:=1-\eta\in(0,1)$, as $0<c<1$ (Definition~\hyperref[D:par]{90} and Lemma~\hyperref[L:saving]{26}). For $L$ large, Lemmas~\hyperref[L:final]{100} and \hyperref[L:npal]{29} give $\#\cQ_L\ll X^{(1-\eta)/2}\le(g\#\cP_L)^{\gamma/k}$. For the finitely many other $L$, $\#\cQ_L\le\#\cP_L$; enlarge $C'$.
+\end{proof}
+
+\begin{hffrem}[Comparison]\label{R:compare}
+Cilleruelo, Luca and Shparlinski~\cite{CLS} proved Theorem~\hyperref[T:main]{101} with $\gamma=1$. The value $\gamma=1-c/(32k)$ obtained here is very close to $1$, as $c$ is tiny. The accompanying paper~\cite{Pal}, with sharper bookkeeping and a certified computation of $S(s)$, gives for instance $\gamma=0.9674$ for $g=2$ and every $k$.
+\end{hffrem}
+
+\begin{thebibliography}{DMRSS}
+\bibitem[BhS]{BhS} G.~Bhowmik and Y.~Suzuki, \emph{On Telhcirid's theorem on arithmetic progressions}, preprint, arXiv:2406.13334 (2024).
+\bibitem[CLS]{CLS} J.~Cilleruelo, F.~Luca and I.~E. Shparlinski, \emph{Power values of palindromes}, J. Comb. Number Theory \textbf{1} (2009), no.~2, 101--107.
+\bibitem[Col]{Col} S.~Col, \emph{Palindromes dans les progressions arithm\'etiques}, Acta Arith. \textbf{137} (2009), no.~1, 1--41.
+\bibitem[DMRSS]{DMRSS} C.~Dartyge, B.~Martin, J.~Rivat, I.~E. Shparlinski and C.~Swaenepoel, \emph{Reversible primes}, J. Lond. Math. Soc. (2) \textbf{109} (2024), no.~3, e12883.
+\bibitem[HFF]{HFF} S.~Iyer, \emph{Checking AI-generated proofs: the Human Friendly Form}, note, October 2026.
+\bibitem[Pal]{Pal} \emph{Palindromic perfect powers: an improvement of the Cilleruelo--Luca--Shparlinski bound}, manuscript, October 2026 (\texttt{palindromic\_powers.pdf}).
+\bibitem[TP]{TP} A.~Tuxanidy and D.~Panario, \emph{Infinitude of palindromic almost-prime numbers}, Int. Math. Res. Not. IMRN \textbf{2024}, no.~18, 12466--12503.
+\end{thebibliography}
+\end{document}

@@ -1,0 +1,1068 @@
+\documentclass[11pt]{amsart}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,booktabs,enumitem}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+
+\numberwithin{equation}{section}
+
+\newcommand{\cP}{\mathcal{P}}
+\newcommand{\cQ}{\mathcal{Q}}
+\newcommand{\cB}{\mathcal{B}}
+\newcommand{\cU}{\mathcal{U}}
+\newcommand{\cT}{\mathcal{T}}
+\newcommand{\rev}{\operatorname{rev}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Sinf}{S_\infty}
+
+\title[Palindromic perfect powers]{Palindromic perfect powers: an improvement of the\\ Cilleruelo--Luca--Shparlinski bound}
+\date{October 2026}
+
+\begin{document}
+
+\begin{abstract}
+For an integer base $g\ge2$ let $\cP_{g,L}$ be the set of palindromes with
+$L$ digits in base $g$. Cilleruelo, Luca and Shparlinski proved that for
+every $k\ge2$ the number of perfect $k$-th powers in $\cP_{g,L}$ is
+$O\bigl((\#\cP_{g,L})^{1/k}\bigr)$. We show that the exponent $1/k$ can be
+replaced by $\gamma/k$ with an explicit $\gamma=\gamma(g,k)<1$, for every
+base $g$ and every $k$. For instance, one may take $\gamma=0.9674$ for
+$g=2$ and every $k$, and the number of $L$-digit palindromic squares in
+base $10$ is $O\bigl((\#\cP_{10,L})^{0.4959}\bigr)$.
+
+The proof combines the tree argument of Cilleruelo, Luca and Shparlinski
+with a Fourier analysis of the next blocks of digits from both ends. This
+reduces the problem to the supremum norm of the Fourier transform of digit
+reversal, summed over one frequency, together with an elementary
+equidistribution of archimedean phases across the tree. A power saving for
+that norm comes from an identity between consecutive digit factors, an idea
+that goes back to Col. We obtain good explicit constants from a certified
+computation of suprema over windows of consecutive digits.
+\end{abstract}
+
+\maketitle
+
+\section{Introduction}
+
+\subsection{Background}
+Let $g\ge2$ be an integer. Every positive integer $n$ has a unique expansion
+$n=\sum_{i<L}d_ig^i$ with digits $0\le d_i<g$ and $d_{L-1}\ne0$; we call $L$
+the length of $n$. The integer $n$ is a \emph{palindrome} (in base $g$) if
+$d_i=d_{L-1-i}$ for all $i$. Let $\cP_{g,L}$ be the set of palindromes of
+length $L$. A palindrome is determined by its first $\lceil L/2\rceil$
+digits, so
+\[
+\#\cP_{g,L}=(g-1)g^{\lceil L/2\rceil-1}\asymp_g g^{L/2}.
+\]
+Palindromes are a sparse set, and their arithmetic properties have
+attracted much attention; see for instance
+\cite{BHS,Col,CLB,TP,DMRSS} and the references there.
+
+Cilleruelo, Luca and Shparlinski \cite{CLS} studied perfect powers among
+palindromes. For $k\ge2$ let
+\[
+\cQ^k_{g,L}=\{n\in\cP_{g,L}:\ n=x^k\text{ for some }x\in\N\}.
+\]
+They proved
+\begin{equation}\label{eq:CLS}
+\#\cQ^k_{g,L}\ \ll_{g,k}\ (\#\cP_{g,L})^{1/k}.
+\end{equation}
+Their argument is elementary. If $x^k$ is a palindrome, its last $t$ digits
+determine its first $t$ digits. The first $t$ digits confine $x$ to a short
+interval, and the last $t$ digits confine $x$ to a few residue classes
+modulo $g^t$. Write $X_1=g^{L/k}$, so that $x<X_1$, and note that
+$X_1\asymp_{g,k}(\#\cP_{g,L})^{2/k}$. Each pair (interval, residue class)
+contains at most $X_1g^{-2t}+1$ admissible $x$, roughly, and there are about
+$g^t$ pairs. The choice $g^t\asymp X_1^{1/2}$ gives \eqref{eq:CLS}. We are not
+aware of any earlier improvement of the exponent $1/k$ in \eqref{eq:CLS},
+for any base.
+
+\subsection{Results}
+Our main result is that \eqref{eq:CLS} can be improved by a power, in
+every base. Let $e(x)=e^{2\pi ix}$ and $F_g(\theta)=\sum_{d=0}^{g-1}e(d\theta)$.
+For $j\ge1$ and $0\le n<g^j$ let $\rev_j(n)$ be the integer obtained by
+reversing the string of the $j$ digits of $n$, leading zeros included. For
+$s\ge1$ and $\ell,a\in\Z$ put
+\[
+\Psi_\ell(a)=\sum_{m=0}^{g^s-1}e\Bigl(-\frac{\ell\rev_s(m)+am}{g^s}\Bigr),
+\qquad
+\Sinf(s)=\sum_{0<|\ell|<g^s}\ \max_{a\in\Z}|\Psi_\ell(a)|.
+\]
+Here $\Psi_\ell(a)$ is the Fourier transform of the function
+$m\mapsto e(-\ell\rev_s(m)/g^s)$ on $\Z/g^s\Z$. Trivially
+$\Sinf(s)\le2g^{2s}$. Let $\omega(g)$ be the number of distinct prime factors
+of $g$.
+
+\begin{theorem}\label{thm:main}
+Let $g\ge2$ and $k\ge2$, and let $0<c<1$ be such that
+$\Sinf(s)\ll_gg^{(2-c)s}$ for all $s\ge1$. Then the following hold for all
+$L\ge3$.
+\begin{enumerate}[label=\textup{(\alph*)}]
+\item If $g$ is a prime power, then
+\[
+\#\cQ^k_{g,L}\ \ll_{g,k,c}\ (\#\cP_{g,L})^{\frac1k\left(1-\frac{c}{4-c}\right)}\log\#\cP_{g,L}.
+\]
+\item If $c\le\frac{\log2}{2\log g}$, then
+\[
+\#\cQ^k_{g,L}\ \ll_{g,k,c}\ (\#\cP_{g,L})^{\frac1k\left(1-\frac{c}{(k-1)(4-c)+2}\right)}\bigl(\log\#\cP_{g,L}\bigr)^{\omega(g)+1}.
+\]
+\end{enumerate}
+\end{theorem}
+
+If $\Sinf(s)\ll g^{(2-c)s}$ then the same holds for every smaller $c$, so
+the condition in (b) is harmless. Part (b) applies to every base; part (a)
+is stronger for prime powers. The difference comes from integers $x$ that
+share a large factor with a power of $g$; this matters only when $g$ is
+not a prime power (see Remark~\ref{rem:whycomposite}).
+
+\begin{theorem}\label{thm:sup}
+For every $g\ge2$ there is $c_g>0$ with $\Sinf(s)\ll_gg^{(2-c_g)s}$ for all
+$s\ge1$. For the bases in Table~\ref{tab:c} one may take the values of $c_g$
+listed there.
+\end{theorem}
+
+\begin{table}[ht]
+\caption{Admissible values of $c_g$ in Theorem~\ref{thm:sup} (rounded down).}\label{tab:c}
+\small
+\begin{tabular}{@{}lccccccccccc@{}}
+\toprule
+$g$ & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 12 & 16\\
+\midrule
+$c_g$ & 0.1263 & 0.1002 & 0.0811 & 0.0709 & 0.0641 & 0.0597 & 0.0543 & 0.0516 & 0.0496 & 0.0458 & 0.0383\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The existence of some $c_g>0$ is proved analytically in
+Section~\ref{subsec:pairing}. The values in Table~\ref{tab:c} come from a
+finite computation, described in Sections~\ref{subsec:windows}
+and~\ref{subsec:comp}, whose output is certified by a Collatz--Wielandt
+bound. It uses $40$-digit arithmetic where this matters and double
+precision elsewhere, with a safety margin that dominates the rounding
+errors; the accompanying script reproduces it.
+Combining the two theorems (and absorbing the logarithms by rounding) gives
+the following.
+
+\begin{corollary}\label{cor:main}
+For every $g\ge2$ and $k\ge2$ there is $\gamma=\gamma(g,k)<1$ with
+$\#\cQ^k_{g,L}\ll_{g,k}(\#\cP_{g,L})^{\gamma/k}$. For the bases below one
+may take the following values.
+\begin{center}\small\upshape
+\begin{tabular}{@{}lcccccccc@{}}
+\toprule
+prime power $g$ (every $k$) & 2 & 3 & 4 & 5 & 7 & 8 & 9 & 16\\
+\midrule
+$\gamma$ & 0.9674 & 0.9744 & 0.9794 & 0.9820 & 0.9849 & 0.9863 & 0.9870 & 0.9904\\
+\bottomrule
+\end{tabular}
+
+\medskip
+\begin{tabular}{@{}lccc@{}}
+\toprule
+other $g$ & 6 & 10 & 12\\
+\midrule
+$\gamma$, $k=2$ & 0.9893 & 0.9917 & 0.9924\\
+$\gamma$, $k=3$ & 0.9936 & 0.9950 & 0.9954\\
+\bottomrule
+\end{tabular}
+\end{center}
+In particular, the number of $L$-digit palindromic squares in base $10$
+is $\ll(\#\cP_{10,L})^{0.4959}$.
+\end{corollary}
+
+For prime powers the table lists $1-c_g/(4-c_g)$, and for the other bases
+$1-c_g/((k-1)(4-c_g)+2)$, rounded up. If $g$ is not a prime power, the saving decays
+like $1/k$ as $k$ grows.
+
+\subsection{Outline of the method}
+We start from the tree of \cite{CLS}: fix $t$, and for each residue class $b$
+modulo $g^t$ (a \emph{node}) the admissible $x$ form an arithmetic
+progression $x=x_b+g^tz$, $0\le z<Z_b$, of length about $X_1g^{-2t}$. The
+argument of \cite{CLS} only uses the first and last $t$ digits. We also use
+the next $s$ digits from both ends. Inside a node, the digits of $x^k$ in
+positions $t,\dots,t+s-1$ are an affine function of $z$ modulo $g^s$
+(a $g$-adic linearisation), and the digits in positions
+$L-t-s,\dots,L-t-1$ are, up to a small error, an affine function of $z$
+over $\R$ (an archimedean linearisation). The palindrome condition says
+that the second block is the reversal of the first. Detecting it with a
+Beurling--Selberg majorant and expanding $e(-\ell\rev_s(n)/g^s)$ in
+additive characters reduces the count to geometric series in $z$ with
+phases $\theta_{b,\ell,a}=(\ell\delta_b+a\beta_b)/g^s$, weighted by
+$|\Psi_\ell(a)|$ (Proposition~\ref{prop:red}). Here $\delta_b$ comes from
+the size of $x$ and $\beta_b=kb^{k-1}\bmod g^s$ from its residue.
+
+We then bound the weights by $\max_a|\Psi_\ell(a)|$, and recover the
+averaging that is needed from the archimedean phases $\ell\delta_b$ alone:
+since $\delta_b$ is a monotone function of the first $t$ digits of $x^k$,
+and different nodes have essentially different first digits, these phases
+are well distributed modulo $1$ across the nodes
+(Lemma~\ref{lem:count}). This reduces everything to $\Sinf(s)$.
+
+A power saving for $\Sinf(s)$ comes from an identity between consecutive
+factors of the product formula for $\Psi_\ell(a)$, in which the frequency
+$a$ cancels (Lemma~\ref{lem:diff}): a large value of $|\Psi_\ell(a)|$ needs
+all factors to be large, and the identity makes this impossible for most
+$\ell$, whatever $a$ is. Arguments of this kind go back to Col
+\cite{Col}; see also \cite{TP}, \cite[Section~2.3]{DMRSS} and \cite{BhS}. We
+give a self-contained treatment, and we sharpen the constants considerably
+by observing that the identity determines the whole sequence of factor
+arguments from the first one (Lemma~\ref{lem:orbit}). This allows us to
+bound the supremum over $a$ on windows of consecutive digits, and to sum
+over $\ell$ with a transfer matrix (Proposition~\ref{prop:windows}).
+
+If $g$ is not a prime power, there is one more difficulty: an integer $x$ may be
+divisible by a high power of one prime factor of $g$, and for such nodes
+the reduction loses. We treat these $x$ separately, by a direct count
+(Lemma~\ref{lem:large}).
+
+\subsection{Related work}
+Uniform bounds for exponential sums involving digit reversal appear in
+Col \cite{Col}, Tuxanidy and Panario \cite{TP}, Dartyge, Martin, Rivat,
+Shparlinski and Swaenepoel \cite{DMRSS} (in base $2$) and Bhowmik and Suzuki
+\cite{BhS} (in general bases, in a preprint). In base $2$, the mechanism
+behind Lemma~\ref{lem:diff} appears in \cite[Lemmas~2.5 and~2.6]{DMRSS},
+where it is credited to an idea of Col \cite[proof of Lemme~2]{Col}. In
+general bases, the identity of Lemma~\ref{lem:diff}, in the form dual to
+ours under Lemma~\ref{lem:psi}(iv), appears in the proof of
+\cite[Lemma~4.6]{BhS}, a lemma which Bhowmik and Suzuki attribute to
+Tuxanidy and Panario \cite{TP}; they
+combine it with a pairing of consecutive factors \cite[Lemmas~4.7
+and~4.9]{BhS}, as we do in Lemma~\ref{lem:chain}. We do not use any result
+of \cite{BhS}: everything we need is proved here. Johnston and Kerr
+\cite{JK} (also a preprint) combine the argument of \cite{CLS} with a
+hybrid $p$-adic/archimedean van der Corput method to prove that every base
+has infinitely many square-free palindromes. They count palindromes
+$n\le x$ coprime to $g^3-g$ and divisible by $d^2$ for some $d\in[D,2D]$;
+their bounds that go beyond the elementary method of \cite{CLS} require
+$D\le x^{2/5}$, while their elementary bound, for $D\asymp x^{1/2}$,
+recovers \eqref{eq:CLS} for squares. Square and cube divisors of
+palindromes also play a role in the recent preprints of Chourasiya and
+Johnston \cite{CJ} and of Tuxanidy \cite{Tux}. We do not use the results
+of these preprints.
+
+\subsection{Notation}
+We use Vinogradov's notation $\ll$ and $\gg$, and $A\asymp B$ for
+$A\ll B\ll A$; implied constants may depend on $g$ and $k$, and on other
+parameters only when indicated. We write $\|x\|$ for the distance from $x$
+to the nearest integer, $v_p$ for the $p$-adic valuation, and
+$0.d_1d_2\cdots d_r$ for $\sum_jd_jg^{-j}$. Throughout,
+$X_1=g^{L/k}$; then $x^k$ has length $L$ if and only if
+$g^{(L-1)/k}\le x<X_1$, and $X_1\asymp(\#\cP_{g,L})^{2/k}$. Finally
+\[
+f(\theta)=\frac{|F_g(\theta)|}{g}=\Bigl|\frac{\sin\pi g\theta}{g\sin\pi\theta}\Bigr|\quad(\theta\notin\Z),\qquad f(\theta)=1\quad(\theta\in\Z).
+\]
+Thus $0\le f\le1$, $f$ is even and $1$-periodic, $f(\theta)<1$ for
+$\theta\notin\Z$, and $f$ is continuous.
+
+\section{Preliminaries}
+
+\begin{lemma}\label{lem:psi}
+Let $s\ge1$ and $\ell,a\in\Z$.
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item For $0\le n<g^s$, $e(-\ell\rev_s(n)/g^s)=g^{-s}\sum_{a\bmod g^s}\Psi_\ell(a)e(an/g^s)$.
+\item $|\Psi_\ell(a)|=\prod_{i=0}^{s-1}|F_g(\theta_i)|=g^s\prod_{i=0}^{s-1}f(\theta_i)$, where
+$\theta_i=\theta_i(\ell,a)=(\ell g^{s-1-i}+ag^i)/g^s$.
+\item If $\ell\not\equiv0\pmod{g^s}$ then $\Psi_\ell(0)=0$.
+\item $|\Psi_\ell(a)|=|\Psi_a(\ell)|$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(i) is Fourier inversion on $\Z/g^s\Z$. (ii) Write $m=\sum_{i<s}m_ig^i$; then
+$\rev_s(m)=\sum_im_ig^{s-1-i}$, and $\Psi_\ell(a)=\prod_{i<s}F_g(-\theta_i)$;
+note $|F_g(-\theta)|=|F_g(\theta)|$. (iii) Since $\rev_s$ permutes
+$[0,g^s)$, $\Psi_\ell(0)=\sum_{n<g^s}e(-\ell n/g^s)=0$. (iv) Substitute
+$m=\rev_s(m')$ in the definition; $\rev_s$ is an involution of $[0,g^s)$.
+\end{proof}
+
+\begin{lemma}[Beurling--Selberg majorant]\label{lem:selberg}
+Let $J\subset\R/\Z$ be an arc of length $|J|<1$ and let $\kappa\ge0$ be an
+integer. There is a real trigonometric polynomial
+$S(x)=\sum_{|\ell|\le\kappa}\hat S(\ell)e(\ell x)$ with $S\ge\mathbf 1_J$ and
+$\hat S(0)=|J|+1/(\kappa+1)$. Moreover $|\hat S(\ell)|\le\hat S(0)$ for all
+$\ell$.
+\end{lemma}
+
+\begin{proof}
+The first statement is Selberg's construction; see \cite{Va} or
+\cite[Chapter~1]{Mo}. Since $S\ge0$, $|\hat S(\ell)|\le\int_0^1S=\hat S(0)$.
+\end{proof}
+
+\begin{lemma}\label{lem:geom}
+For $\theta\in\R$ and an integer $Z\ge1$,
+$\bigl|\sum_{z=0}^{Z-1}e(z\theta)\bigr|\le\min\bigl(Z,\frac1{2\|\theta\|}\bigr)$.
+\end{lemma}
+
+\begin{proof}
+For $\theta\notin\Z$ the sum is $(e(Z\theta)-1)/(e(\theta)-1)$, of modulus at
+most $1/|\sin\pi\theta|\le1/(2\|\theta\|)$.
+\end{proof}
+
+\begin{lemma}\label{lem:roots}
+For every integer $n\ge1$, the group $(\Z/n\Z)^\times$ has at most
+$(2k)^{\omega(n)}$ elements $u$ with $u^k=1$.
+\end{lemma}
+
+\begin{proof}
+By the Chinese remainder theorem it suffices to treat $n=p^a$. For odd $p$,
+or $p^a\le4$, the group $(\Z/p^a\Z)^\times$ is cyclic and has at most $k$
+such elements; for $a\ge3$, $(\Z/2^a\Z)^\times\cong\Z/2\times\Z/2^{a-2}$ has
+at most $2k$ (see \cite[Chapter~4]{IR}).
+\end{proof}
+
+\section{The tree and the reduction}\label{sec:reduction}
+
+\subsection{Nodes}
+Fix integers $t\ge3$ and $1\le s\le t-2$ with $t+s\le L/2$. A \emph{node}
+is an integer $b\in[0,g^t)$ with $g\nmid b^k$. For a node $b$ put
+\[
+T_b=\rev_t(b^k\bmod g^t),\qquad
+I_b=\bigl[(T_bg^{L-t})^{1/k},\ ((T_b+1)g^{L-t})^{1/k}\bigr),
+\]
+and let $Z_b$ be the number of integers $x\in I_b$ with $x\equiv b\pmod{g^t}$.
+If $Z_b\ge1$ let $x_b$ be the least of them, and put
+\[
+\beta_b=kb^{k-1}\bmod g^s,\qquad\delta_b=kx_b^{k-1}g^{2t+s-L},\qquad
+\theta_{b,\ell,a}=\frac{\ell\delta_b+a\beta_b}{g^s}.
+\]
+Since $g\nmid b^k$, the last digit of $b^k$ is non-zero, so
+$g^{t-1}\le T_b<g^t$. Finally put
+\[
+Z=X_1g^{-2t},\qquad \delta(T)=k(Tg^{L-t})^{(k-1)/k}g^{2t+s-L}\quad(g^{t-1}\le T<g^t).
+\]
+
+\begin{lemma}[\cite{CLS}]\label{lem:tree}
+If $x^k\in\cP_{g,L}$, then $b=x\bmod g^t$ is a node, $x\in I_b$, and
+$x=x_b+g^tz$ for some $0\le z<Z_b$.
+\end{lemma}
+
+\begin{proof}
+The last digit of a palindrome equals its first digit, which is non-zero;
+so $g\nmid x^k$, and hence $g\nmid b^k$. The number formed by the first $t$
+digits of $x^k$ is $\lfloor x^k/g^{L-t}\rfloor$, and by the palindrome
+property it equals $\rev_t(x^k\bmod g^t)=\rev_t(b^k\bmod g^t)=T_b$. Hence
+$T_bg^{L-t}\le x^k<(T_b+1)g^{L-t}$, i.e.\ $x\in I_b$.
+\end{proof}
+
+\begin{lemma}\label{lem:sizes}
+For every node, $|I_b|g^{-t}\in[Z/k,\ gZ/k]$, so $Z/k-1\le Z_b\le gZ/k+1$;
+in particular $Z_b\ge1$ if $Z\ge2k$. If $Z_b\ge1$ then
+$0\le\delta_b-\delta(T_b)\le g^{1-t}\delta(T_b)$. Finally
+$\frac{k}{2g}\,\frac{g^s}Z\le\delta(T)\le k\,\frac{g^s}Z$ for
+$g^{t-1}\le T<g^t$.
+\end{lemma}
+
+\begin{proof}
+Let $g^{t-1}\le T<g^t$, $y_0=Tg^{L-t}$ and $y_1=y_0+g^{L-t}$. By the mean value
+theorem $y_1^{1/k}-y_0^{1/k}=g^{L-t}/(k\xi^{(k-1)/k})$ for some
+$\xi\in(y_0,y_1)\subset[g^{L-1},g^L]$, which gives the first claim (take
+$T=T_b$). Next, $x_b\in[y_0^{1/k},y_1^{1/k})$ for $T=T_b$, so
+$\delta_b/\delta(T_b)=(x_b/y_0^{1/k})^{k-1}\in[1,(y_1/y_0)^{(k-1)/k}]$, and
+$y_1/y_0=1+1/T_b\le1+g^{1-t}$. Finally
+$\delta(T)\cdot g^{L-t}/(k\xi^{(k-1)/k})=g^{t+s}(y_0/\xi)^{(k-1)/k}\in[g^{t+s}/2,g^{t+s}]$,
+because $y_0/\xi\ge y_0/y_1\ge\frac12$; combine with
+$g^{L-t}/(k\xi^{(k-1)/k})\in[g^tZ/k,g^{t+1}Z/k]$.
+\end{proof}
+
+\subsection{Linearisation}
+For a node $b$ with $Z_b\ge1$ put
+$\alpha_b=\lfloor x_b^k/g^t\rfloor\bmod g^s$, and for real $z\ge0$
+\[
+\varphi_b(z)=\frac{(x_b+g^tz)^k}{g^{L-t-s}}-T_bg^s,\qquad
+\lambda_b(z)=\varphi_b(0)+\delta_bz .
+\]
+
+\begin{lemma}\label{lem:lin}
+Let $b$ be a node and $x=x_b+g^tz$ with $0\le z<Z_b$.
+\begin{enumerate}[label=\textup{(\alph*)}]
+\item The digits of $x^k$ in positions $t,\dots,t+s-1$ form the number
+$n_b(z):=(\alpha_b+\beta_bz)\bmod g^s$.
+\item The digits of $x^k$ in positions $L-t-s,\dots,L-t-1$ form the number
+$\lfloor\varphi_b(z)\rfloor$, and
+$0\le\varphi_b(z)-\lambda_b(z)\le\frac{k-1}kg^{s+1-t}\le\frac1g$.
+\item If $x^k\in\cP_{g,L}$, then
+$\lambda_b(z)-\rev_s(n_b(z))\in[-\frac1g,1)$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+(a) Write $x^k=x_b^k+kx_b^{k-1}g^tz+g^{2t}N'$ with $N'\in\Z$. Then
+$\lfloor x^k/g^t\rfloor=\lfloor x_b^k/g^t\rfloor+kx_b^{k-1}z+g^tN'$; reduce modulo
+$g^s$, using $s\le t$ and $x_b\equiv b\pmod{g^t}$.
+
+(b) For $x\in I_b$ we have $\lfloor x^k/g^{L-t}\rfloor=T_b$, so the block in
+question is $\lfloor x^k/g^{L-t-s}\rfloor-T_bg^s=\lfloor\varphi_b(z)\rfloor$. As a
+function of real $z$, $\varphi_b$ is convex with $\varphi_b'(0)=\delta_b$, so
+$\varphi_b\ge\lambda_b$, and by Taylor's theorem
+\[
+\varphi_b(z)-\lambda_b(z)\le\tfrac12k(k-1)\,x_{\max}^{k-2}(g^tz)^2g^{-(L-t-s)},
+\]
+where $x_{\max}=\sup I_b$. With $y_0,y_1$ as in the proof of
+Lemma~\ref{lem:sizes} (for $T=T_b$) we have $g^tz\le|I_b|\le g^{L-t}/(ky_0^{1-1/k})$
+and $x_{\max}\le y_1^{1/k}$, so
+\[
+x_{\max}^{k-2}(g^tz)^2\le\Bigl(\frac{y_1}{y_0}\Bigr)^{\frac{k-2}k}\frac{g^{2(L-t)}}{k^2y_0}\le\frac{2g^{L-2t+1}}{k^2},
+\]
+using $y_0\ge g^{L-1}$ and $y_1\le2y_0$. This gives the bound
+$\frac{k-1}kg^{s+1-t}$, which is at most $1/g$ because $s\le t-2$.
+
+(c) Since $t+s\le L/2$, the two blocks are disjoint, and the palindrome
+property says that the digit in position $L-1-j$ equals the digit in
+position $j$. Hence the number formed by the block in (b) is the reversal of
+the number formed by the block in (a): $\lfloor\varphi_b(z)\rfloor=\rev_s(n_b(z))$.
+So $\rev_s(n_b(z))\in(\varphi_b(z)-1,\varphi_b(z)]$, and the claim follows
+from (b).
+\end{proof}
+
+\subsection{The reduction}
+For a set $\cB$ of nodes with $Z_b\ge1$ for all $b\in\cB$, put
+\[
+E(\cB)=\sum_{b\in\cB}\ \sum_{0<|\ell|<g^s}\ \sum_{a\not\equiv0\ (g^s)}|\Psi_\ell(a)|\min\Bigl(Z_b,\frac1{2\|\theta_{b,\ell,a}\|}\Bigr).
+\]
+
+\begin{proposition}\label{prop:red}
+For every such $\cB$,
+\[
+\#\{x:\ x^k\in\cP_{g,L},\ x\bmod g^t\in\cB\}\ \le\ \frac52g^{-s}\sum_{b\in\cB}Z_b+\frac52g^{-2s}E(\cB).
+\]
+\end{proposition}
+
+\begin{proof}
+Let $J$ be the image of $[-\frac12,1]$ in $\R/g^s\Z$. Applying
+Lemma~\ref{lem:selberg} to the arc $g^{-s}J$ of $\R/\Z$ with $\kappa=g^s-1$ and
+rescaling, we get $F(y)=\sum_{|\ell|\le\kappa}c_\ell e(\ell y/g^s)$ with
+$F\ge\mathbf1_J$ on $\R$, $c_0=\frac{3/2}{g^s}+\frac1{g^s}=\frac5{2g^s}$ and
+$|c_\ell|\le c_0$.
+
+Fix $b\in\cB$. By Lemmas~\ref{lem:tree} and~\ref{lem:lin}(c), the number of
+solutions $x$ with $x\equiv b\pmod{g^t}$ is at most
+\[
+\sum_{z<Z_b}F\bigl(\lambda_b(z)-\rev_s(n_b(z))\bigr)
+=\sum_{|\ell|\le\kappa}c_\ell\sum_{z<Z_b}e\Bigl(\frac{\ell\lambda_b(z)}{g^s}\Bigr)e\Bigl(-\frac{\ell\rev_s(n_b(z))}{g^s}\Bigr).
+\]
+Expand the last factor by Lemma~\ref{lem:psi}(i). Since
+$e(an_b(z)/g^s)=e(a(\alpha_b+\beta_bz)/g^s)$ and
+$\lambda_b(z)=\lambda_b(0)+\delta_bz$, the sum over $z$ becomes
+$g^{-s}\sum_a\Psi_\ell(a)\,e(\cdot)\sum_{z<Z_b}e(z\theta_{b,\ell,a})$, with a
+unimodular factor $e(\cdot)$ independent of $z$. By Lemma~\ref{lem:geom}
+its modulus is at most
+$g^{-s}\sum_a|\Psi_\ell(a)|\min(Z_b,1/(2\|\theta_{b,\ell,a}\|))$. For
+$\ell=0$, $\Psi_0(a)=g^s\mathbf1_{a\equiv0}$ and the term is $c_0Z_b$. For
+$0<|\ell|\le\kappa$ we have $\ell\not\equiv0\pmod{g^s}$, so the term $a\equiv0$
+vanishes by Lemma~\ref{lem:psi}(iii). Sum over $b\in\cB$ and use
+$|c_\ell|\le c_0$.
+\end{proof}
+
+\section{The supremum over the \texorpdfstring{$g$}{g}-adic frequency}\label{sec:count}
+
+We now bound the weights $|\Psi_\ell(a)|$ in $E(\cB)$ by their maximum
+over $a$, sum the remaining factor over $a$ (Lemma~\ref{lem:asum}), and
+then over the nodes (Lemma~\ref{lem:count}).
+
+\begin{lemma}\label{lem:asum}
+Let $y\in\R$, $\beta\in\Z$, $d=\gcd(\beta,g^s)$ and $A\ge1$. Then
+\[
+\sum_{a\bmod g^s}\min\Bigl(A,\frac1{2\|(y+a\beta)/g^s\|}\Bigr)\ \le\
+\min\Bigl(dA,\frac{g^s}{2\|y/d\|}\Bigr)+g^s(2+s\log g).
+\]
+\end{lemma}
+
+\begin{proof}
+As $a$ runs modulo $g^s$, $a\beta$ runs over the multiples of $d$ modulo
+$g^s$, each taken $d$ times. Put $Q=g^s/d$ and $y/d=n_0+\epsilon_0$ with
+$n_0\in\Z$, $|\epsilon_0|=\|y/d\|$. Then $(y+cd)/g^s=(n_0+c+\epsilon_0)/Q$, and as $c$ runs
+modulo $Q$ the residue $j\equiv n_0+c$ runs over $(-Q/2,Q/2]$. For $j=0$ the
+distance to $\Z$ is $|\epsilon_0|/Q$; for $j\ne0$ it is at least $(|j|-\frac12)/Q$.
+Hence the sum is at most
+$d\min(A,Q/(2|\epsilon_0|))+d\sum_{j\ne0}Q/(2|j|-1)\le\min(dA,g^s/(2|\epsilon_0|))+g^s(2+\log Q)$.
+\end{proof}
+
+For a non-zero integer $n$ let $m_g(n)=\prod_{p\mid g}p^{v_p(n)}$ be its
+\emph{$g$-part}, so that $n/m_g(n)$ is coprime to $g$. For $D\ge1$ let
+$\tau_g(D)=\#\{m\le D:\ m\mid g^\infty\}\le(1+\log_2D)^{\omega(g)}$.
+
+\begin{lemma}[nodes with small $g$-part]\label{lem:nodes}
+Let $D\ge1$ with $D^k<2^t$, and let $b$ be a node with $m:=m_g(b)\le D$.
+\begin{enumerate}[label=\textup{(\roman*)}]
+\item $d_b:=\gcd(\beta_b,g^s)$ divides $km^{k-1}$.
+\item Every node $b'$ with $T_{b'}=T_b$ has $m_g(b')=m$, and there are at
+most $(2k)^{\omega(g)}m^{k-1}$ such nodes.
+\end{enumerate}
+If $g=p^e$ is a prime power, every node has $m_g(b)<g^{1/k}$.
+\end{lemma}
+
+\begin{proof}
+Write $b=mu$ with $\gcd(u,g)=1$. (i) $\beta_b\equiv km^{k-1}u^{k-1}\pmod{g^s}$,
+so $d_b=\gcd(km^{k-1},g^s)$. (ii) Let $p\mid g$, $e_p=v_p(g)$ and $v=v_p(b)$.
+Then $p^{kv}\le m^k<2^t\le p^{e_pt}$, so $kv<e_pt$. If $T_{b'}=T_b$ then
+$b'^k\equiv b^k\pmod{p^{e_pt}}$, and the right side has $p$-adic valuation
+exactly $kv<e_pt$; hence $v_p(b')=v$. So $m_g(b')=m$, and $b'=mu'$ with
+$\gcd(u',g)=1$ and $u'^k\equiv u^k\pmod{g^t/m^k}$ (note $m^k\mid g^t$). By
+Lemma~\ref{lem:roots}, $u'$ lies in at most $(2k)^{\omega(g)}$ classes
+modulo $g^t/m^k$. Since $b'\bmod g^t$ is determined by $u'\bmod g^t/m$, and
+each class modulo $g^t/m^k$ has $m^{k-1}$ lifts modulo $g^t/m$, there are at
+most $(2k)^{\omega(g)}m^{k-1}$ such $b'$. Finally, if $g=p^e$ then
+$p^e\nmid b^k$ gives $kv_p(b)<e$.
+\end{proof}
+
+\begin{lemma}[archimedean count]\label{lem:count}
+Let $s\le t-2$, $Z\ge2k$, and $D\ge1$ with $D^k<2^t$. Let $\cB$ be a set of
+nodes with $m_g(b)\le D$ for all $b\in\cB$, and for $0<|\ell|<g^s$ put
+\[
+W_\ell(\cB)=\sum_{b\in\cB}\ \sum_{a\not\equiv0}\min\Bigl(Z_b,\frac1{2\|\theta_{b,\ell,a}\|}\Bigr).
+\]
+Then, with $\tau=\tau_g(kD^{k-1})$,
+\[
+W_\ell(\cB)\ll\tau D^{k-1}\Bigl((\log DZ)\,g^{t+s}+g^{2s}+D^{k-1}Z\Bigr)+\tau D^{k-2}\,\frac{Zg^t}{|\ell|}+(s+1)\,g^{t+s}.
+\]
+\end{lemma}
+
+\begin{proof}
+By Lemma~\ref{lem:sizes}, $Z_b\ge1$ for every node. By Lemma~\ref{lem:asum}
+with $A=Z_b\le Z_+:=gZ/k+1$,
+\[
+W_\ell(\cB)\le\sum_{b\in\cB}\min\Bigl(d_bZ_+,\frac{g^s}{2\|\ell\delta_b/d_b\|}\Bigr)+g^{t+s}(2+s\log g).
+\]
+Split $\cB$ into $\cB_1=\{b:|\ell|\delta_b\le d_b/2\}$ and
+$\cB_2=\cB\setminus\cB_1$.
+
+\emph{Small phases.} For $b\in\cB_1$ we have
+$\|\ell\delta_b/d_b\|=|\ell|\delta_b/d_b$, and $\delta_b\ge\delta(T_b)\ge
+kg^s/(2gZ)$ by Lemma~\ref{lem:sizes}. So the term for $b$ is at most
+$gZd_b/(k|\ell|)$. By Lemma~\ref{lem:nodes}(i), and since at most $g^t/m$
+residues modulo $g^t$ are divisible by a given $m\mid g^t$,
+\[
+\sum_{b\in\cB}d_b\le\sum_{\substack{m\le D\\ m\mid g^\infty}}\frac{g^t}m\,km^{k-1}\le k\,\tau_g(D)\,D^{k-2}g^t .
+\]
+This gives the term $\tau D^{k-2}Zg^t/|\ell|$, since $\tau_g(D)\le\tau$.
+
+\emph{Large phases: reduction to a count over $T$.} Let $b\in\cB_2$. By
+Lemma~\ref{lem:sizes} and $s\le t-2$,
+$|\ell\delta_b-\ell\delta(T_b)|/d_b\le g^s\cdot\frac{kg^s}Z\cdot\frac{g^{1-t}}{d_b}\le\frac{kg^{s-1}}{d_bZ}=:\varepsilon_1$.
+Replace $\delta_b$ by $\delta(T_b)$ in the minimum. If
+$\|\ell\delta(T_b)/d_b\|\ge2\varepsilon_1$, the old minimum is at most twice the
+new one. Otherwise the new minimum is at least
+$\min(d_bZ_+,g^s/(4\varepsilon_1))\ge gd_bZ/(4k)$, while the old one
+is at most $d_bZ_+\le gd_bZ/k+d_b$; so again the ratio is at most
+$4+4k/(gZ)\le6$. Also
+$|\ell|\delta(T_b)\ge|\ell|\delta_b/(1+g^{1-t})>d_b/3$. Group the nodes of
+$\cB_2$ by $d=d_b$; by Lemma~\ref{lem:nodes}(i) there are at most $\tau$
+values of $d$, all at most $kD^{k-1}$. By Lemma~\ref{lem:nodes}(ii), each
+$T$ equals $T_b$ for at most $(2k)^{\omega(g)}D^{k-1}$ nodes $b\in\cB$.
+Hence
+\[
+\sum_{b\in\cB_2}\min\Bigl(d_bZ_+,\frac{g^s}{2\|\ell\delta_b/d_b\|}\Bigr)
+\ll D^{k-1}\sum_{d}\ \sum_{T\in\cT_d}\min\Bigl(dZ_+,\frac{g^s}{2\|h_d(T)\|}\Bigr),
+\]
+where $h_d(T)=\ell\delta(T)/d$ and
+$\cT_d=\{T\in[g^{t-1},g^t):|h_d(T)|\ge\frac13\}$, an interval.
+
+\emph{The count.} On $[g^{t-1},g^t)$ the function $h_d$ is monotone with
+$|h_d'(T)|=\frac{k-1}k|h_d(T)|/T$, and $|h_d'|$ varies by a factor at most
+$g$ there, since $|h_d'|\propto T^{-1/k}$. Let $\mu=\min_{\cT_d}|h_d'|$; then
+$\mu\ge\frac{k-1}{3k}g^{-t}$. The range of $h_d$ on $\cT_d$ has length
+$R\le g^{t+1}\mu$, and also $R\le|\ell|\max\delta/d\le k|\ell|g^s/(dZ)$. For
+every $u>0$, the $T\in\cT_d$ with $\|h_d(T)\|\le u$ lie in at most $R+2$
+intervals of length at most $2u/\mu$, each containing at most $2u/\mu+1$
+integers, so
+\[
+n(u):=\#\{T\in\cT_d:\|h_d(T)\|\le u\}\le(R+2)\Bigl(\frac{2u}\mu+1\Bigr)\le2ug^{t+1}+\frac{4u}\mu+R+2\ll ug^{t+1}+R+2.
+\]
+Split the $T$ dyadically according to $\|h_d(T)\|$, starting at $H/A'$ with
+$A'=dZ_+$ and $H=g^s/2$; there are $j_0+2$ ranges with $j_0\ll\log(DZ)$. This
+gives
+\[
+\sum_{T\in\cT_d}\min\Bigl(A',\frac H{\|h_d(T)\|}\Bigr)\le\sum_{j=-1}^{j_0}\frac{A'}{2^j}\,n\Bigl(\frac{2^{j+1}H}{A'}\Bigr)
+\ll(j_0+2)\,g^{t+1}H+A'(R+2).
+\]
+Here $A'R\ll|\ell|g^s\le g^{2s}$ and $A'\le kD^{k-1}Z_+$. Summing over the
+at most $\tau$ values of $d$ gives the claim.
+\end{proof}
+
+\begin{corollary}\label{cor:E}
+Under the hypotheses of Lemma~\ref{lem:count},
+\[
+E(\cB)\ \ll\ \tau D^{k-1}\Bigl((\log DZ)\,g^{t+s}+g^{2s}+D^{k-1}Z\Bigr)\Sinf(s)
++\tau D^{k-2}(s+1)\,Zg^{t+s}+(s+1)\,g^{t+s}\Sinf(s).
+\]
+\end{corollary}
+
+\begin{proof}
+Clearly $E(\cB)\le\sum_{0<|\ell|<g^s}\max_a|\Psi_\ell(a)|\,W_\ell(\cB)$.
+Insert Lemma~\ref{lem:count}. In the term with $1/|\ell|$, use
+$\max_a|\Psi_\ell(a)|\le g^s$ and
+$\sum_{0<|\ell|<g^s}|\ell|^{-1}\le2(1+s\log g)$.
+\end{proof}
+
+\section{The supremum norm of the reversal transform}\label{sec:sup}
+
+\subsection{The identity}
+Recall from Lemma~\ref{lem:psi}(ii) that $|\Psi_\ell(a)|=g^s\prod_{i<s}f(\theta_i)$
+with $\theta_i=(\ell g^{s-1-i}+ag^i)/g^s$.
+
+\begin{lemma}\label{lem:diff}
+For all $\ell,a$ and $0\le i\le s-2$,
+$g\theta_i-\theta_{i+1}=(g^2-1)\ell/g^{i+2}$. Consequently
+\[
+g\|\theta_i\|+\|\theta_{i+1}\|\ \ge\ \Delta_i(\ell):=\Bigl\|\frac{(g^2-1)\ell}{g^{i+2}}\Bigr\|.
+\]
+\end{lemma}
+
+\begin{proof}
+$g\theta_i=\ell/g^i+a/g^{s-1-i}$ and $\theta_{i+1}=\ell/g^{i+2}+a/g^{s-1-i}$.
+Subtract.
+\end{proof}
+
+The point is that $a$ cancels: a large value of $|\Psi_\ell(a)|$ needs every
+$\theta_i$ to be close to an integer, and this is impossible when
+$\Delta_i(\ell)$ is not small, whatever $a$ is. In fact the identity
+determines the whole sequence $(\theta_i)$ from $\theta_0$:
+
+\begin{lemma}[forced orbit]\label{lem:orbit}
+Let $\ell'=(g^2-1)\ell\bmod g^s$ and, for $0\le i\le s-2$,
+$D_i=\ell'/g^{i+2}\bmod1=0.\ell'_{i+1}\ell'_i\cdots\ell'_0$, where
+$\ell'_j$ are the digits of $\ell'$. Then
+$\Delta_i(\ell)=\|D_i\|$ and $\theta_{i+1}\equiv g\theta_i-D_i\pmod1$ for every
+$a$. The map $\ell\mapsto\ell'$ is a bijection of $\Z/g^s\Z$.
+\end{lemma}
+
+\begin{proof}
+By Lemma~\ref{lem:diff}, $\theta_{i+1}=g\theta_i-(g^2-1)\ell/g^{i+2}$, and
+$(g^2-1)\ell\equiv\ell'\pmod{g^s}$ with $i+2\le s$. Since
+$\gcd(g^2-1,g)=1$, multiplication by $g^2-1$ is a bijection modulo $g^s$.
+\end{proof}
+
+\subsection{A power saving in every base}\label{subsec:pairing}
+Let $\psi(\epsilon)=\sup\{f(\theta):\|\theta\|\ge\epsilon\}$,
+$\phi=-\log\psi\in[0,\infty]$, and
+\[
+\chi(\Delta)=\inf\{\phi(x)+\phi(y):\ x,y\in[0,\tfrac12],\ gx+y\ge\Delta\}.
+\]
+The function $\psi$ is non-increasing, and $\phi$ and $\chi$ are
+non-decreasing. Since $f$ is continuous and $f<1$ off
+$\Z$, we have $\psi(\epsilon)<1$, i.e.\ $\phi(\epsilon)>0$, for
+$\epsilon>0$; and $\chi(\Delta)\ge\phi(\Delta/(g+1))>0$ for $\Delta>0$,
+because $gx+y\ge\Delta$ forces $\max(x,y)\ge\Delta/(g+1)$.
+
+\begin{lemma}\label{lem:chain}
+For every $\ell$,
+$\max_a|\Psi_\ell(a)|\le g^s\exp\bigl(-\frac12\sum_{i=0}^{s-2}\chi(\Delta_i(\ell))\bigr)$.
+\end{lemma}
+
+\begin{proof}
+We have $f(\theta_i)\le\psi(\|\theta_i\|)$, so
+$\log(|\Psi_\ell(a)|/g^s)\le-\sum_{i<s}\phi(\|\theta_i\|)$. Each index occurs
+in at most two of the pairs $\{i,i+1\}$, $0\le i\le s-2$, so
+$\sum_{i<s}\phi(\|\theta_i\|)\ge\frac12\sum_{i\le s-2}\bigl(\phi(\|\theta_i\|)+\phi(\|\theta_{i+1}\|)\bigr)\ge\frac12\sum_{i\le s-2}\chi(\Delta_i(\ell))$
+by Lemma~\ref{lem:diff}.
+\end{proof}
+
+\begin{proposition}\label{prop:pairing}
+For every $g\ge2$ there is $c>0$ with $\Sinf(s)\ll_gg^{(2-c)s}$.
+\end{proposition}
+
+\begin{proof}
+By Lemma~\ref{lem:orbit} we may sum over $\ell'$ instead of $\ell$; each
+non-zero residue is represented by two values of $\ell$ with
+$0<|\ell|<g^s$. Let $r=1$ if $g\ge3$ and $r=2$ if $g=2$. By
+Lemma~\ref{lem:orbit}, $\Delta_i(\ell)=\|D_i\|$, and
+$D_i=0.\ell'_{i+1}\ell'_i\cdots\ell'_0$ lies in the interval $[v,v+g^{-r}]$
+with $v=0.\ell'_{i+1}\cdots\ell'_{i+2-r}$. Hence $\Delta_i(\ell)\ge
+\Lambda_r(\ell'_{i+1},\dots,\ell'_{i+2-r})$, where
+$\Lambda_r(d_1,\dots,d_r)=\max(0,\min(v,1-v-g^{-r}))$ for $v=0.d_1\cdots d_r$.
+By Lemma~\ref{lem:chain} and the monotonicity of $\chi$,
+\[
+\Sinf(s)\le2g^s\sum_{\ell'\bmod g^s}\ \prod_{i=0}^{s-2}\xi(\ell'_{i+1},\dots,\ell'_{i+2-r}),\qquad
+\xi(d_1,\dots,d_r)=e^{-\chi(\Lambda_r(d_1,\dots,d_r))/2}.
+\]
+If $g\ge3$ and $r=1$, the product is over single digits, and the sum is at
+most $g\rho^{s-1}$ with $\rho=\sum_{d<g}\xi(d)$. Here $\xi(d)<1$ for $1\le d\le
+g-2$, since then $\Lambda_1(d)\ge1/g>0$; so $\rho<g$. If $g=2$ and $r=2$, then
+$\Lambda_2(d_1,d_2)=\frac14$ when $d_1\ne d_2$, so the sum is at most
+$2\|M^{s-1}\|_\infty$ for the matrix $M=\bigl(\begin{smallmatrix}1&u\\u&1\end{smallmatrix}\bigr)$
+with $u=e^{-\chi(1/4)/2}<1$, whose spectral radius is $1+u<2$. In both
+cases $\Sinf(s)\ll g^s\rho^s$ with $\rho<g$, which is the claim with
+$c=1-\log_g\rho$.
+\end{proof}
+
+\begin{example}\label{ex:hand}
+For $g=2$, $f(\theta)=|\cos\pi\theta|$ and $\phi(x)=-\log\cos\pi x$. From
+$2x+y\ge\frac14$ we get $\max(x,y)\ge\frac1{12}$, so
+$\chi(\frac14)\ge-\log\cos(\pi/12)>0.0346$, $u<e^{-0.0173}$,
+$1+u<1.9829$, and the proof gives $c_2>0.012$.
+\end{example}
+
+\subsection{Windows}\label{subsec:windows}
+Lemma~\ref{lem:chain} uses Lemma~\ref{lem:diff} only as an inequality for
+each pair of neighbouring factors, and then halves. Lemma~\ref{lem:orbit}
+allows us to do much better: we bound the supremum over all real starting
+phases on windows of consecutive factors, along the exact recursion.
+Transfer matrices with certified Perron--Frobenius bounds are a standard
+device for products over digits with a single frequency; the point here is
+that the supremum over the second frequency $a$ can be taken window by
+window.
+
+Fix a window length $w\ge2$ and weights $\lambda_0,\dots,\lambda_{w-1}\ge0$
+with $K=\sum_j\lambda_j>0$. For real $D_0,\dots,D_{w-2}$ put
+\[
+\cU(D_0,\dots,D_{w-2})=\sup_{\theta\in\R}\ \prod_{j=0}^{w-1}f(\theta_j)^{\lambda_j},\qquad
+\theta_0=\theta,\quad\theta_{j+1}=g\theta_j-D_j .
+\]
+
+\begin{lemma}\label{lem:window}
+If $w\le s$, then for every $\ell$, with $D_i$ as in Lemma~\ref{lem:orbit},
+\[
+\max_a|\Psi_\ell(a)|\le g^s\prod_{i=0}^{s-w}\cU(D_i,\dots,D_{i+w-2})^{1/K}.
+\]
+\end{lemma}
+
+\begin{proof}
+Fix $a$. By Lemma~\ref{lem:orbit} and the periodicity of $f$, for each
+$0\le i\le s-w$ the numbers $\theta_i,\dots,\theta_{i+w-1}$ give the value of
+a product as in the definition of $\cU(D_i,\dots,D_{i+w-2})$, so
+$\sum_j\lambda_j\log f(\theta_{i+j})\le\log\cU(D_i,\dots,D_{i+w-2})$. Sum over
+$i$. Each index $m\in[0,s)$ receives total weight
+$\mathrm{cov}_m\le K$, and $\log f\le0$, so
+$K\sum_m\log f(\theta_m)\le\sum_m\mathrm{cov}_m\log f(\theta_m)\le\sum_i\log\cU(\cdots)$.
+Finally use Lemma~\ref{lem:psi}(ii).
+\end{proof}
+
+\begin{proposition}\label{prop:windows}
+Fix $w$ and $\lambda$ as above and an integer $r\ge1$, and put $\nu=w+r-2$;
+assume that $\nu\ge2$. For
+$\sigma=(\sigma_0,\dots,\sigma_{\nu-1})\in\{0,\dots,g-1\}^\nu$ let
+$v(\sigma)=\sum_{j=0}^{r-1}\sigma_{r-1-j}g^{-j-1}$ and
+\[
+\widehat U(\sigma)=\sup\Bigl\{\cU(D_0,\dots,D_{w-2}):\
+D_0\in\bigl[v(\sigma),v(\sigma)+g^{-r}\bigr],\ D_m=\frac{\sigma_{r-1+m}+D_{m-1}}g\Bigr\},
+\]
+where $1\le m\le w-2$. Let $\overline U(\sigma)\ge\widehat U(\sigma)$ for all
+$\sigma$, and let $M$ be the non-negative matrix indexed by
+$\{0,\dots,g-1\}^{\nu-1}$ with
+\[
+M\bigl[(\sigma_0,\dots,\sigma_{\nu-2}),(\sigma_1,\dots,\sigma_{\nu-1})\bigr]=\overline U(\sigma)^{1/K}
+\]
+and all other entries $0$. If $\mathbf x$ is a vector with positive entries
+and $\rho_{\mathbf x}=\max_i(M\mathbf x)_i/\mathbf x_i$, then
+$\Sinf(s)\ll g^s\rho_{\mathbf x}^s$, where the implied constant depends on
+$g,w,r,\lambda,\overline U$ and $\mathbf x$. That is, Theorem~\ref{thm:sup} holds with
+$c_g=1-\log_g\rho_{\mathbf x}$.
+\end{proposition}
+
+\begin{proof}
+For $s<w$ the claim follows from the trivial bound $\Sinf(s)\le2g^{2s}$, so
+let $s\ge w$. For the window starting at $i$ put
+$\sigma^{(i)}=(\ell'_{i+2-r},\dots,\ell'_{i+w-1})$, with $\ell'_j=0$ for
+$j<0$. By Lemma~\ref{lem:orbit}, the number $D_i$ lies in the interval
+$[v(\sigma^{(i)}),v(\sigma^{(i)})+g^{-r}]$, and
+$D_{i+m}=(\ell'_{i+m+1}+D_{i+m-1})/g$; hence
+$\cU(D_i,\dots,D_{i+w-2})\le\overline U(\sigma^{(i)})$. As in the proof of
+Proposition~\ref{prop:pairing}, Lemmas~\ref{lem:window} and~\ref{lem:orbit}
+give
+\[
+\Sinf(s)\le2g^s\sum_{\ell'\bmod g^s}\ \prod_{i=0}^{s-w}\overline U(\sigma^{(i)})^{1/K}.
+\]
+Consecutive $\sigma^{(i)}$ overlap in $\nu-1$ digits, so each product is
+the weight of a path with $n=s-w+1$ edges in the graph of $M$. Summing also
+over the (fictitious) digits $\ell'_j$, $j<0$, and over $\ell'_0$ when $r=1$
+(it then lies in no window), we see that the sum over $\ell'$ is at most
+$g\,\mathbf 1^{\mathsf T}M^n\mathbf 1\le g^\nu\max_i(M^n\mathbf 1)_i$, where
+$\mathbf 1$ is the all-ones vector. Finally, $M\mathbf x\le\rho_{\mathbf x}\mathbf x$
+entrywise and $M\ge0$ give $M^n\mathbf x\le\rho_{\mathbf x}^n\mathbf x$, hence
+$M^n\mathbf 1\le(\max_i\mathbf x_i/\min_i\mathbf x_i)\,\rho_{\mathbf x}^n\mathbf 1$.
+\end{proof}
+
+The weights $\overline U(\sigma)^{1/K}$ are positive, since $\widehat U(\sigma)>0$
+($f$ vanishes only at finitely many points modulo $1$), and the graph of
+$M$ is a de~Bruijn graph, which is strongly connected. So $M$ is
+irreducible, and by the Collatz--Wielandt formula the infimum of
+$\rho_{\mathbf x}$ over all positive $\mathbf x$ is the spectral radius of
+$M$ \cite[Chapter~8]{HJ}. In practice, power iteration produces a vector
+$\mathbf x$ for which $\rho_{\mathbf x}$ is very close to the spectral radius.
+
+\subsection{Computing the constants}\label{subsec:comp}
+We now describe how the values in Table~\ref{tab:c} were obtained. A Python
+script that carries out the computation accompanies this paper (see
+Section~\ref{subsec:checks}).
+
+\emph{Upper bounds for $\widehat U$.} Parametrise an orbit by its last point.
+Put $C_0=f^{\lambda_0}$ and
+\[
+C_{m+1}(y)=f(y)^{\lambda_{m+1}}\max_{0\le q<g}\ \sup_{D_m}\ C_m\Bigl(\frac{y+D_m+q}g\Bigr)\qquad(0\le m\le w-2),
+\]
+where $D_m$ runs over the interval $[v_m,v_m+g^{-r-m}]$, with $v_0=v(\sigma)$
+and $v_m=(\sigma_{r-1+m}+v_{m-1})/g$. Then $\widehat U(\sigma)\le\sup_yC_{w-1}(y)$.
+Indeed, the numbers $(y+D_m+q)/g$, $0\le q<g$, are the preimages of $y$
+modulo $1$ under $\theta\mapsto g\theta-D_m$, so by induction $C_m(y)$ is at
+least $\prod_{j\le m}f(\theta_j)^{\lambda_j}$ for every orbit with
+$\theta_m\equiv y\pmod1$; treating the $D_m$ as independent in their
+intervals only enlarges the bound.
+
+Since the argument of $C_m$ is contracted by $g$, a fixed grid suffices. We
+use the closed cells $[n/N,(n+1)/N]$, $0\le n<N$, and the following upper
+bound for $f$ on each cell. It is $1$ on the two cells that contain an
+integer. On the other cells, $|\sin\pi\theta|$ is minimal at an endpoint,
+and $|\sin\pi g\theta|$ is at most $1$, and is maximal at an endpoint if the
+cell contains no $\theta$ with $g\theta\in\frac12+\Z$. These bounds are
+propagated through the recursion: the bound for $C_{m+1}$ on a cell is the
+bound for $f^{\lambda_{m+1}}$ on that cell times the maximum of the bounds
+for $C_m$ over blocks of consecutive cells that contain the preimages of the
+cell, for all $D_m$ in its interval. These blocks are computed in exact
+integer arithmetic, and no Lipschitz constants are needed.
+
+\emph{Rounding.} The cell bounds for $f$ are evaluated in $40$-digit
+decimal arithmetic, multiplied by $1+10^{-12}$, and rounded upward to
+double precision. All later steps are carried out in double precision,
+where maxima are exact; we assume, as holds for standard implementations,
+that each power, product, sum or quotient has relative error at most
+$2^{-52}$ (any bound below $10^{-14}$ would do). The script also checks
+that every computed $\overline U(\sigma)$ exceeds $10^{-280}$, so underflow
+plays no role. Consider one step of the recursion on one cell. If the cell
+bound for $f$ equals $1$, the step consists of maxima and a multiplication
+by $1$, which are exact. Otherwise the cell bound for $f$ exceeds the exact
+one by a factor of about $1+10^{-12}$; since $\lambda_{m+1}\ge1$ (all our
+weights are positive integers), this factor covers the rounding errors of
+the power and of the product. By induction, the computed bounds for $C_m$
+are at least the exact ones, so the computed values $\overline U(\sigma)$
+are upper bounds for $\widehat U(\sigma)$. In the last stage, each ratio
+$(M\mathbf x)_i/\mathbf x_i$ involves $3g$ roundings ($g$ powers, $g$
+products, $g-1$ sums and one quotient) and the rounding of the exponent
+$1/K$, whose relative effect on an entry $e$ is at most
+$|\log e|\,2^{-53}<10^{-13}/2$, because $e>10^{-140}$. The total relative
+effect is below $10^{-13}$, and we multiply the final maximum by
+$1+10^{-12}$.
+
+\emph{Parameters.} We use triangular weights $\lambda_j=\min(j+1,w-j)$,
+which reduce the edge effects of the windows, $N=8192$, and the vector
+$\mathbf x$ produced by power iteration. Table~\ref{tab:rho} lists the
+parameters and the resulting upper bounds $\rho_{\rm CW}$ for
+$\rho_{\mathbf x}$; then
+$c_g=1-\log_g\rho_{\rm CW}$, rounded down, is the value in
+Table~\ref{tab:c}. The cost grows like $g^{w+r-1}N$, which limits $w$ for
+large $g$.
+
+\begin{table}[ht]
+\caption{Window parameters, certified bounds $\rho_{\rm CW}$ (rounded up)
+and the resulting values of $c_g$ (rounded down). All rows use triangular
+weights and $N=8192$.}\label{tab:rho}
+\small
+\begin{tabular}{@{}rrrll@{}}
+\toprule
+$g$ & $w$ & $r$ & $\rho_{\rm CW}$ & $c_g$\\
+\midrule
+2 & 14 & 5 & 1.832340 & 0.1263\\
+3 & 10 & 3 & 2.687053 & 0.1002\\
+4 & 7 & 3 & 3.574206 & 0.0811\\
+5 & 6 & 3 & 4.460721 & 0.0709\\
+6 & 6 & 2 & 5.348980 & 0.0641\\
+7 & 6 & 2 & 6.231057 & 0.0597\\
+8 & 5 & 2 & 7.145309 & 0.0543\\
+9 & 5 & 2 & 8.034354 & 0.0516\\
+10 & 6 & 1 & 8.919963 & 0.0496\\
+12 & 5 & 2 & 10.706920 & 0.0458\\
+16 & 4 & 2 & 14.387430 & 0.0383\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{proof}[Proof of Theorem~\ref{thm:sup}]
+The existence of $c_g>0$ for every $g$ is Proposition~\ref{prop:pairing}.
+The values in Table~\ref{tab:c} follow from Proposition~\ref{prop:windows}
+and the computation just described.
+\end{proof}
+
+\begin{remark}\label{rem:sharp}
+For $g=2$ and $r=5$, uniform weights give $c_2\ge0.114$, $0.117$, $0.119$
+for $w=10,12,14$, and triangular weights give $0.121$, $0.124$, $0.126$.
+Numerically, $\Sinf(s+1)/\Sinf(s)$ settles at about $2^{1.866}$
+($s\le16$), which corresponds to $c_2\approx0.134$; for $g=3$ and $g=4$ the
+corresponding values are about $0.108$ and $0.090$, and for $g=10$ the
+ratio at $s=4$ corresponds to $c_{10}\approx0.064$. If these values
+reflect the true growth of $\Sinf$, then no bound for $\Sinf$ can improve
+$\gamma$ much further for $g=2$: with $c_2=0.134$,
+Theorem~\ref{thm:main}(a) would give $\gamma\approx0.965$, against our
+$0.9674$. The remaining gap comes partly from the window length and partly
+from the discretisation. The pairing bound of
+Proposition~\ref{prop:pairing}, with more digits $r$ and the same
+discretisation, gives only $c_2\approx0.06$ and $c_{10}\approx0.03$.
+\end{remark}
+
+\begin{remark}
+The power saving for $\Sinf$ uses the special structure of digit reversal
+only through the product formula of Lemma~\ref{lem:psi}(ii) and the
+identity of Lemma~\ref{lem:diff}. For a general permutation $\pi$ of
+$[0,g^s)$, let $\Psi^\pi_\ell(a)$ be defined as $\Psi_\ell(a)$ with $\pi$
+in place of $\rev_s$. Then $\max_a|\Psi^\pi_\ell(a)|$ can equal $g^s$ for
+every $\ell$, so that the analogue of $\Sinf(s)$ is of order $g^{2s}$; for
+instance, $\pi(m)=hm\bmod g^s$ with $\gcd(h,g)=1$ gives
+$|\Psi^\pi_\ell(-h\ell)|=g^s$.
+\end{remark}
+
+\section{Proof of \texorpdfstring{Theorem~\ref{thm:main}}{Theorem 1.1}}\label{sec:proof}
+
+\begin{remark}\label{rem:whycomposite}
+For a prime power $g$, Lemma~\ref{lem:nodes} applies to every node with
+$D=g^{1/k}$, a constant. If $g$ is not a prime power, a node can be divisible by a
+high power of one prime factor of $g$ and still satisfy $g\nmid b^k$ (in
+base $10$, for example $b=2^v$). For such nodes both $d_b$ and the
+multiplicity of $b\mapsto T_b$ are about $m_g(b)^{k-1}$, and the
+corresponding progressions resonate together. We therefore treat the
+integers $x$ with large $g$-part separately, by a direct count.
+\end{remark}
+
+\begin{lemma}[large $g$-part]\label{lem:large}
+Let $P$ be the largest prime factor of $g$, and let $D\ge1$ with
+$PD\le X_1^{\log2/(2\log g)}$. Then
+\[
+\#\{x:\ x^k\in\cP_{g,L},\ m_g(x)>D\}\ \ll\ \tau_g(PD)\,X_1^{1/2}D^{-1}.
+\]
+\end{lemma}
+
+\begin{proof}
+Multiplying in the prime factors of $m_g(x)$ one at a time, we find a
+divisor $m'$ of $m_g(x)$ with $D<m'\le PD$. Fix such an $m'$, and choose $t'$
+with $X_1^{1/2}\le g^{t'}<gX_1^{1/2}$. Then
+$p^{v_p(m')}\le PD\le2^{t'}\le p^{v_p(g)t'}$ for each $p\mid g$, so
+$m'\mid g^{t'}$. Apply Lemma~\ref{lem:tree} with $t'$ in place of $t$ (this
+part of Lemma~\ref{lem:tree} does not use $s$): the $x$ in question with
+$m'\mid x$ lie in nodes $b$ of level $t'$ with $m'\mid b$, of which there are at
+most $g^{t'}/m'$. By the first assertion of Lemma~\ref{lem:sizes} (which
+does not involve $s$, and where now $X_1g^{-2t'}\le1$), each such node
+contains at most $g/k+1$ of them. So there are $\ll X_1^{1/2}/m'\le
+X_1^{1/2}/D$ such $x$, and there are at most $\tau_g(PD)$ choices of $m'$.
+\end{proof}
+
+\begin{proof}[Proof of Theorem~\ref{thm:main}]
+Recall $X_1\asymp(\#\cP_{g,L})^{2/k}$, and note
+$\frac2k\cdot\frac{2-c}{4-c}=\frac1k\bigl(1-\frac c{4-c}\bigr)$. We may assume
+that $L$ is large.
+
+\emph{(a)} Let $g=p^e$, $D=g^{1/k}$, and let $\cB$ be the set of all nodes;
+by Lemma~\ref{lem:nodes} every node has $m_g(b)<D$, and $\tau\ll1$. Choose
+$t$ with $g^{(4-c)t}\asymp X_1$ and put $s=t-2$. Then
+$Z=X_1g^{-2t}\asymp g^{(2-c)t}$; for large $L$ we have $2k\le Z$,
+$D^k=g<2^t$, $D^{k-1}Z\le g^{2s}$, and $t+s<2t\le L/2$ because
+$t=L/(k(4-c))+O(1)$ and $k(4-c)>6$. By Lemma~\ref{lem:tree} every solution
+$x$ satisfies $x\bmod g^t\in\cB$. By Proposition~\ref{prop:red},
+Lemma~\ref{lem:sizes} and Corollary~\ref{cor:E}, using $g^{t-s}=g^2$ and
+$s\asymp\log Z\asymp\log X_1$,
+\[
+\#\cQ^k_{g,L}\ll Z+1+(\log X_1)\bigl(\Sinf(s)+Z\bigr)\ll(\log X_1)\,X_1^{\frac{2-c}{4-c}} ,
+\]
+since $\Sinf(s)\ll g^{(2-c)s}\le g^{(2-c)t}\asymp Z\asymp X_1^{(2-c)/(4-c)}$.
+
+\emph{(b)} Let
+\[
+\eta=\frac{c}{2\bigl((k-1)(4-c)+2\bigr)},\qquad D=X_1^\eta .
+\]
+Split the $x$ with $x^k\in\cQ^k_{g,L}$ according to whether $m_g(x)>D$.
+Those with $m_g(x)>D$ number $\ll(\log X_1)^{\omega(g)}X_1^{1/2-\eta}$ by
+Lemma~\ref{lem:large}; its condition holds because
+$\eta<c/4\le\log2/(8\log g)$.
+
+For the others, choose $t$ with $g^{(4-c)t}\asymp X_1/D$, put $s=t-2$, and
+let $\cB$ be the set of nodes $b$ with $m_g(b)\le D$. Then
+$t=(1-\eta)L/(k(4-c))+O(1)$, so for large $L$ we have $t\ge3$ and
+$t+s<2t\le L/2$. Moreover $D^k<2^t$ for large $L$, because
+\[
+k\eta\le\frac c{4-c}\le\frac{\log2}{2(4-c)\log g}<(1-\eta)\frac{\log2}{(4-c)\log g}
+\quad\text{and}\quad 2^t\gg X_1^{(1-\eta)\log2/((4-c)\log g)} .
+\]
+If $m_g(x)\le D$ then $p^{v_p(x)}\le D<2^t\le p^{v_p(g)t}$ for each
+$p\mid g$, so $m_g(x\bmod g^t)=m_g(x)$, and by Lemma~\ref{lem:tree},
+$x\bmod g^t\in\cB$. Now $Z=X_1g^{-2t}\asymp X_1^{\frac{2-c}{4-c}}D^{\frac2{4-c}}$
+and $Dg^{(2-c)t}\asymp X_1^{\frac{2-c}{4-c}}D^{\frac2{4-c}}$ as well; in
+particular $Z\ge2k$ for large $L$, so Lemma~\ref{lem:count} applies. We
+shall also use $D^{k-1}Z\le g^{2s}$, which holds for large $L$ because
+$\eta\bigl((k-1)(4-c)+4\bigr)<c$. By Proposition~\ref{prop:red},
+Lemma~\ref{lem:sizes} and Corollary~\ref{cor:E}, with
+$\tau\ll(\log X_1)^{\omega(g)}$ and $g^{t-s}=g^2$,
+\begin{align*}
+\#\{x:\ m_g(x)\le D\}&\ll Z+\tau(\log X_1)\Bigl(D^{k-1}\Sinf(s)+D^{2k-2}Zg^{-2s}\Sinf(s)+D^{k-2}Z\Bigr)\\
+&\ll(\log X_1)^{\omega(g)+1}D^{k-2}\bigl(D\,g^{(2-c)t}+Z\bigr),
+\end{align*}
+using $D^{k-1}Z\le g^{2s}$ in the middle term. The right side is
+$\ll(\log X_1)^{\omega(g)+1}D^{k-2+\frac2{4-c}}X_1^{\frac{2-c}{4-c}}$. With
+$D=X_1^\eta$ the exponent of $X_1$ is
+\[
+\eta\Bigl(k-2+\frac2{4-c}\Bigr)+\frac{2-c}{4-c}=\frac12-\eta,
+\]
+by the choice of $\eta$. Finally
+$2(\frac12-\eta)=1-\frac c{(k-1)(4-c)+2}$.
+\end{proof}
+
+\begin{proof}[Proof of Corollary~\ref{cor:main}]
+The first statement follows from Theorems~\ref{thm:main} and~\ref{thm:sup},
+replacing $c$ by $\min(c_g,\frac{\log2}{2\log g})$ in part (b). For the
+table, apply Theorem~\ref{thm:main}(a) for prime powers and (b) for $g=6,10,12$,
+with $c=c_g$ from Table~\ref{tab:c}; these satisfy
+$c_g\le\log2/(2\log g)$. The table entries are the resulting exponents
+rounded up in the fourth decimal, which absorbs the logarithmic factors.
+\end{proof}
+
+\section{Further remarks}\label{sec:remarks}
+
+\subsection{Numerical checks}\label{subsec:checks}
+The script \texttt{window\_constants.py}, which accompanies this paper,
+implements Section~\ref{subsec:comp}: for each base it prints
+$\rho_{\rm CW}$ and $c_g$, and it reproduces Table~\ref{tab:rho} in about
+an hour on one processor core. In a second mode it computes, for
+small $s$, the values of $\max_a|\Psi_\ell(a)|$ by the fast Fourier
+transform (in floating point), and compares them for every $\ell$ with the bound of
+Lemma~\ref{lem:window}, with $\overline U$ in place of $\cU$. For
+$(g,s,w,r)=(2,12,8,5)$, $(3,7,5,3)$, $(4,7,5,3)$, $(6,5,4,2)$,
+$(10,4,3,1)$, $(10,4,3,2)$ and $(16,3,3,1)$, with $N=4096$, the bound held
+for every $\ell$; the largest ratio was $0.99995$, for $g=16$. Finally, we
+checked
+the identity of Lemma~\ref{lem:diff} exhaustively for small $(g,s)$,
+Lemma~\ref{lem:orbit} in exact rational arithmetic, and the structural
+statements of Lemma~\ref{lem:nodes} for all nodes for
+$(g,k,t)=(10,2,4)$, $(10,2,5)$, $(10,3,4)$, $(6,2,5)$, $(6,3,5)$ and
+$(12,2,4)$; these checks are not needed for the proofs.
+
+\subsection{Limits of the method}
+The argument bounds the weights $|\Psi_\ell(a)|$ by their maximum over $a$
+and uses averaging only over the archimedean phases. By
+Remark~\ref{rem:sharp}, this is unlikely to give much more than
+$\gamma\approx0.965$ in base $2$. Going further would require cancellation in the sum over $a$,
+that is, information on the joint distribution of the archimedean phases
+$\ell\delta_b$ and the $g$-adic phases $a\beta_b$ across the nodes. For
+bases that are not prime powers, the treatment of integers with a large $g$-part
+(Lemma~\ref{lem:large}) is also wasteful and could probably be improved.
+
+\section*{Acknowledgements}
+The arguments and computations in this paper were developed with the
+assistance of Claude, an AI model made by Anthropic. Claude did not have
+access to the version of
+\cite{DMRSS} published in the Journal of the London Mathematical Society;
+references to specific results of \cite{DMRSS} are to its arXiv version,
+arXiv:2309.11380v1.
+
+\begin{thebibliography}{99}
+\bibitem{BHS} W.~D. Banks, D.~N. Hart and M.~Sakata, \emph{Almost all palindromes are composite}, Math.\ Res.\ Lett.\ \textbf{11} (2004), no.~5--6, 853--868.
+\bibitem{BhS} G.~Bhowmik and Y.~Suzuki, \emph{On Telhcirid's theorem on arithmetic progressions}, preprint, arXiv:2406.13334v1 (2024).
+\bibitem{CJ} S.~Chourasiya and D.~R. Johnston, \emph{Power-free palindromes and reversed primes}, preprint, arXiv:2503.21136v5 (2025).
+\bibitem{CLB} J.~Cilleruelo, F.~Luca and L.~Baxter, \emph{Every positive integer is a sum of three palindromes}, Math.\ Comp.\ \textbf{87} (2018), no.~314, 3023--3055.
+\bibitem{CLS} J.~Cilleruelo, F.~Luca and I.~E. Shparlinski, \emph{Power values of palindromes}, J.\ Comb.\ Number Theory \textbf{1} (2009), no.~2, 101--107.
+\bibitem{Col} S.~Col, \emph{Palindromes dans les progressions arithm\'etiques}, Acta Arith.\ \textbf{137} (2009), no.~1, 1--41.
+\bibitem{DMRSS} C.~Dartyge, B.~Martin, J.~Rivat, I.~E. Shparlinski and C.~Swaenepoel, \emph{Reversible primes}, J.\ Lond.\ Math.\ Soc.\ (2) \textbf{109} (2024), no.~3, Paper No.\ e12883; arXiv:2309.11380.
+\bibitem{HJ} R.~A. Horn and C.~R. Johnson, \emph{Matrix Analysis}, 2nd ed., Cambridge University Press, Cambridge, 2013.
+\bibitem{IR} K.~Ireland and M.~Rosen, \emph{A Classical Introduction to Modern Number Theory}, 2nd ed., Graduate Texts in Mathematics \textbf{84}, Springer, New York, 1990.
+\bibitem{JK} D.~R. Johnston and B.~Kerr, \emph{The infinitude of square-free palindromes}, preprint, arXiv:2601.07097v2 (2026).
+\bibitem{Mo} H.~L. Montgomery, \emph{Ten Lectures on the Interface between Analytic Number Theory and Harmonic Analysis}, CBMS Regional Conference Series in Mathematics \textbf{84}, American Mathematical Society, Providence, RI, 1994.
+\bibitem{Tux} A.~Tuxanidy, \emph{Distribution of square-free palindromes}, preprint, arXiv:2603.02549v2 (2026).
+\bibitem{TP} A.~Tuxanidy and D.~Panario, \emph{Infinitude of palindromic almost-prime numbers}, Int.\ Math.\ Res.\ Not.\ IMRN \textbf{2024}, no.~18, 12466--12503.
+\bibitem{Va} J.~D. Vaaler, \emph{Some extremal functions in Fourier analysis}, Bull.\ Amer.\ Math.\ Soc.\ (N.S.) \textbf{12} (1985), no.~2, 183--216.
+\end{thebibliography}
+
+\end{document}

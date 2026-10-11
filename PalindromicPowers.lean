@@ -1,0 +1,17 @@
+import PalindromicPowers.Conventions
+import PalindromicPowers.Basic
+import PalindromicPowers.Assumptions
+import PalindromicPowers.Digits
+import PalindromicPowers.ReversalTransform
+import PalindromicPowers.PowerSaving
+import PalindromicPowers.Tree
+import PalindromicPowers.Linearisation
+import PalindromicPowers.Majorant
+import PalindromicPowers.Residues
+import PalindromicPowers.Roots
+import PalindromicPowers.Frequencies
+import PalindromicPowers.Spacing
+import PalindromicPowers.LargeGPart
+import PalindromicPowers.Final
+import PalindromicPowers.Discharge
+import PalindromicPowers.MainTheorem

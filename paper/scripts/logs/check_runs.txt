@@ -1,0 +1,7 @@
+g=2 s=12 w=8 r=5 N=4096: max over ell of exact/bound = 0.781978 (must be <= 1);  S_inf(s) = 1.068473e+07 <= 2.249032e+07
+g=3 s=7 w=5 r=3 N=4096: max over ell of exact/bound = 0.951849 (must be <= 1);  S_inf(s) = 4.145773e+06 <= 7.173486e+06
+g=4 s=7 w=5 r=3 N=4096: max over ell of exact/bound = 0.985487 (must be <= 1);  S_inf(s) = 2.230155e+08 <= 3.923242e+08
+g=6 s=5 w=4 r=2 N=4096: max over ell of exact/bound = 0.997327 (must be <= 1);  S_inf(s) = 6.274439e+07 <= 9.878969e+07
+g=10 s=4 w=3 r=1 N=4096: max over ell of exact/bound = 0.983632 (must be <= 1);  S_inf(s) = 1.167760e+08 <= 1.700023e+08
+g=10 s=4 w=3 r=2 N=4096: max over ell of exact/bound = 0.983632 (must be <= 1);  S_inf(s) = 1.167760e+08 <= 1.665632e+08
+g=16 s=3 w=3 r=1 N=4096: max over ell of exact/bound = 0.999950 (must be <= 1);  S_inf(s) = 2.268094e+07 <= 3.079324e+07

@@ -1,0 +1,15 @@
+# Lean / Lake build output and the downloaded Mathlib (get it with `lake exe cache get`)
+.lake/
+scratch/
+
+# LaTeX and HFF build intermediates (the final .tex, .pdf, map .json/.html are kept)
+hff/out/*.aux
+hff/out/*.log
+hff/out/*.out
+hff/out/measure_*
+hff/out/full.txt
+hff/tools/pdftotext
+__pycache__/
+*.pyc
+
+.DS_Store
